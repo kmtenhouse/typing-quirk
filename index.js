@@ -1,5 +1,5 @@
 const Quirk = require("./quirk");
 
-const myQuirk = new Quirk();
-myQuirk.prefix("23");
+const myQuirk = new Quirk({prefix: "^", suffix: "6"});
 console.log(myQuirk.prefix);
+console.log(myQuirk.suffix);
