@@ -28,10 +28,13 @@ class Quirk {
             throw new Error("Prefix must be a non-empty string!");
         }
         try {
-            this.prefix = new RegExp("^" + this.escapeRegExpSpecials(prefixStr));
+            this.prefix = {
+                pattern: new RegExp("^" + this.escapeRegExpSpecials(prefixStr)),
+                text: prefixStr
+            };
         }
-        catch {
-            throw new Error("Invalid prefix");
+        catch (err) {
+            throw err;
         }
     }
 
@@ -41,10 +44,13 @@ class Quirk {
             throw new Error("Suffix must be a non-empty string!");
         }
         try {
-            this.suffix = new RegExp(this.escapeRegExpSpecials(suffixStr) + "$");
+            this.suffix = {
+                pattern: new RegExp(this.escapeRegExpSpecials(suffixStr) + "$"),
+                text: suffixStr
+            };
         }
-        catch {
-            throw new Error("Invalid suffix");
+        catch (err) {
+            throw err;
         }
     }
 
@@ -56,6 +62,16 @@ class Quirk {
         return arr
             .map(char => (specialChars.test(char) ? ("\\" + char) : char))
             .join("");
+    }
+
+    //takes in a string
+    //returns the encoded version of that string
+    encode(str) {
+      return str;
+    }
+
+    decode(str) {
+        return str;
     }
 
 }
