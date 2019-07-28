@@ -1,3 +1,6 @@
+const utils = require("./utils");
+const Substitution = require("./substitution");
+
 class Quirk {
     constructor() {
         try {
@@ -11,13 +14,15 @@ class Quirk {
                             break;
                         case "suffix": this.setSuffix(configObj[key]);
                             break;
+                        case "separator": this.setSeparator(configObj[key]);
+                            break;
                         default:
                             break;
                     }
                 });
             }
         }
-        catch(err) {
+        catch (err) {
             throw err;
         }
     }
@@ -29,7 +34,7 @@ class Quirk {
         }
         try {
             this.prefix = {
-                pattern: new RegExp("^" + this.escapeRegExpSpecials(prefixStr)),
+                pattern: new RegExp("^" + utils.escapeRegExpSpecials(prefixStr)),
                 text: prefixStr
             };
         }
@@ -45,7 +50,7 @@ class Quirk {
         }
         try {
             this.suffix = {
-                pattern: new RegExp(this.escapeRegExpSpecials(suffixStr) + "$"),
+                pattern: new RegExp(utils.escapeRegExpSpecials(suffixStr) + "$"),
                 text: suffixStr
             };
         }
@@ -54,30 +59,35 @@ class Quirk {
         }
     }
 
-    escapeRegExpSpecials(str) {
-        const arr = str.split("");
-        //matches the 12 special characters in regexps - \ ^ $ . | ? * + ( ) { [ ]
-        const specialChars = /[\\\^\$\.\|\?\*\+\(\)\[\{\]]/;
-    
-        return arr
-            .map(char => (specialChars.test(char) ? ("\\" + char) : char))
-            .join("");
+    setSeparator(separator) {
+        if (typeof (separator) !== "string" || separator === "") {
+            throw new Error("Invalid separator!");
+        }
+
+       this.separator = {
+           text: separator, 
+           pattern: new RegExp(utils.escapeRegExpSpecials(separator), "g")
+       };
     }
 
     //takes in a string
     //returns the encoded version of that string
-    encode(str) {  
-      return (this.prefix ? this.prefix.text : "" ) + str + (this.suffix ? this.suffix.text : "" );
+    encode(str) {
+        return (this.prefix ? this.prefix.text : "") + (this.separator ? str.replace(/\s/g, this.separator.text) : str) + (this.suffix ? this.suffix.text : "");
     }
 
     decode(str) {
         let newStr = str;
-        if(this.prefix) {
+        if (this.prefix) {
             newStr = newStr.replace(this.prefix.pattern, "");
         }
-        if(this.suffix) {
+        if (this.suffix) {
             newStr = newStr.replace(this.suffix.pattern, "");
         }
+        if(this.separator) {
+            newStr = newStr.replace(this.separator.pattern," ");
+        }
+
         return newStr;
     }
 

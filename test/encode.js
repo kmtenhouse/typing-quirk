@@ -12,4 +12,9 @@ describe('encode-test', function () {
         expect(letterPrefix.encode("hello world!")).to.equal("hello world!<");
     });
 
+    it('should create a sentence with a custom word separator', function () {
+        const letterPrefix = new Quirk({ separator: "*" });
+        expect(letterPrefix.encode("i am the star child")).to.equal("i*am*the*star*child");
+    });
+
 });
