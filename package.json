@@ -1,0 +1,23 @@
+{
+  "name": "typing-quirk",
+  "version": "1.0.0",
+  "description": "Troll typing quirk encoding and decoding",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kmtenhouse/typing-quirk.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kmtenhouse/typing-quirk/issues"
+  },
+  "homepage": "https://github.com/kmtenhouse/typing-quirk#readme",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0"
+  }
+}
