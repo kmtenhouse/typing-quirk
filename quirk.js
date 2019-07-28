@@ -66,12 +66,19 @@ class Quirk {
 
     //takes in a string
     //returns the encoded version of that string
-    encode(str) {
-      return str;
+    encode(str) {  
+      return (this.prefix ? this.prefix.text : "" ) + str + (this.suffix ? this.suffix.text : "" );
     }
 
     decode(str) {
-        return str;
+        let newStr = str;
+        if(this.prefix) {
+            newStr = newStr.replace(this.prefix.pattern, "");
+        }
+        if(this.suffix) {
+            newStr = newStr.replace(this.suffix.pattern, "");
+        }
+        return newStr;
     }
 
 }
