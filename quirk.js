@@ -1,13 +1,3 @@
-function escapeRegExpSpecials(str) {
-    const arr = str.split("");
-    //matches the 12 special characters in regexps - \ ^ $ . | ? * + ( ) { [ ]
-    const specialChars = /[\\\^\$\.\|\?\*\+\(\)\[\{\]]/;
-
-    return arr
-        .map(char => (specialChars.test(char) ? ("\\" + char) : char))
-        .join("");
-}
-
 class Quirk {
     constructor() {
         try {
@@ -38,7 +28,7 @@ class Quirk {
             throw new Error("Prefix must be a non-empty string!");
         }
         try {
-            this.prefix = new RegExp("^" + escapeRegExpSpecials(prefixStr));
+            this.prefix = new RegExp("^" + this.escapeRegExpSpecials(prefixStr));
         }
         catch {
             throw new Error("Invalid prefix");
@@ -51,13 +41,22 @@ class Quirk {
             throw new Error("Suffix must be a non-empty string!");
         }
         try {
-            this.suffix = new RegExp(escapeRegExpSpecials(suffixStr) + "$");
+            this.suffix = new RegExp(this.escapeRegExpSpecials(suffixStr) + "$");
         }
         catch {
             throw new Error("Invalid suffix");
         }
     }
 
+    escapeRegExpSpecials(str) {
+        const arr = str.split("");
+        //matches the 12 special characters in regexps - \ ^ $ . | ? * + ( ) { [ ]
+        const specialChars = /[\\\^\$\.\|\?\*\+\(\)\[\{\]]/;
+    
+        return arr
+            .map(char => (specialChars.test(char) ? ("\\" + char) : char))
+            .join("");
+    }
 
 }
 
