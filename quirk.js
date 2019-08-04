@@ -82,14 +82,17 @@ class Quirk {
 
     setSubstitution(sub) {
         //takes in an original string, to be replaced by the quirk version
-        if(!sub.hasOwnProperty(plain) || !sub.hasOwnProperty(quirk)) {
+        console.log(sub);
+        if(!sub.hasOwnProperty("plain") || !sub.hasOwnProperty("quirk")) {
             throw new Error("Invalid substitution!");
         }
 
         const newSub = new Substitution({
-            plainText: plain,
-            quirkText: quirk
+            plainText: sub.plain,
+            quirkText: sub.quirk,
+            isCaseSensitive: (sub.isCaseSensitive===true)
         });
+        console.log(newSub);
 
         this.substitutions.push(newSub);
         
