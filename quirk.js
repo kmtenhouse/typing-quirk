@@ -4,22 +4,32 @@ const Substitution = require("./substitution");
 class Quirk {
     constructor() {
         try {
+            this.substitutions = [];
             //the constructor can (optionally) take an object 
             if (arguments.length === 1 && typeof (arguments[0] === "object") && !Array.isArray(arguments[0])) {
                 const configObj = arguments[0];
-                const keys = Object.keys(configObj);
-                keys.forEach(key => {
-                    switch (key) {
-                        case "prefix": this.setPrefix(configObj[key]);
-                            break;
-                        case "suffix": this.setSuffix(configObj[key]);
-                            break;
-                        case "separator": this.setSeparator(configObj[key]);
-                            break;
-                        default:
-                            break;
+
+                if(configObj.hasOwnProperty("prefix")) {
+                    this.setPrefix(configObj.prefix);
+                }
+
+                if(configObj.hasOwnProperty("suffix")) {
+                    this.setSuffix(configObj.suffix);
+                }
+
+                if(configObj.hasOwnProperty("separator")) {
+                    this.setSeparator(configObj.separator);
+                } else {
+                    //defaults to spaces
+                    this.separator = { 
+                        text: " ",
+                        pattern: / /g
                     }
-                });
+                }
+
+                if(configObj.hasOwnProperty("substitutions") && Array.isArray(configObj.substitutions)) {
+                    configObj.substitutions.forEach(sub => this.setSubstitution(sub));
+                }
             }
         }
         catch (err) {
@@ -70,10 +80,36 @@ class Quirk {
        };
     }
 
+    setSubstitution(sub) {
+        //takes in an original string, to be replaced by the quirk version
+        if(!sub.hasOwnProperty(plain) || !sub.hasOwnProperty(quirk)) {
+            throw new Error("Invalid substitution!");
+        }
+
+        const newSub = new Substitution({
+            plainText: plain,
+            quirkText: quirk
+        });
+
+        this.substitutions.push(newSub);
+        
+    }
+
     //takes in a string
     //returns the encoded version of that string
     encode(str) {
-        return (this.prefix ? this.prefix.text : "") + (this.separator ? str.replace(/\s/g, this.separator.text) : str) + (this.suffix ? this.suffix.text : "");
+        //first, determine if we are going to use a custom separator or not
+
+        let newStr = str.split(/ /)
+            .map(word => {
+                this.substitutions.forEach(sub => {
+                    word = word.replace(sub.plain.pattern, sub.quirk.text);
+                })
+                return word;
+            })
+            .join(this.separator.text);
+
+        return (this.prefix ? this.prefix.text : "") + newStr + (this.suffix ? this.suffix.text : "");
     }
 
     decode(str) {
