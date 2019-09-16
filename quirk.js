@@ -137,9 +137,9 @@ class Quirk {
                 sentence = this.separator.toQuirk(str);
             }
             //perform substitutions (currently: across the entire sentence at once)
-            this.substitutions.forEach(sub => str = sub.toQuirk(sentence));
+            this.substitutions.forEach(sub => sentence = sub.toQuirk(sentence));
             //join the sentence with prefix and suffix
-            sentence = (this.prefix ? this.prefix.text : '') + str + (this.suffix ? this.suffix.text : '');
+            sentence = (this.prefix ? this.prefix.text : '') + sentence + (this.suffix ? this.suffix.text : '');
             //lastly, enforce case
             if (this.sentenceCase === 'lowercase') {
                 sentence = sentence.toLowerCase();

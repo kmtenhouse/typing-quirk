@@ -26,3 +26,9 @@ console.log(eridan.toQuirk('Terrible circumstances what I been reduced to. Ingra
 const karkat = new Quirk();
 karkat.enforceCase('uppercase');
 console.log(karkat.toQuirk("This is absolutely, without a doubt, the stupidest thing you have ever done. And I am counting getting yourself cut in half."));
+
+let testSub = new Quirk();
+testSub.addSubstitution('w', 'ww');
+testSub.addSubstitution('v', 'vv');
+testSub.substitutions.forEach(sub=> console.log(sub));
+console.log(testSub.toQuirk("weh everyone is mean to me. I swear everyone hates me."));
