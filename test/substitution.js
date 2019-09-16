@@ -3,27 +3,65 @@ const Substitution = require("../substitution");
 const regexgen = require('regexgen');
 
 describe('substitution-test', function () {
-    it('should create a valid case-sensitive substitution from a letter', function () {
-        let testSub = new Substitution(regexgen(['ww'], 'g'), "w");
-        expect(testSub.pattern).to.eql(/ww/g);
-        expect(testSub.replaceWith).to.equal("w");
-        expect(testSub.encode("wweh")).to.equal('weh');
+    it('should create a valid substitution from two strings', function () {
+        let testSub = new Substitution('w', 'ww');
+        expect(testSub.plain.patternToMatch).to.eql(/ww/g);
+        expect(testSub.plain.replaceWith).to.equal("w");
+        expect(testSub.quirk.patternToMatch).to.eql(/w/g);
+        expect(testSub.quirk.replaceWith).to.equal("ww");
+        expect(testSub.toPlain("wweh")).to.equal('weh');
+        expect(testSub.toQuirk("weh")).to.equal('wweh');
     });
 
-    it('should create a valid case-sensitive substitution from a symbol', function () {
-        let testSub = new Substitution(regexgen(['///'], 'g'), "");
-        expect(testSub.pattern).to.eql(/\/\/\//g);
-        expect(testSub.replaceWith).to.equal("");
-        expect(testSub.encode("hello///")).to.equal('hello');
+    it('should create a valid substitution from two substitution objects', function () {
+        let testSub = new Substitution({
+            patternToMatch: /w{2}/g,
+            replaceWith: 'w'
+        }, {
+            patternToMatch: /w{1}/g,
+            replaceWith: 'ww'
+        });
+        expect(testSub.plain.patternToMatch).to.eql(/w{2}/g);
+        expect(testSub.plain.replaceWith).to.equal("w");
+        expect(testSub.quirk.patternToMatch).to.eql(/w{1}/g);
+        expect(testSub.quirk.replaceWith).to.equal("ww");
+        expect(testSub.toPlain("wweh")).to.equal('weh');
+        expect(testSub.toQuirk("weh")).to.equal('wweh');
     });
 
-    it('should throw an error when the first argument is not a regexp', function () {
-        const badFn = () => { const badQuirk = new Substitution('ww', 'w'); }
+    it('should create a valid substitution from one substitution object and a string', function () {
+        let testSub = new Substitution({
+            patternToMatch: /w{2}/g,
+            replaceWith: 'w'
+        }, 'ww');
+        expect(testSub.plain.patternToMatch).to.eql(/w{2}/g);
+        expect(testSub.plain.replaceWith).to.equal("w");
+        expect(testSub.quirk.patternToMatch).to.eql(/w/g);
+        expect(testSub.quirk.replaceWith).to.equal("ww");
+        expect(testSub.toPlain("wweh")).to.equal('weh');
+        expect(testSub.toQuirk("weh")).to.equal('wweh');
+    });
+
+    it('should create a valid substitution from one string and one substitution object', function () {
+        let testSub = new Substitution('w', {
+            patternToMatch: /w{1}/g,
+            replaceWith: 'ww'
+        });
+        expect(testSub.plain.patternToMatch).to.eql(/ww/g);
+        expect(testSub.plain.replaceWith).to.equal("w");
+        expect(testSub.quirk.patternToMatch).to.eql(/w{1}/g);
+        expect(testSub.quirk.replaceWith).to.equal("ww");
+        expect(testSub.toPlain("wweh")).to.equal('weh');
+        expect(testSub.toQuirk("weh")).to.equal('wweh');
+    });
+
+    it('should throw an error when the first argument is not valid', function () {
+        const badFn = () => { const badQuirk = new Substitution('', 'w'); }
         expect(badFn).to.throw();
     });
 
-    it('should throw an error when the second argument is not a string', function () {
-        const badFn = () => { const badQuirk = new Substitution(/ww/g, 2); }
+    it('should throw an error when the second argument is not valid', function () {
+        const badFn = () => { const badQuirk = new Substitution('w', 2); }
         expect(badFn).to.throw();
     });
 
