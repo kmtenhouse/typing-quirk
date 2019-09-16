@@ -7,5 +7,9 @@ console.log(eridan.decode('wweh wwhat havve i been reduced to')); */
 
 const Quirk = require("./quirk");
 
-const eridan = new Quirk({}, {});
+const dismas = new Quirk();
+dismas.addSuffix('///');
+dismas.addPrefix('^');
+
+console.log(dismas.toQuirk("fuck you"));
 

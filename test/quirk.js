@@ -10,6 +10,20 @@ describe('quirk-test', function () {
         expect(testSub.toQuirk("weh everyone is mean")).to.equal('wweh evveryone is mean');
     });
 
+    it('should create a valid quirk from prefixes added via addPrefix', function () {
+        let testSub = new Quirk();
+        testSub.addPrefix('BB')
+        expect(testSub.toPlain("BBbats")).to.equal('bats');
+        expect(testSub.toQuirk("bats")).to.equal('BBbats');
+    });
+
+    it('should create a valid quirk from suffixes added via addSuffix', function () {
+        let testSub = new Quirk();
+        testSub.addSuffix('///');
+        expect(testSub.toPlain("this is nonsense///")).to.equal('this is nonsense');
+        expect(testSub.toQuirk("this is nonsense")).to.equal('this is nonsense///');
+    });
+
     it('should not throw an error when initialized with no data', function () {
         const goodFn = () => { 
             let testSub = new Quirk();
