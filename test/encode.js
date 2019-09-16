@@ -1,4 +1,4 @@
-const expect = require('chai').expect;
+/* const expect = require('chai').expect;
 const Quirk = require("../quirk");
 
 describe('encode-test', function () {
@@ -17,4 +17,4 @@ describe('encode-test', function () {
         expect(letterPrefix.encode("i am the star child")).to.equal("i*am*the*star*child");
     });
 
-});
+}); */

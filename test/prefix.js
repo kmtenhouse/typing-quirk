@@ -1,4 +1,4 @@
-const expect = require('chai').expect;
+/* const expect = require('chai').expect;
 const Quirk = require("../quirk");
 
 describe('prefix-test', function () {
@@ -27,4 +27,4 @@ describe('prefix-test', function () {
         const badFn = () => { const badQuirk = new Quirk({ prefix: [] }); }
         expect(badFn).to.throw();
     });
-});
+}); */
