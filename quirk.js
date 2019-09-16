@@ -37,29 +37,46 @@ class Quirk {
 
     }
 
-    addPrefix(prefix) {
+    addPrefix(prefix, pattern = '') {
         if (typeof prefix !== "string" || prefix === '') {
             throw new Error("Prefix must be a non-empty string!");
         }
 
-        let prefixPattern = "^" + escapeRegExpSpecials(prefix);
-        console.log(prefixPattern);
-        let prefixRegExp = new RegExp(prefixPattern);
+        //if a pattern paramater was provided, check that 1) a regular expression
+        if (pattern !== '' && !(pattern instanceof RegExp)) {
+            throw new Error("Invalid regexp provided!");
+        }
+        //...and that it's a valid regexp for the start of a string
+        if (pattern instanceof RegExp && !/^\^/.test(pattern.source)) {
+            throw new Error("Invalid regexp provided for a prefix (hint: check for missing ^)");
+        }
 
         //create the proper regexp for the prefix (if necessary)
+        let prefixRegExp = (pattern ? pattern : new RegExp("^" + escapeRegExpSpecials(prefix)));
+
         this.prefix = {
             text: prefix,
             patternToStrip: prefixRegExp
         };
     }
 
-    addSuffix(suffix) {
+    addSuffix(suffix, pattern = '') {
         if (typeof suffix !== "string" || suffix === '') {
             throw new Error("Suffix must be a non-empty string!");
         }
+
+        //if a pattern paramater was provided, check that 1) a regular expression
+        if (pattern !== '' && !(pattern instanceof RegExp)) {
+            throw new Error("Invalid regexp provided!");
+        }
+        //...and that it's a valid regexp for the end of a string
+        if (pattern instanceof RegExp && !/\$$/.test(pattern.source)) {
+            throw new Error("Invalid regexp provided for a suffix (hint: check for missing $)");
+        }
+
+
         //create the proper regexp for the suffix (if necessary)
-        let suffixPattern = escapeRegExpSpecials(suffix)+ "$";
-        let suffixRegExp = new RegExp(suffixPattern);
+        let suffixRegExp = (pattern ? pattern : new RegExp(escapeRegExpSpecials(suffix) + "$"));
 
         this.suffix = {
             text: suffix,

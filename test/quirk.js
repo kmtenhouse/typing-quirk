@@ -17,12 +17,73 @@ describe('quirk-test', function () {
         expect(testSub.toQuirk("bats")).to.equal('BBbats');
     });
 
+    it('should create a valid quirk from prefixes with a custom regexp', function () {
+        let testSub = new Quirk();
+        testSub.addPrefix('BB', /^[B]{2}/)
+        expect(testSub.toPlain("BBbats")).to.equal('bats');
+        expect(testSub.toQuirk("bats")).to.equal('BBbats');
+    });
+
+    it('should create a valid quirk from prefixes added via addPrefix even when special characters are included', function () {
+        let testSub = new Quirk();
+        testSub.addPrefix('^')
+        expect(testSub.toPlain("^bats")).to.equal('bats');
+        expect(testSub.toQuirk("bats")).to.equal('^bats');
+    });
+
     it('should create a valid quirk from suffixes added via addSuffix', function () {
         let testSub = new Quirk();
         testSub.addSuffix('///');
         expect(testSub.toPlain("this is nonsense///")).to.equal('this is nonsense');
         expect(testSub.toQuirk("this is nonsense")).to.equal('this is nonsense///');
     });
+
+    it('should create a valid quirk from suffixes with a custom regexp', function () {
+        let testSub = new Quirk();
+        testSub.addSuffix('///', /\/{3}$/);
+        expect(testSub.toPlain("this is nonsense///")).to.equal('this is nonsense');
+        expect(testSub.toQuirk("this is nonsense")).to.equal('this is nonsense///');
+    });
+
+    it('should create a valid quirk from suffixes added via addSuffix even when special characters are included', function () {
+        let testSub = new Quirk();
+        testSub.addSuffix('$');
+        expect(testSub.toPlain("this is nonsense$")).to.equal('this is nonsense');
+        expect(testSub.toQuirk("this is nonsense")).to.equal('this is nonsense$');
+    });
+
+    it('should throw an error when given an invalid prefix', function () {
+        const badFn = () => { 
+            let testSub = new Quirk();
+            testSub.addPrefix('');
+         }
+        expect(badFn).to.throw();
+    });
+
+    it('should throw an error when given an invalid prefix regexp', function () {
+        const badFn = () => { 
+            let testSub = new Quirk();
+            testSub.addPrefix('^', /g/);
+         }
+        expect(badFn).to.throw();
+    });
+
+    it('should throw an error when given an invalid suffix', function () {
+        const badFn = () => { 
+            let testSub = new Quirk();
+            testSub.addSuffix('');
+         }
+        expect(badFn).to.throw();
+    });
+
+    it('should throw an error when given an invalid suffix regexp', function () {
+        const badFn = () => { 
+            let testSub = new Quirk();
+            testSub.addSuffix('///', /g/);
+         }
+        expect(badFn).to.throw();
+    });
+
 
     it('should not throw an error when initialized with no data', function () {
         const goodFn = () => { 
