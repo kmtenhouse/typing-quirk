@@ -117,12 +117,11 @@ class Quirk {
         } else {
             throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase.");
         }
-
     }
 
-    addSubstitution(plain, quirk, options = null) {
+    addSubstitution(plain, quirk, options=null) {
         //options: case-sensitive substitutions; apply to full sentences or individual words (default)
-        let newSub = new Substitution(plain, quirk);
+        let newSub = new Substitution(plain, quirk, options);
         this.substitutions.push(newSub);
     }
 
@@ -164,6 +163,7 @@ class Quirk {
         return adjustedParagraph;
     }
 
+    //(TO-DO) Adjust to support paragraphs properly
     toPlain(str) {
         //start by removing prefix and suffix from the whole string
         if (this.prefix) {
@@ -178,6 +178,10 @@ class Quirk {
             str = this.separator.toPlain(str);
         }
         this.substitutions.forEach(sub => str = sub.toPlain(str));
+
+        //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
+        str = str.replace(/i\b/g, 'I');
+
         return str;
     }
 

@@ -48,6 +48,15 @@ describe('substitutions', function () {
         expect(testSub.toQuirk("weh everyone is mean")).to.equal('wweh evveryone is mean');
     });
 
+    it('should create a valid case-insensitive quirk from substitutions added via addSubstitution', function () {
+        let testSub = new Quirk();
+        testSub.addSubstitution('i', 'ii', {ignoreCase: true});
+        testSub.addSubstitution('s', '2', {ignoreCase: true});
+        expect(testSub.toPlain("thii2 ii2 bee e22!")).to.equal('this is bee ess!');
+        expect(testSub.toQuirk("this IS BEE ESS!")).to.equal('thii2 ii2 BEE E22!');
+    });
+
+
     it('should throw an error when given an invalid substitution to add', function () {
         const badFn = () => {
             let testSub = new Quirk();

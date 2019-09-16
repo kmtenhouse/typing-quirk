@@ -1,7 +1,7 @@
 const regexgen = require('regexgen');
 
 class Substitution {
-    constructor(plain, quirk) {
+    constructor(plain, quirk, options=null) {
         //first, check if we received one or more valid substitution objects for the plain text speech (happy path)
         if (isValidSubstitutionObj(plain)) {
             this.plain = {
@@ -41,6 +41,21 @@ class Substitution {
             };
         }
 
+        //finally, perform a check if we need to ignore case when going into the quirk
+        if(options!==null) {
+            if(options.hasOwnProperty('ignoreCase')) {
+                if (typeof options.ignoreCase!=='boolean') {
+                    throw new Error("Must provide true or false for option: ignoreCase");
+                }
+                if (options.ignoreCase === true) {
+                    //check if we have a case insensitive regexp - if not, we'll fix that!
+                    if (!this.quirk.patternToMatch.flags.includes('i')) {
+                        let newPattern = this.quirk.patternToMatch.source;
+                        this.quirk.patternToMatch = new RegExp(newPattern, 'gi');
+                    }
+                }
+            }
+        }
 
     }
 
@@ -62,6 +77,8 @@ class Substitution {
 //'replaceWith' cannot be empty
 function isValidSubstitutionObj(input) {
     return (typeof input === 'object' &&
+        !Array.isArray(input) &&
+        input!==null &&
         input.hasOwnProperty('patternToMatch') &&
         input.hasOwnProperty('replaceWith') &&
         input.patternToMatch instanceof RegExp &&
