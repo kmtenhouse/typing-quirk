@@ -13,12 +13,26 @@ function escapeRegExpSpecials(str) {
 //
 //Takes in a paragraph with one or more sentences and changes each sentence to proper case
 //Proper case is defined as first letter capitalized
+//Sentences end in one or more . ! ? 
 //Sentences can be wrapped in "", '', ``, and () -- these will be preserved
-function capitalizeSentences(str) {
+function capitalizeSentences(paragraph) {
+    const sentenceBoundaries = /(?<=[\.!\?]+['"`\)]*)\s+/g;
     //first, grab the whitespace so we can preserve it
+    const whiteSpace = paragraph.match(sentenceBoundaries);
     //next, split the paragraph into discrete sentences
+    const sentences = paragraph.split(sentenceBoundaries);
     //for each sentence we have, perform the capitalization
+    const modifiedSentences = sentences.map(sentence => capitalizeOneSentence(sentence));
     //then recombine the sentences with their original whitespace
+    let modifiedParagraph = '';
+    let whiteSpaceIndex = 0; //note: we're not using shift here to see if this might be more efficient than constantly changing the whitespace array :)
+    modifiedSentences.forEach(sentence=> {
+        let spacing = ((whiteSpace && whiteSpaceIndex < whiteSpace.length) ? whiteSpace[whiteSpaceIndex] : '');
+        whiteSpaceIndex++;
+        modifiedParagraph+=sentence + spacing;
+    });
+
+    return modifiedParagraph;
 }
 
 function capitalizeOneSentence(str) {
@@ -29,26 +43,8 @@ function capitalizeOneSentence(str) {
     return initialPunctuation + str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function splitIntoSentences(paragraph) {
-    //takes in a chunk of text and splits it into discrete sentences
-    //Sentences end in one or more . ! ? 
-    //Sentences can be encapsulated in parenthesises, quotes, backticks, or single quotes
-    const sentenceBoundaries = /(?<=[\.!\?]+['"`\)]*)\s+/g;
-    return paragraph.split(sentenceBoundaries);
-}
-
-function extractParagraphWhitespace(paragraph) {
-    //takes in a chunk of text and returns the chunks of whitespace between the sentences
-    //Sentences end in one or more . ! ? 
-    //Sentences can be encapsulated in parenthesises, quotes, backticks, or single quotes
-    const sentenceBoundaries = /(?<=[\.!\?]+['"`\)]*)\s+/g;
-    return(paragraph.match(sentenceBoundaries));
-}
-
 module.exports = {
     escapeRegExpSpecials: escapeRegExpSpecials,
     capitalizeOneSentence: capitalizeOneSentence,
     capitalizeSentences: capitalizeSentences,
-    splitIntoSentences: splitIntoSentences, 
-    extractParagraphWhitespace: extractParagraphWhitespace
 };
