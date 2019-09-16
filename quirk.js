@@ -128,32 +128,40 @@ class Quirk {
 
     //the fun part - encoding their speech!!
     toQuirk(str) {
-        this.substitutions.forEach(sub => str = sub.toQuirk(str));
-
-        if (this.separator) {
-            str = this.separator.toQuirk(str);
-        }
-
-        //join the sentence
-        str = (this.prefix ? this.prefix.text : '') + str + (this.suffix ? this.suffix.text : '');
-        //lastly, enforce case
-
-        if (this.sentenceCase) {
-            switch (this.sentenceCase) {
-                case 'lowercase': str = str.toLowerCase();
-                    break;
-                case 'uppercase': str = str.toUpperCase();
-                    break;
-                case 'propercase':
-                    str = utils.capitalizeSentences(str);
-                    break;
-                default:
-                    //this code should be unreachable
-                    break;
+        //we will do this sentence by sentence within a paragraph
+        //first, split up the sentences
+        const { sentences, whiteSpace } = utils.separateSentencesAndWhiteSpace(str);
+        const adjustedSentences = sentences.map(sentence => {
+            //if there is a custom separator, add that
+            if (this.separator) {
+                sentence = this.separator.toQuirk(str);
             }
-        }
+            //perform substitutions (currently: across the entire sentence at once)
+            this.substitutions.forEach(sub => str = sub.toQuirk(sentence));
+            //join the sentence with prefix and suffix
+            sentence = (this.prefix ? this.prefix.text : '') + str + (this.suffix ? this.suffix.text : '');
+            //lastly, enforce case
+            if (this.sentenceCase === 'lowercase') {
+                sentence = sentence.toLowerCase();
+            } else if (this.sentenceCase === 'uppercase') {
+                sentence = sentence.toUpperCase();
+            } else if (this.sentenceCase === 'propercase') {
+                sentence = utils.capitalizeOneSentence(sentence);
+            }
+            //return the sentence to our map
+            return sentence;
+        });
 
-        return str;
+        //lastly, recombine the sentences with their original whitespace
+        let adjustedParagraph = '';
+        let whiteSpaceIndex = 0; //note: we're not using shift here to see if this might be more efficient than constantly changing the whitespace array :)
+        adjustedSentences.forEach(sentence => {
+            let spacing = ((whiteSpace && whiteSpaceIndex < whiteSpace.length) ? whiteSpace[whiteSpaceIndex] : '');
+            whiteSpaceIndex++;
+            adjustedParagraph += sentence + spacing;
+        });
+
+        return adjustedParagraph;
     }
 
     toPlain(str) {

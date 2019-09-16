@@ -43,8 +43,18 @@ function capitalizeOneSentence(str) {
     return initialPunctuation + str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function separateSentencesAndWhiteSpace(paragraph) {
+    const sentenceBoundaries = /(?<=[\.!\?]+['"`\)]*)\s+/g;
+    //first, grab the whitespace so we can preserve it
+    const whiteSpace = paragraph.match(sentenceBoundaries);
+    //next, split the paragraph into discrete sentences
+    const sentences = paragraph.split(sentenceBoundaries);
+    return {sentences, whiteSpace};
+}
+
 module.exports = {
     escapeRegExpSpecials: escapeRegExpSpecials,
     capitalizeOneSentence: capitalizeOneSentence,
     capitalizeSentences: capitalizeSentences,
+    separateSentencesAndWhiteSpace: separateSentencesAndWhiteSpace
 };
