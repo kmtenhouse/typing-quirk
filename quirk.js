@@ -144,7 +144,11 @@ class Quirk {
                     break;
                 case 'uppercase': str = str.toUpperCase();
                     break;
+                case 'propercase':
+                    str = utils.capitalizeSentences(str);
+                    break;
                 default:
+                    //this code should be unreachable
                     break;
             }
         }

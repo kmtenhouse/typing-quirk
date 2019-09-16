@@ -125,6 +125,15 @@ describe('sentence case', function () {
         expect(testSub.toQuirk("H3lLO")).to.equal('h3llo');
     });
 
+    it('should enforce lowercase even if spelled with weird caps', function () {
+        let testSub = new Quirk();
+        testSub.enforceCase('lowercASe');
+        expect(testSub.toQuirk("HELLO")).to.equal('hello');
+        expect(testSub.toQuirk("hello")).to.equal('hello');
+        expect(testSub.toQuirk("HEllO")).to.equal('hello');
+        expect(testSub.toQuirk("H3lLO")).to.equal('h3llo');
+    });
+
     it('should enforce uppercase', function () {
         let testSub = new Quirk();
         testSub.enforceCase('uppercase');
@@ -132,6 +141,20 @@ describe('sentence case', function () {
         expect(testSub.toQuirk("HELLO")).to.equal('HELLO');
         expect(testSub.toQuirk("H3lL0")).to.equal('H3LL0');
     });
+
+    it('should enforce uppercase even if spelled with weird caps', function () {
+        let testSub = new Quirk();
+        testSub.enforceCase('uppeRCase');
+        expect(testSub.toQuirk("hello")).to.equal('HELLO');
+        expect(testSub.toQuirk("HELLO")).to.equal('HELLO');
+        expect(testSub.toQuirk("H3lL0")).to.equal('H3LL0');
+    });
+
+  /*   it('should enforce propercase', function () {
+        let testSub = new Quirk();
+        testSub.enforceCase('propercase');
+        expect(testSub.toQuirk("hello. this is a test.")).to.equal("Hello. This is a test.");
+    }); */
 
     it('should throw an error when given an invalid case', function () {
         const badFn = () => {
