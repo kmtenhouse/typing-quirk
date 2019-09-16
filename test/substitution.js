@@ -55,13 +55,34 @@ describe('substitution-test', function () {
         expect(testSub.toQuirk("weh")).to.equal('wweh');
     });
 
-    it('should throw an error when the first argument is not valid', function () {
-        const badFn = () => { const badQuirk = new Substitution('', 'w'); }
+    it('should throw an error when the first argument is not a valid type', function () {
+        const badFn = () => { const badQuirk = new Substitution([], 'w'); }
         expect(badFn).to.throw();
     });
 
-    it('should throw an error when the second argument is not valid', function () {
+    it('should throw an error when the second argument is not a valid type', function () {
         const badFn = () => { const badQuirk = new Substitution('w', 2); }
+        expect(badFn).to.throw();
+    });
+
+    it('should throw an error when provided a subsitution object missing the pattern', function () {
+        const badFn = () => { const badQuirk = new Substitution('w', {replaceWith: 'ww'}); }
+        expect(badFn).to.throw();
+    });
+
+    it('should throw an error when provided a subsitution object missing the replaceWith', function () {
+        const badFn = () => { const badQuirk = new Substitution('w', {patternToMatch: /w/g}); }
+        expect(badFn).to.throw();
+    });
+
+
+    it('should throw an error when provided a subsitution object with an invalid pattern', function () {
+        const badFn = () => { const badQuirk = new Substitution('w', {replaceWith: 'ww', patternToMatch: 2}); }
+        expect(badFn).to.throw();
+    });
+
+    it('should throw an error when provided a subsitution object with an invalid replaceWith', function () {
+        const badFn = () => { const badQuirk = new Substitution('w', {replaceWith: 2, patternToMatch: /w/g}); }
         expect(badFn).to.throw();
     });
 
