@@ -1,2 +1,2 @@
 # typing-quirk
-A package for encoding and decoding typing quirks
+A package for encoding and decoding typing quirks.

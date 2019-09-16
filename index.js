@@ -1,11 +1,13 @@
 const Quirk = require("./quirk");
 
-const myQuirk = new Quirk({
-    prefix: "<",
-    suffix: ">", 
-    substitutions: [{ plain: "h", quirk: "j", isCaseSensitive: true} ]
-});
+const murrit = new Quirk(); 
+murrit.addPrefix('>([');
+murrit.addSuffix(']');
+murrit.addSubstitution('h', '#');
+const words = ["hey guys what's up", "why are you so glum"];
+words.forEach(word => {
+    let quirk = murrit.toQuirk(word);
+    let plain = murrit.toPlain(quirk);
+    console.log(plain, quirk);
+})
 
-console.log(myQuirk.encode("Hello world"));
-console.log(myQuirk.substitutions);
-//console.log(myQuirk.decode("<Hi>"));

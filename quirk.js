@@ -1,135 +1,127 @@
-const utils = require("./utils");
 const Substitution = require("./substitution");
+const regexgen = require('regexgen');
 
 class Quirk {
     constructor() {
-        try {
-            this.substitutions = [];
-            //the constructor can (optionally) take an object 
-            if (arguments.length === 1 && typeof (arguments[0] === "object") && !Array.isArray(arguments[0])) {
-                const configObj = arguments[0];
+        //initialize the number of substitutions to nothing
+        this.substitutions = [];
+        this.suffix = null;
+        this.prefix = null;
 
-                if(configObj.hasOwnProperty("prefix")) {
-                    this.setPrefix(configObj.prefix);
-                }
+        //check if we received a possible config object with valid items
+        if (arguments.length > 0) {
+            //valid config objects are: 
+            //1) one object only
+            //2) not null
+            //3) not an array
+            if (arguments.length > 1) {
+                throw new Error("Too many arguments to constructor!");
+            }
+            const config = arguments[0];
 
-                if(configObj.hasOwnProperty("suffix")) {
-                    this.setSuffix(configObj.suffix);
-                }
+            if (typeof config !== 'object' || Array.isArray(config) || config === null) {
+                throw new Error("Invalid argument passed to constructor!");
+            }
 
-                if(configObj.hasOwnProperty("separator")) {
-                    this.setSeparator(configObj.separator);
-                } else {
-                    //defaults to spaces
-                    this.separator = { 
-                        text: " ",
-                        pattern: / /g
-                    }
-                }
+            //use the config object to set up the quirk :)
+            //ADD PREFIX
+            if (config.hasOwnProperty('prefix')) {
+                this.addPrefix(config.prefix);
+            }
 
-                if(configObj.hasOwnProperty("substitutions") && Array.isArray(configObj.substitutions)) {
-                    configObj.substitutions.forEach(sub => this.setSubstitution(sub));
-                }
+            //ADD SUFFIX
+            if (config.hasOwnProperty('suffix')) {
+                this.addPrefix(config.suffix);
             }
         }
-        catch (err) {
-            throw err;
-        }
+
     }
 
-    setPrefix(prefixStr) {
-        //create a regexp
-        if (typeof (prefixStr) !== "string" || prefixStr === "") {
+    addPrefix(prefix, pattern = '') {
+        if (typeof prefix !== "string" || prefix === '') {
             throw new Error("Prefix must be a non-empty string!");
         }
-        try {
-            this.prefix = {
-                pattern: new RegExp("^" + utils.escapeRegExpSpecials(prefixStr)),
-                text: prefixStr
-            };
+
+        //if a pattern paramater was provided, check that 1) a regular expression
+        if (pattern !== '' && !(pattern instanceof RegExp)) {
+            throw new Error("Invalid regexp provided!");
         }
-        catch (err) {
-            throw err;
+        //...and that it's a valid regexp for the start of a string
+        if (pattern instanceof RegExp && !/^\^/.test(pattern.source)) {
+            throw new Error("Invalid regexp provided for a prefix (hint: check for missing ^)");
         }
+
+        //create the proper regexp for the prefix (if necessary)
+        let prefixRegExp = (pattern ? pattern : new RegExp("^" + escapeRegExpSpecials(prefix)));
+
+        this.prefix = {
+            text: prefix,
+            patternToStrip: prefixRegExp
+        };
     }
 
-    setSuffix(suffixStr) {
-        //create a regexp
-        if (typeof (suffixStr) !== "string" || suffixStr === "") {
+    addSuffix(suffix, pattern = '') {
+        if (typeof suffix !== "string" || suffix === '') {
             throw new Error("Suffix must be a non-empty string!");
         }
-        try {
-            this.suffix = {
-                pattern: new RegExp(utils.escapeRegExpSpecials(suffixStr) + "$"),
-                text: suffixStr
-            };
+
+        //if a pattern paramater was provided, check that 1) a regular expression
+        if (pattern !== '' && !(pattern instanceof RegExp)) {
+            throw new Error("Invalid regexp provided!");
         }
-        catch (err) {
-            throw err;
+        //...and that it's a valid regexp for the end of a string
+        if (pattern instanceof RegExp && !/\$$/.test(pattern.source)) {
+            throw new Error("Invalid regexp provided for a suffix (hint: check for missing $)");
         }
+
+
+        //create the proper regexp for the suffix (if necessary)
+        let suffixRegExp = (pattern ? pattern : new RegExp(escapeRegExpSpecials(suffix) + "$"));
+
+        this.suffix = {
+            text: suffix,
+            patternToStrip: suffixRegExp
+        };
     }
 
-    setSeparator(separator) {
-        if (typeof (separator) !== "string" || separator === "") {
-            throw new Error("Invalid separator!");
-        }
-
-       this.separator = {
-           text: separator, 
-           pattern: new RegExp(utils.escapeRegExpSpecials(separator), "g")
-       };
-    }
-
-    setSubstitution(sub) {
-        //takes in an original string, to be replaced by the quirk version
-        console.log(sub);
-        if(!sub.hasOwnProperty("plain") || !sub.hasOwnProperty("quirk")) {
-            throw new Error("Invalid substitution!");
-        }
-
-        const newSub = new Substitution({
-            plainText: sub.plain,
-            quirkText: sub.quirk,
-            isCaseSensitive: (sub.isCaseSensitive===true)
-        });
-        console.log(newSub);
-
+    addSubstitution(plain, quirk) {
+        let newSub = new Substitution(plain, quirk);
         this.substitutions.push(newSub);
-        
     }
 
-    //takes in a string
-    //returns the encoded version of that string
-    encode(str) {
-        //first, determine if we are going to use a custom separator or not
-
-        let newStr = str.split(/ /)
-            .map(word => {
-                this.substitutions.forEach(sub => {
-                    word = word.replace(sub.plain.pattern, sub.quirk.text);
-                })
-                return word;
-            })
-            .join(this.separator.text);
-
-        return (this.prefix ? this.prefix.text : "") + newStr + (this.suffix ? this.suffix.text : "");
+    //the fun part - encoding their speech!!
+    toQuirk(str) {
+        this.substitutions.forEach(sub => str = sub.toQuirk(str));
+        return (this.prefix ? this.prefix.text : '') + str + (this.suffix ? this.suffix.text : '');
     }
 
-    decode(str) {
-        let newStr = str;
+    toPlain(str) {
+        //start by removing prefix and suffix from the whole string
         if (this.prefix) {
-            newStr = newStr.replace(this.prefix.pattern, "");
-        }
-        if (this.suffix) {
-            newStr = newStr.replace(this.suffix.pattern, "");
-        }
-        if(this.separator) {
-            newStr = newStr.replace(this.separator.pattern," ");
+            str = str.replace(this.prefix.patternToStrip, '');
         }
 
-        return newStr;
+        if (this.suffix) {
+            str = str.replace(this.suffix.patternToStrip, '');
+        }
+
+        this.substitutions.forEach(sub => str = sub.toPlain(str));
+        return str;
     }
 
+}
+
+//HELPER FUNCTIONS
+//
+//
+function escapeRegExpSpecials(str) {
+    const arr = str.split("");
+    //matches the 12 special characters in regexps - \ ^ $ . | ? * + ( ) { [ ]
+    const specialChars = /[\\\^\$\.\|\?\*\+\(\)\[\{\]]/;
+
+    return arr
+        .map(char => (specialChars.test(char) ? ("\\" + char) : char))
+        .join("");
 }
 
 module.exports = Quirk;
