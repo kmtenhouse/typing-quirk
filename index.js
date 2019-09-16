@@ -1,13 +1,9 @@
 const Quirk = require("./quirk");
 
-const murrit = new Quirk(); 
-murrit.addPrefix('>([');
-murrit.addSuffix(']');
-murrit.addSubstitution('h', '#');
-const words = ["hey guys what's up", "why are you so glum"];
-words.forEach(word => {
-    let quirk = murrit.toQuirk(word);
-    let plain = murrit.toPlain(quirk);
-    console.log(plain, quirk);
-})
 
+const sollux = new Quirk();
+sollux.addSubstitution('i', 'ii');
+sollux.addSubstitution('I', 'ii');
+sollux.addSubstitution('s','2');
+sollux.addSubstitution('S','2');
+console.log(sollux.toQuirk("Now I can type anything Sollux says and it's really cool."));
