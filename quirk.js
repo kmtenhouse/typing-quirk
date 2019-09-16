@@ -1,5 +1,5 @@
 const Substitution = require("./substitution");
-const regexgen = require('regexgen');
+const utils = require("./utils")
 
 class Quirk {
     constructor() {
@@ -7,6 +7,7 @@ class Quirk {
         this.substitutions = [];
         this.suffix = null;
         this.prefix = null;
+        this.separator = null; //default word separator is a space
 
         //check if we received a possible config object with valid items
         if (arguments.length > 0) {
@@ -25,14 +26,19 @@ class Quirk {
 
             //use the config object to set up the quirk :)
             //ADD PREFIX
-            if (config.hasOwnProperty('prefix')) {
-                this.addPrefix(config.prefix);
-            }
+            /*  if (config.hasOwnProperty('prefix')) {
+                 this.addPrefix(config.prefix);
+             } */
 
             //ADD SUFFIX
-            if (config.hasOwnProperty('suffix')) {
+            /* if (config.hasOwnProperty('suffix')) {
                 this.addPrefix(config.suffix);
-            }
+            } */
+
+            //ADD SEPARATORS
+            /*   if (config.hasOwnProperty('separator')) {
+                  this.addPrefix(config.separator);
+              } */
         }
 
     }
@@ -52,7 +58,7 @@ class Quirk {
         }
 
         //create the proper regexp for the prefix (if necessary)
-        let prefixRegExp = (pattern ? pattern : new RegExp("^" + escapeRegExpSpecials(prefix)));
+        let prefixRegExp = (pattern ? pattern : new RegExp("^" + utils.escapeRegExpSpecials(prefix)));
 
         this.prefix = {
             text: prefix,
@@ -74,9 +80,8 @@ class Quirk {
             throw new Error("Invalid regexp provided for a suffix (hint: check for missing $)");
         }
 
-
         //create the proper regexp for the suffix (if necessary)
-        let suffixRegExp = (pattern ? pattern : new RegExp(escapeRegExpSpecials(suffix) + "$"));
+        let suffixRegExp = (pattern ? pattern : new RegExp(utils.escapeRegExpSpecials(suffix) + "$"));
 
         this.suffix = {
             text: suffix,
@@ -84,7 +89,22 @@ class Quirk {
         };
     }
 
-    addSubstitution(plain, quirk) {
+    addSeparator(separator) {
+        // Registers a custom word separator (ex: the*asterisk*is*the*separator*.)
+        // Only disallowed separator is ''
+        if (typeof separator !== 'string' || separator === '') {
+            throw new Error("Must provide a valid separator!");
+        }
+
+        // Note: assumes that all whitespace will be concatenated into a single separator (TO-DO: add a flag to make that an option)
+        this.separator = new Substitution(' ', {
+            patternToMatch: /\s+/g,
+            replaceWith: separator
+        });
+    }
+
+    addSubstitution(plain, quirk, options = null) {
+        //options: case-sensitive substitutions; apply to full sentences or individual words (default)
         let newSub = new Substitution(plain, quirk);
         this.substitutions.push(newSub);
     }
@@ -92,6 +112,10 @@ class Quirk {
     //the fun part - encoding their speech!!
     toQuirk(str) {
         this.substitutions.forEach(sub => str = sub.toQuirk(str));
+        if(this.separator) {
+            str = this.separator.toQuirk(str);
+        }
+    
         return (this.prefix ? this.prefix.text : '') + str + (this.suffix ? this.suffix.text : '');
     }
 
@@ -105,23 +129,13 @@ class Quirk {
             str = str.replace(this.suffix.patternToStrip, '');
         }
 
+        if(this.separator) {
+           str = this.separator.toPlain(str);
+        }
         this.substitutions.forEach(sub => str = sub.toPlain(str));
         return str;
     }
 
-}
-
-//HELPER FUNCTIONS
-//
-//
-function escapeRegExpSpecials(str) {
-    const arr = str.split("");
-    //matches the 12 special characters in regexps - \ ^ $ . | ? * + ( ) { [ ]
-    const specialChars = /[\\\^\$\.\|\?\*\+\(\)\[\{\]]/;
-
-    return arr
-        .map(char => (specialChars.test(char) ? ("\\" + char) : char))
-        .join("");
 }
 
 module.exports = Quirk;
