@@ -65,6 +65,11 @@ describe('substitution-test', function () {
         expect(badFn).to.throw();
     });
 
+    it('should throw an error when passed an empty string', function () {
+        const badFn = () => { const badQuirk = new Substitution('', 'ww'); }
+        expect(badFn).to.throw();
+    });
+
     it('should throw an error when provided a subsitution object missing the pattern', function () {
         const badFn = () => { const badQuirk = new Substitution('w', {replaceWith: 'ww'}); }
         expect(badFn).to.throw();
