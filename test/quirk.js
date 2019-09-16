@@ -98,6 +98,23 @@ describe('prefixes', function () {
 
 });
 
+describe('separator', function () {
+    it('should create a valid quirk from a separator', function () {
+        let testSub = new Quirk();
+        testSub.addSeparator('*');
+        expect(testSub.toPlain("this*is*nonsense")).to.equal('this is nonsense');
+        expect(testSub.toQuirk("this is nonsense")).to.equal('this*is*nonsense');
+    });
+
+    it('should throw an error when given an invalid separator', function () {
+        const badFn = () => {
+            let testSub = new Quirk();
+            testSub.addSeparator(2);
+        }
+        expect(badFn).to.throw();
+    });
+});
+
 describe('suffixes', function () {
 
     it('should create a valid quirk from suffixes added via addSuffix', function () {
