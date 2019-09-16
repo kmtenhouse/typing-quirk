@@ -5,9 +5,10 @@ class Quirk {
     constructor() {
         //initialize the number of substitutions to nothing
         this.substitutions = [];
-        this.suffix = null;
-        this.prefix = null;
+        this.suffix = null; //default: no suffix
+        this.prefix = null; //default: no prefix
         this.separator = null; //default word separator is a space
+        this.sentenceCase = null; //default: attempt to follow the input as closely as possible
 
         //check if we received a possible config object with valid items
         if (arguments.length > 0) {
@@ -103,6 +104,22 @@ class Quirk {
         });
     }
 
+    enforceCase(sentenceCase) {
+        //enforces a specific case-sensitivity across all the text
+        //(default is that the algorithm attempts to match the existing case as closely as possible)
+        if (typeof sentenceCase !== 'string') {
+            throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase.");
+        }
+
+        const caseProvided = sentenceCase.toLowerCase();
+        if (caseProvided === 'lowercase' || caseProvided === 'uppercase' || caseProvided === 'propercase') {
+            this.sentenceCase = caseProvided;
+        } else {
+            throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase.");
+        }
+
+    }
+
     addSubstitution(plain, quirk, options = null) {
         //options: case-sensitive substitutions; apply to full sentences or individual words (default)
         let newSub = new Substitution(plain, quirk);
@@ -112,11 +129,27 @@ class Quirk {
     //the fun part - encoding their speech!!
     toQuirk(str) {
         this.substitutions.forEach(sub => str = sub.toQuirk(str));
-        if(this.separator) {
+
+        if (this.separator) {
             str = this.separator.toQuirk(str);
         }
-    
-        return (this.prefix ? this.prefix.text : '') + str + (this.suffix ? this.suffix.text : '');
+
+        //join the sentence
+        str = (this.prefix ? this.prefix.text : '') + str + (this.suffix ? this.suffix.text : '');
+        //lastly, enforce case
+
+        if (this.sentenceCase) {
+            switch (this.sentenceCase) {
+                case 'lowercase': str = str.toLowerCase();
+                    break;
+                case 'uppercase': str = str.toUpperCase();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return str;
     }
 
     toPlain(str) {
@@ -129,8 +162,8 @@ class Quirk {
             str = str.replace(this.suffix.patternToStrip, '');
         }
 
-        if(this.separator) {
-           str = this.separator.toPlain(str);
+        if (this.separator) {
+            str = this.separator.toPlain(str);
         }
         this.substitutions.forEach(sub => str = sub.toPlain(str));
         return str;
