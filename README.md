@@ -10,12 +10,17 @@ This package attempts to help readers and writers more easily manage their text 
 ```
 const Quirk = require("quirk");
 let example = new Quirk();
-example.addSubstitution("U", "u");
-example.enforceQuirkCase("uppercase", {exceptions: "u"});
-let quirkifiedText = example.toQuirk("You have to check this out!");
-// Output: 'YOu HAVE TO CHECK THIS OuT!'
-let plainText = example.toPlain("YOu HAVE TO CHECK THIS OuT!");
-// Output: 'YOu HAVE TO CHECK THIS OuT!'
+example.addPrefix("::");
+example.addSuffix("::");
+example.addSubstitution("i", "ii", {ignoreCase: true});
+example.addSubstitution("s", "2");
+example.enforceQuirkCase("lowercase");
+
+console.log(example.toQuirk("Check this stuff out! It even works for multiple sentences."));
+//Outputs: ::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::
+
+console.log(example.toPlain("::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::"));
+//Outputs: Check this stuff out! It even works for multiple sentences.
 ```
 
 Quirks are defined by invoking a new instance of the Quirk class and invoking its methods to configure a quirk's ruleset. Once configured, the quirk can be applied via the toQuirk() method. Quirkified text can be converted via the toPlain() method.
@@ -37,22 +42,36 @@ Quirks are defined by invoking a new instance of the Quirk class and invoking it
 <hr />
 
 ## Quirk Ruleset Methods
-This collection of methods creates rules that can be applied to text.
+This collection of methods creates rules that define a typing quirk. 
 
+<hr />
 
 <a href="add-prefix"></a>
 
-### addPrefix
+### addPrefix(prefix, _optional_ patternToMatch)
 
+Adds a set prefix to the beginning of every sentence. 
 
+* ```prefix```: (String) A string to prepend at the start of every sentence.
+* ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
 
-
+<hr />
 <a href="add-suffix"></a>
 
-### addSuffix
+### addSuffix(suffix, _optional_ patternToMatch)
 
+Adds a set suffix at the end of every sentence. 
+
+* ```suffix```: (String) A string to append at the end of every sentence.
+* ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
+
+<hr />
 <a href="add-separator"></a>
+
+<hr />
 <a href="add-substitution"></a>
+
+<hr />
 <a href="enforce-case"></a>
 
 <hr />
@@ -60,7 +79,12 @@ This collection of methods creates rules that can be applied to text.
 
 ## Text Conversion Methods
 
+These methods convert
+
+<hr />
 <a href="to-quirk"></a>
+
+<hr />
 <a href="to-plain"></a>
 
 ## How to Install

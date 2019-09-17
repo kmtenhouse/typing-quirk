@@ -28,12 +28,12 @@ const Quirk = require("./quirk");
 let example = new Quirk();
 example.addPrefix("::");
 example.addSuffix("::");
-example.addSubstitution("i", "ii");
+example.addSubstitution("i", "ii", {ignoreCase: true});
 example.addSubstitution("s", "2");
 example.enforceQuirkCase("lowercase");
 
 console.log(example.toQuirk("Check this stuff out! It even works for multiple sentences."));
-//Outputs: ::check thii2 2tuff out!::
+//Outputs: ::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::
 
-console.log(example.toPlain("::check thii2 2tuff out!:: ::it even work2 for multiiple 2entence2.::"));
-//Outputs: Check this stuff out!
+console.log(example.toPlain("::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::"));
+//Outputs: Check this stuff out! It even works for multiple sentences.
