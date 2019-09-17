@@ -1,4 +1,4 @@
-const utils = require("../utils");
+const utils = require("../../utils");
 const expect = require('chai').expect;
 
 //matches the 12 special characters in regexps - \ ^ $ . | ? * + ( ) { [ ]

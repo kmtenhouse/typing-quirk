@@ -1,5 +1,5 @@
 const expect = require('chai').expect;
-const Substitution = require("../substitution");
+const Substitution = require("../../substitution");
 
 describe('substitution-test', function () {
     it('should create a valid substitution from two strings', function () {
