@@ -52,7 +52,7 @@ function capitalizeOneSentence(str, exceptions=null) {
 function hasPunctuation(str) {
     //takes in a string and detects if it has punctuation
     //TO-DO: account for custom punctuation (for quirks)
-    const punctuation = /[\.\!\?\)]+$/;
+    const punctuation = /[\.\!\?\)]+[\s\W]*$/;
     return punctuation.test(str); 
 }
 
