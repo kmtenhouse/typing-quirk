@@ -1,11 +1,11 @@
-const Quirk = require("./quirk");
+/* const Quirk = require("./quirk");
 let example = new Quirk();
 example.addSubstitution("U", "u");
 example.enforceQuirkCase("uppercase", {exceptions: "u"});
 let quirkifiedText = example.toQuirk("You have to check this out!ss :)");
 let plainText = example.toPlain("yOu HAVE TO CHECK THIS OuT! :)ss");
 console.log(quirkifiedText);
-console.log(plainText);
+console.log(plainText); */
 /* 
 let callie = new Quirk();
 callie.addSubstitution("u", "U", {ignoreCase: true});
@@ -23,3 +23,17 @@ let testSub = new Quirk();
 testSub.addSubstitution("w", "ww");
 testSub.addSubstitution("v", "vv");
 console.log(testSub.toQuirk("Weh everyone is mean")); */
+
+const Quirk = require("./quirk");
+let example = new Quirk();
+example.addPrefix("::");
+example.addSuffix("::");
+example.addSubstitution("i", "ii");
+example.addSubstitution("s", "2");
+example.enforceQuirkCase("lowercase");
+
+console.log(example.toQuirk("Check this stuff out! It even works for multiple sentences."));
+//Outputs: ::check thii2 2tuff out!::
+
+console.log(example.toPlain("::check thii2 2tuff out!:: ::it even work2 for multiiple 2entence2.::"));
+//Outputs: Check this stuff out!

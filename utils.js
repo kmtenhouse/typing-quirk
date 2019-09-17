@@ -68,7 +68,8 @@ function capitalizeFirstPerson(str) {
 
 //Separating and recombining sentences
 function separateSentencesAndWhiteSpace(paragraph) {
-    const sentenceBoundaries = /(?<=[\.!\?]+['"`\)]*)\s+/g;
+    //TO-DO: accept any characters that might need to be added to boundary detection due to custom punctuation / suffixes
+    const sentenceBoundaries = /(?<=[\.!\?]+[\W]*)\s+/g;
     //first, grab the whitespace so we can preserve it
     const whiteSpace = paragraph.match(sentenceBoundaries);
     //next, split the paragraph into discrete sentences

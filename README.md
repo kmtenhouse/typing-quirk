@@ -13,12 +13,14 @@ let example = new Quirk();
 example.addSubstitution("U", "u");
 example.enforceQuirkCase("uppercase", {exceptions: "u"});
 let quirkifiedText = example.toQuirk("You have to check this out!");
+// Output: 'YOu HAVE TO CHECK THIS OuT!'
 let plainText = example.toPlain("YOu HAVE TO CHECK THIS OuT!");
+// Output: 'YOu HAVE TO CHECK THIS OuT!'
 ```
 
 Quirks are defined by invoking a new instance of the Quirk class and invoking its methods to configure a quirk's ruleset. Once configured, the quirk can be applied via the toQuirk() method. Quirkified text can be converted via the toPlain() method.
 
-## Methods
+## Table of Contents
 1. [ Quirk Ruleset Methods ](#ruleset)
     * [ addPrefix ](#add-prefix)
     * [ addSuffix ](#add-suffix)
@@ -31,16 +33,33 @@ Quirks are defined by invoking a new instance of the Quirk class and invoking it
     * [ toPlain ](#to-plain)
 
 <a href="ruleset"></a>
-### Quirk Ruleset Methods
+
+<hr />
+
+## Quirk Ruleset Methods
+This collection of methods creates rules that can be applied to text.
+
 
 <a href="add-prefix"></a>
+
+### addPrefix
+
+
+
+
 <a href="add-suffix"></a>
+
+### addSuffix
+
 <a href="add-separator"></a>
 <a href="add-substitution"></a>
 <a href="enforce-case"></a>
 
+<hr />
 <a href="conversion"></a>
-### Text Conversion Methods
+
+## Text Conversion Methods
+
 <a href="to-quirk"></a>
 <a href="to-plain"></a>
 
