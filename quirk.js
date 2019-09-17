@@ -30,20 +30,6 @@ class Quirk {
             }
 
             //use the config object to set up the quirk :)
-            //ADD PREFIX
-            /*  if (config.hasOwnProperty('prefix')) {
-                 this.addPrefix(config.prefix);
-             } */
-
-            //ADD SUFFIX
-            /* if (config.hasOwnProperty('suffix')) {
-                this.addPrefix(config.suffix);
-            } */
-
-            //ADD SEPARATORS
-            /*   if (config.hasOwnProperty('separator')) {
-                  this.addPrefix(config.separator);
-              } */
         }
 
     }
@@ -108,25 +94,25 @@ class Quirk {
         });
     }
 
-    enforceQuirkCase(sentenceCase, exceptions = "") {
+    enforceQuirkCase(sentenceCase, options = null) {
         //enforces a specific case across all text when quirkified 
         //(default is that the algorithm attempts to match the existing case of the input as closely as possible)
         if (!isString(sentenceCase) || ['lowercase', 'uppercase', 'propercase'].includes(sentenceCase.toLowerCase()) === false) {
             throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase.");
         }
 
-        //if a value other than a string is provided as the (optional) second parameter, or the string contains invalid options, throw an error
-        if (!isString(exceptions)) {
-            throw new Error("Exceptions to enforceCase must be provided as a string of characters to exclude!");
+        //if a value other than a string is provided as the (optional) second parameter, throw an error
+        if (options!== null) {
+            if(!options.hasOwnProperty('exceptions') || !isString(options.exceptions) || options.exceptions==='' )
+            throw new Error("Exceptions to enforceCase must be provided as an object { exceptions: <String of characters to exclude> }!");
         }
 
         //set the overall quirk case
         this.quirkCase.sentenceCase = sentenceCase.toLowerCase();
 
-        //lastly check if we have passed a string of letters that should not be affected by case enforcement 
-        //exceptions are currently English-language letters only
-        if (exceptions) {
-            let matchPattern = exceptions;
+        //lastly, if we have passed a string of letters that should not be affected by case enforcement, create a match pattern for them
+        if (options) {
+            let matchPattern = options.exceptions;
             this.quirkCase.exceptions = new RegExp("[" + matchPattern + "]", 'g');
         }
     }
@@ -154,9 +140,15 @@ class Quirk {
             } else if (this.quirkCase.sentenceCase === 'uppercase') {
                 sentence = utils.convertToUpperCase(sentence, this.quirkCase.exceptions);
             } else if (this.quirkCase.sentenceCase === 'propercase') {
-                sentence = utils.capitalizeOneSentence(sentence);
+                //note: we will only perform capitalization if this sentence is punctuated!
+                if (utils.hasPunctuation(sentence)) {
+                    //First, forcibly perform lowercasing
+                    //TO-DO: handle exception WORDS (?)
+                    sentence = utils.convertToLowerCase(sentence, this.quirkCase.exceptions);
+                    sentence = utils.capitalizeOneSentence(sentence, this.quirkCase.exceptions);
+                    sentence = utils.capitalizeFirstPerson(sentence);
+                }
             }
-
             //lastly, if there is a custom separator, add that
             if (this.separator) {
                 sentence = this.separator.toQuirk(str);
@@ -172,7 +164,6 @@ class Quirk {
 
     //(TO-DO) Adjust to support paragraphs properly
     toPlain(str) {
-
         //first, split up the sentences
         const { sentences, whiteSpace } = utils.separateSentencesAndWhiteSpace(str);
         const adjustedSentences = sentences.map(sentence => {
@@ -192,11 +183,13 @@ class Quirk {
             this.substitutions.forEach(sub => sentence = sub.toPlain(sentence));
 
             //Now we should handle case (as best we can):
-            if (this.quirkCase.sentenceCase === 'uppercase') {
+            //If we did an enforced case, reset to lowercase first
+            //To-do: handle any exceptions
+            if (this.quirkCase.sentenceCase === 'uppercase' || this.quirkCase.sentenceCase ==='lowercase') {
                 sentence = sentence.toLowerCase();
             }
             //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
-            sentence = sentence.replace(/i\b/g, 'I');
+            sentence = utils.capitalizeFirstPerson(sentence);
 
             //Finally, check if this chunk is a sentence that we need to capitalize
             //(Default assumption is that a proper sentence will have punctuation at the end; otherwise it's a fragment)
@@ -209,9 +202,7 @@ class Quirk {
         //lastly, recombine the sentences with their original whitespace
         const adjustedParagraph = utils.recombineSentencesAndWhiteSpace(adjustedSentences, whiteSpace);
         return adjustedParagraph;
-
     }
-
 }
 
 module.exports = Quirk;

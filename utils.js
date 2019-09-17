@@ -35,12 +35,18 @@ function capitalizeSentences(paragraph) {
     return modifiedParagraph;
 }
 
-function capitalizeOneSentence(str) {
+function capitalizeOneSentence(str, exceptions=null) {
     //takes in a single sentence and capitalizes the first letter
     //sentences can begin with ' " ` and ( -- these are ignored
+    //exceptions are passed as a regular expression to check - if the start of the string is an exception, don't capitalize it!
     const initialPunctuation = str.match(/^["'`\("]*/)[0];
     str = str.replace(initialPunctuation, '');
-    return initialPunctuation + str.charAt(0).toUpperCase() + str.slice(1);
+    
+    let firstChar = str.charAt(0);
+    //check if we have exceptions -- and if so, leave the first character alone if it matches!
+    firstChar = ( (exceptions && exceptions.test(firstChar)) ? firstChar : firstChar.toUpperCase());
+
+    return initialPunctuation + firstChar + str.slice(1);
 }
 
 function hasPunctuation(str) {
@@ -48,6 +54,16 @@ function hasPunctuation(str) {
     //TO-DO: account for custom punctuation (for quirks)
     const punctuation = /[\.\!\?\)]+$/;
     return punctuation.test(str); 
+}
+
+function capitalizeFirstPerson(str) {
+    //takes in a string and ensures that any first person pronouns are capitalized properly
+    //personal pronouns are I, I'm
+    const firstPerson =/i\b/g;
+    const firstPersonPossessive = /i\'m\b/g
+    str =str.replace(firstPerson, "I");
+    str =str.replace(firstPersonPossessive, "I'm");
+    return str;
 }
 
 //Separating and recombining sentences
@@ -102,5 +118,6 @@ module.exports = {
     convertToLowerCase,
     convertToUpperCase,
     recombineSentencesAndWhiteSpace,
-    hasPunctuation
+    hasPunctuation, 
+    capitalizeFirstPerson
 };
