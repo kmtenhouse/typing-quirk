@@ -52,9 +52,33 @@ function separateSentencesAndWhiteSpace(paragraph) {
     return {sentences, whiteSpace};
 }
 
+//Lower case a string -- with an exception mask
+function convertToLowerCase(str, options=null) {
+    if(!options) {
+        return str.toLowerCase();
+    }
+
+    return str.split('').map(char=> {
+        return (options.test(char) ? char : char.toLowerCase());
+    }).join('');
+}
+
+//Capitalize a string -- with an exception mask
+function convertToUpperCase(str, options=null) {
+    if(!options) {
+        return str.toUpperCase();
+    }
+
+    return str.split('').map(char=> {
+        return (options.test(char) ? char : char.toUpperCase());
+    }).join('');
+}
+
 module.exports = {
-    escapeRegExpSpecials: escapeRegExpSpecials,
-    capitalizeOneSentence: capitalizeOneSentence,
-    capitalizeSentences: capitalizeSentences,
-    separateSentencesAndWhiteSpace: separateSentencesAndWhiteSpace
+    escapeRegExpSpecials,
+    capitalizeOneSentence,
+    capitalizeSentences,
+    separateSentencesAndWhiteSpace, 
+    convertToLowerCase,
+    convertToUpperCase
 };

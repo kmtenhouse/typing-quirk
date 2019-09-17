@@ -6,7 +6,12 @@ function isString(str) {
     return(typeof str === 'string');
 }
 
+function isRegExp(reg) {
+    return(reg instanceof RegExp);
+}
+
 module.exports = {
     isObject: isObject,
-    isString: isString
+    isString: isString,
+    isRegExp: isRegExp
 }

@@ -127,7 +127,7 @@ describe('separator', function () {
 describe('sentence case', function () {
     it('should enforce lowercase', function () {
         let testSub = new Quirk();
-        testSub.enforceCase('lowercase');
+        testSub.enforceQuirkCase('lowercase');
         expect(testSub.toQuirk("HELLO")).to.equal('hello');
         expect(testSub.toQuirk("hello")).to.equal('hello');
         expect(testSub.toQuirk("HEllO")).to.equal('hello');
@@ -136,7 +136,7 @@ describe('sentence case', function () {
 
     it('should enforce lowercase even if spelled with weird caps', function () {
         let testSub = new Quirk();
-        testSub.enforceCase('lowercASe');
+        testSub.enforceQuirkCase('lowercASe');
         expect(testSub.toQuirk("HELLO")).to.equal('hello');
         expect(testSub.toQuirk("hello")).to.equal('hello');
         expect(testSub.toQuirk("HEllO")).to.equal('hello');
@@ -145,7 +145,7 @@ describe('sentence case', function () {
 
     it('should enforce uppercase', function () {
         let testSub = new Quirk();
-        testSub.enforceCase('uppercase');
+        testSub.enforceQuirkCase('uppercase');
         expect(testSub.toQuirk("hello")).to.equal('HELLO');
         expect(testSub.toQuirk("HELLO")).to.equal('HELLO');
         expect(testSub.toQuirk("H3lL0")).to.equal('H3LL0');
@@ -153,7 +153,7 @@ describe('sentence case', function () {
 
     it('should enforce uppercase even if spelled with weird caps', function () {
         let testSub = new Quirk();
-        testSub.enforceCase('uppeRCase');
+        testSub.enforceQuirkCase('uppeRCase');
         expect(testSub.toQuirk("hello")).to.equal('HELLO');
         expect(testSub.toQuirk("HELLO")).to.equal('HELLO');
         expect(testSub.toQuirk("H3lL0")).to.equal('H3LL0');

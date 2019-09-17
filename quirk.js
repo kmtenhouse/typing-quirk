@@ -1,5 +1,6 @@
 const Substitution = require("./substitution");
-const utils = require("./utils")
+const utils = require("./utils");
+const {isObject,isString, isRegExp} = require("./validators");
 
 class Quirk {
     constructor() {
@@ -8,7 +9,10 @@ class Quirk {
         this.suffix = null; //default: no suffix
         this.prefix = null; //default: no prefix
         this.separator = null; //default word separator is a space
-        this.sentenceCase = null; //default: attempt to follow the input as closely as possible
+        this.quirkCase = {
+            sentenceCase: "default", //default: attempt to follow the input as closely as possible,
+            exceptions: null //regular expression to trap any letters that should be exempt from case enforcement
+        }; 
 
         //check if we received a possible config object with valid items
         if (arguments.length > 0) {
@@ -21,7 +25,7 @@ class Quirk {
             }
             const config = arguments[0];
 
-            if (typeof config !== 'object' || Array.isArray(config) || config === null) {
+            if (!isObject(config)) {
                 throw new Error("Invalid argument passed to constructor!");
             }
 
@@ -45,16 +49,16 @@ class Quirk {
     }
 
     addPrefix(prefix, pattern = '') {
-        if (typeof prefix !== "string" || prefix === '') {
+        if (!isString(prefix) || prefix === '') {
             throw new Error("Prefix must be a non-empty string!");
         }
 
         //if a pattern paramater was provided, check that 1) a regular expression
-        if (pattern !== '' && !(pattern instanceof RegExp)) {
-            throw new Error("Invalid regexp provided!");
+        if (pattern !== '' && !isRegExp(pattern)) {
+            throw new Error("Invalid regexp provided for prefix!");
         }
         //...and that it's a valid regexp for the start of a string
-        if (pattern instanceof RegExp && !/^\^/.test(pattern.source)) {
+        if (isRegExp(pattern) && !/^\^/.test(pattern.source)) {
             throw new Error("Invalid regexp provided for a prefix (hint: check for missing ^)");
         }
 
@@ -68,16 +72,16 @@ class Quirk {
     }
 
     addSuffix(suffix, pattern = '') {
-        if (typeof suffix !== "string" || suffix === '') {
+        if (!isString(suffix) || suffix === '') {
             throw new Error("Suffix must be a non-empty string!");
         }
 
         //if a pattern paramater was provided, check that 1) a regular expression
-        if (pattern !== '' && !(pattern instanceof RegExp)) {
-            throw new Error("Invalid regexp provided!");
+        if (pattern !== '' && !isRegExp(pattern)) {
+            throw new Error("Invalid regexp provided for suffix!");
         }
         //...and that it's a valid regexp for the end of a string
-        if (pattern instanceof RegExp && !/\$$/.test(pattern.source)) {
+        if (isRegExp(pattern) && !/\$$/.test(pattern.source)) {
             throw new Error("Invalid regexp provided for a suffix (hint: check for missing $)");
         }
 
@@ -104,18 +108,29 @@ class Quirk {
         });
     }
 
-    enforceCase(sentenceCase) {
-        //enforces a specific case-sensitivity across all the text
-        //(default is that the algorithm attempts to match the existing case as closely as possible)
-        if (typeof sentenceCase !== 'string') {
+    enforceQuirkCase(sentenceCase, exceptions="") {
+        //enforces a specific case across all text when quirkified 
+        //(default is that the algorithm attempts to match the existing case of the input as closely as possible)
+        if (!isString(sentenceCase) || ['lowercase', 'uppercase', 'propercase'].includes(sentenceCase.toLowerCase())===false ) {
             throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase.");
         }
+        
+        //if a value other than a string is provided as the (optional) second parameter, or the string contains invalid options, throw an error
+        if(!isString(exceptions) || (exceptions.length > 0 && /[A-Za-z]/.test(exceptions)===false) ) {
+            throw new Error("Exceptions to enforceCase must be provided as a string of letters to exclude (a-zA-Z only)!");
+        }
 
-        const caseProvided = sentenceCase.toLowerCase();
-        if (caseProvided === 'lowercase' || caseProvided === 'uppercase' || caseProvided === 'propercase') {
-            this.sentenceCase = caseProvided;
-        } else {
-            throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase.");
+        //set the overall quirk case
+        this.quirkCase.sentenceCase = sentenceCase.toLowerCase();
+
+        //lastly check if we have passed a string of letters that should not be affected by case enforcement 
+        //exceptions are currently English-language letters
+        //Uppercase - exceptions will remain lowercase
+        //Lowercase - exceptions will remain uppercase
+        if(exceptions) {
+            let matchPattern = exceptions;
+            let flags = ((this.quirkCase.sentenceCase==='lowercase' || this.quirkCase.sentenceCase==='uppercase') ? 'gi': 'g'); 
+            this.quirkCase.exceptions = new RegExp("[" + matchPattern +"]", flags);
         }
     }
 
@@ -140,11 +155,11 @@ class Quirk {
             //join the sentence with prefix and suffix
             sentence = (this.prefix ? this.prefix.text : '') + sentence + (this.suffix ? this.suffix.text : '');
             //lastly, enforce case
-            if (this.sentenceCase === 'lowercase') {
-                sentence = sentence.toLowerCase();
-            } else if (this.sentenceCase === 'uppercase') {
-                sentence = sentence.toUpperCase();
-            } else if (this.sentenceCase === 'propercase') {
+            if (this.quirkCase.sentenceCase === 'lowercase') {
+                sentence = utils.convertToLowerCase(sentence, this.quirkCase.exceptions);
+            } else if (this.quirkCase.sentenceCase === 'uppercase') {
+                sentence = utils.convertToUpperCase(sentence, this.quirkCase.exceptions);
+            } else if (this.quirkCase.sentenceCase === 'propercase') {
                 sentence = utils.capitalizeOneSentence(sentence);
             }
             //return the sentence to our map

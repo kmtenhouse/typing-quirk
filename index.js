@@ -1,13 +1,14 @@
 const Quirk = require("./quirk");
+const utils = require("./utils");
 
-let eridan = new Quirk();
-eridan.addSubstitution('w', 'ww', { ignoreCase: true});
-eridan.addSubstitution('v', 'vv', {ignoreCase: true});
-eridan.enforceCase('lowercase');
-console.log(eridan.toQuirk("Why is everyone so mean to me? I swear everyone hates me!"));
+let callie = new Quirk();
+callie.addSubstitution('u', 'U');
+callie.addSubstitution('U', 'U');
+callie.enforceQuirkCase('lowercase', 'U');
+console.log(callie.toQuirk("I love you so much uwu"));
 
-let sollux = new Quirk();
-sollux.addSubstitution('s', '2', {ignoreCase: true});
-sollux.addSubstitution('i', 'ii', {ignoreCase: true});
-console.log(sollux.toQuirk("I hate everything so much FUCK!"));
-console.log(sollux.toPlain("ii hate everythiing 2o much FUCK!"));
+let caliborn = new Quirk();
+caliborn.addSubstitution('U', 'u');
+caliborn.addSubstitution('u', 'u');
+caliborn.enforceQuirkCase('uppercase', 'u');
+console.log(caliborn.toQuirk("what a conincidence I hate you too you suck"))
