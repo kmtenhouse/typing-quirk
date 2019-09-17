@@ -116,21 +116,18 @@ class Quirk {
         }
 
         //if a value other than a string is provided as the (optional) second parameter, or the string contains invalid options, throw an error
-        if (!isString(exceptions) || (exceptions.length > 0 && /[A-Za-z]/.test(exceptions) === false)) {
-            throw new Error("Exceptions to enforceCase must be provided as a string of letters to exclude (a-zA-Z only)!");
+        if (!isString(exceptions)) {
+            throw new Error("Exceptions to enforceCase must be provided as a string of characters to exclude!");
         }
 
         //set the overall quirk case
         this.quirkCase.sentenceCase = sentenceCase.toLowerCase();
 
         //lastly check if we have passed a string of letters that should not be affected by case enforcement 
-        //exceptions are currently English-language letters
-        //Uppercase - exceptions will remain lowercase
-        //Lowercase - exceptions will remain uppercase
+        //exceptions are currently English-language letters only
         if (exceptions) {
             let matchPattern = exceptions;
-            let flags = ((this.quirkCase.sentenceCase === 'lowercase' || this.quirkCase.sentenceCase === 'uppercase') ? 'gi' : 'g');
-            this.quirkCase.exceptions = new RegExp("[" + matchPattern + "]", flags);
+            this.quirkCase.exceptions = new RegExp("[" + matchPattern + "]", 'g');
         }
     }
 
