@@ -68,6 +68,12 @@ Adds a set suffix at the end of every sentence.
 <hr />
 <a href="add-separator"></a>
 
+### addSeparator(separator)
+
+Adds a custom string to separate the words of a sentence instead of spaces (the default). Every space (including tabs) will be replaced by this string.
+
+* ```separator```: (String) A string that will replace existing whitespace within a sentence
+
 <hr />
 <a href="add-substitution"></a>
 
