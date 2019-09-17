@@ -43,6 +43,13 @@ function capitalizeOneSentence(str) {
     return initialPunctuation + str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function hasPunctuation(str) {
+    //takes in a string and detects if it has punctuation
+    //TO-DO: account for custom punctuation (for quirks)
+    const punctuation = /[\.\!\?\)]+$/;
+    return punctuation.test(str); 
+}
+
 //Separating and recombining sentences
 function separateSentencesAndWhiteSpace(paragraph) {
     const sentenceBoundaries = /(?<=[\.!\?]+['"`\)]*)\s+/g;
@@ -94,5 +101,6 @@ module.exports = {
     separateSentencesAndWhiteSpace,
     convertToLowerCase,
     convertToUpperCase,
-    recombineSentencesAndWhiteSpace
+    recombineSentencesAndWhiteSpace,
+    hasPunctuation
 };

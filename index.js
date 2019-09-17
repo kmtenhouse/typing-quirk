@@ -14,3 +14,10 @@ caliborn.addSubstitution('u', 'u');
 caliborn.enforceQuirkCase('uppercase', 'u');
 console.log(caliborn.toQuirk("what a conincidence I hate you too you suck"))
 console.log(caliborn.toPlain("I REALLY DON't HAVE WORDS FOR HOW MuCH I DESPISE YOu! YOu SuCk!"));
+
+let testSub = new Quirk();
+testSub.addSubstitution('w', 'ww');
+testSub.addSubstitution('v', 'vv');
+console.log(testSub.toQuirk('Weh everyone is mean'));
+
+console.log(testSub.toPlain('wweh evveryone is mean'));

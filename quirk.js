@@ -146,10 +146,7 @@ class Quirk {
         //first, split up the sentences
         const { sentences, whiteSpace } = utils.separateSentencesAndWhiteSpace(str);
         const adjustedSentences = sentences.map(sentence => {
-            //if there is a custom separator, add that
-            if (this.separator) {
-                sentence = this.separator.toQuirk(str);
-            }
+
             //perform substitutions (currently: across the entire sentence at once)
             this.substitutions.forEach(sub => sentence = sub.toQuirk(sentence));
             //join the sentence with prefix and suffix
@@ -161,6 +158,11 @@ class Quirk {
                 sentence = utils.convertToUpperCase(sentence, this.quirkCase.exceptions);
             } else if (this.quirkCase.sentenceCase === 'propercase') {
                 sentence = utils.capitalizeOneSentence(sentence);
+            }
+
+            //lastly, if there is a custom separator, add that
+            if (this.separator) {
+                sentence = this.separator.toQuirk(str);
             }
             //return the sentence to our map
             return sentence;
@@ -193,14 +195,17 @@ class Quirk {
             this.substitutions.forEach(sub => sentence = sub.toPlain(sentence));
 
             //Now we should handle case (as best we can):
-            if(this.quirkCase.sentenceCase === 'uppercase') {
+            if (this.quirkCase.sentenceCase === 'uppercase') {
                 sentence = sentence.toLowerCase();
-            } 
+            }
             //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
             sentence = sentence.replace(/i\b/g, 'I');
 
-            //Finally, capitalize the first word of the sentence:
-            sentence = utils.capitalizeOneSentence(sentence);
+            //Finally, check if this chunk is a sentence that we need to capitalize
+            //(Default assumption is that a proper sentence will have punctuation at the end; otherwise it's a fragment)
+            if (utils.hasPunctuation(sentence)) {
+                sentence = utils.capitalizeOneSentence(sentence);
+            }
 
             return sentence;
         });

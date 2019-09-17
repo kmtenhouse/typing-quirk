@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
-const capitalizeOneSentence = require('../utils').capitalizeOneSentence;
-const capitalizeSentences = require("../utils").capitalizeSentences;
+const capitalizeOneSentence = require('../../utils').capitalizeOneSentence;
+const capitalizeSentences = require("../../utils").capitalizeSentences;
 
 describe('single sentence capitalization', function () {
     it('should capitalize a sentence with no encapsulation', function () {
