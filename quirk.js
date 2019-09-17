@@ -1,6 +1,6 @@
 const Substitution = require("./substitution");
 const utils = require("./utils");
-const {isObject,isString, isRegExp} = require("./validators");
+const { isObject, isString, isRegExp } = require("./validators");
 
 class Quirk {
     constructor() {
@@ -12,7 +12,7 @@ class Quirk {
         this.quirkCase = {
             sentenceCase: "default", //default: attempt to follow the input as closely as possible,
             exceptions: null //regular expression to trap any letters that should be exempt from case enforcement
-        }; 
+        };
 
         //check if we received a possible config object with valid items
         if (arguments.length > 0) {
@@ -108,15 +108,15 @@ class Quirk {
         });
     }
 
-    enforceQuirkCase(sentenceCase, exceptions="") {
+    enforceQuirkCase(sentenceCase, exceptions = "") {
         //enforces a specific case across all text when quirkified 
         //(default is that the algorithm attempts to match the existing case of the input as closely as possible)
-        if (!isString(sentenceCase) || ['lowercase', 'uppercase', 'propercase'].includes(sentenceCase.toLowerCase())===false ) {
+        if (!isString(sentenceCase) || ['lowercase', 'uppercase', 'propercase'].includes(sentenceCase.toLowerCase()) === false) {
             throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase.");
         }
-        
+
         //if a value other than a string is provided as the (optional) second parameter, or the string contains invalid options, throw an error
-        if(!isString(exceptions) || (exceptions.length > 0 && /[A-Za-z]/.test(exceptions)===false) ) {
+        if (!isString(exceptions) || (exceptions.length > 0 && /[A-Za-z]/.test(exceptions) === false)) {
             throw new Error("Exceptions to enforceCase must be provided as a string of letters to exclude (a-zA-Z only)!");
         }
 
@@ -127,14 +127,14 @@ class Quirk {
         //exceptions are currently English-language letters
         //Uppercase - exceptions will remain lowercase
         //Lowercase - exceptions will remain uppercase
-        if(exceptions) {
+        if (exceptions) {
             let matchPattern = exceptions;
-            let flags = ((this.quirkCase.sentenceCase==='lowercase' || this.quirkCase.sentenceCase==='uppercase') ? 'gi': 'g'); 
-            this.quirkCase.exceptions = new RegExp("[" + matchPattern +"]", flags);
+            let flags = ((this.quirkCase.sentenceCase === 'lowercase' || this.quirkCase.sentenceCase === 'uppercase') ? 'gi' : 'g');
+            this.quirkCase.exceptions = new RegExp("[" + matchPattern + "]", flags);
         }
     }
 
-    addSubstitution(plain, quirk, options=null) {
+    addSubstitution(plain, quirk, options = null) {
         //options: case-sensitive substitutions; apply to full sentences or individual words (default)
         let newSub = new Substitution(plain, quirk, options);
         this.substitutions.push(newSub);
@@ -167,37 +167,47 @@ class Quirk {
         });
 
         //lastly, recombine the sentences with their original whitespace
-        let adjustedParagraph = '';
-        let whiteSpaceIndex = 0; //note: we're not using shift here to see if this might be more efficient than constantly changing the whitespace array :)
-        adjustedSentences.forEach(sentence => {
-            let spacing = ((whiteSpace && whiteSpaceIndex < whiteSpace.length) ? whiteSpace[whiteSpaceIndex] : '');
-            whiteSpaceIndex++;
-            adjustedParagraph += sentence + spacing;
-        });
-
+        const adjustedParagraph = utils.recombineSentencesAndWhiteSpace(adjustedSentences, whiteSpace);
         return adjustedParagraph;
     }
 
     //(TO-DO) Adjust to support paragraphs properly
     toPlain(str) {
-        //start by removing prefix and suffix from the whole string
-        if (this.prefix) {
-            str = str.replace(this.prefix.patternToStrip, '');
-        }
 
-        if (this.suffix) {
-            str = str.replace(this.suffix.patternToStrip, '');
-        }
+        //first, split up the sentences
+        const { sentences, whiteSpace } = utils.separateSentencesAndWhiteSpace(str);
+        const adjustedSentences = sentences.map(sentence => {
 
-        if (this.separator) {
-            str = this.separator.toPlain(str);
-        }
-        this.substitutions.forEach(sub => str = sub.toPlain(str));
+            //start by removing prefix and suffix from the whole string
+            if (this.prefix) {
+                sentence = sentence.replace(this.prefix.patternToStrip, '');
+            }
 
-        //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
-        str = str.replace(/i\b/g, 'I');
+            if (this.suffix) {
+                sentence = sentence.replace(this.suffix.patternToStrip, '');
+            }
 
-        return str;
+            if (this.separator) {
+                sentence = this.separator.toPlain(sentence);
+            }
+            this.substitutions.forEach(sub => sentence = sub.toPlain(sentence));
+
+            //Now we should handle case (as best we can):
+            if(this.quirkCase.sentenceCase === 'uppercase') {
+                sentence = sentence.toLowerCase();
+            } 
+            //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
+            sentence = sentence.replace(/i\b/g, 'I');
+
+            //Finally, capitalize the first word of the sentence:
+            sentence = utils.capitalizeOneSentence(sentence);
+
+            return sentence;
+        });
+        //lastly, recombine the sentences with their original whitespace
+        const adjustedParagraph = utils.recombineSentencesAndWhiteSpace(adjustedSentences, whiteSpace);
+        return adjustedParagraph;
+
     }
 
 }

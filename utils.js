@@ -26,10 +26,10 @@ function capitalizeSentences(paragraph) {
     //then recombine the sentences with their original whitespace
     let modifiedParagraph = '';
     let whiteSpaceIndex = 0; //note: we're not using shift here to see if this might be more efficient than constantly changing the whitespace array :)
-    modifiedSentences.forEach(sentence=> {
+    modifiedSentences.forEach(sentence => {
         let spacing = ((whiteSpace && whiteSpaceIndex < whiteSpace.length) ? whiteSpace[whiteSpaceIndex] : '');
         whiteSpaceIndex++;
-        modifiedParagraph+=sentence + spacing;
+        modifiedParagraph += sentence + spacing;
     });
 
     return modifiedParagraph;
@@ -43,33 +43,46 @@ function capitalizeOneSentence(str) {
     return initialPunctuation + str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+//Separating and recombining sentences
 function separateSentencesAndWhiteSpace(paragraph) {
     const sentenceBoundaries = /(?<=[\.!\?]+['"`\)]*)\s+/g;
     //first, grab the whitespace so we can preserve it
     const whiteSpace = paragraph.match(sentenceBoundaries);
     //next, split the paragraph into discrete sentences
     const sentences = paragraph.split(sentenceBoundaries);
-    return {sentences, whiteSpace};
+    return { sentences, whiteSpace };
+}
+
+//Function to rejoin a sentence, given two parts
+function recombineSentencesAndWhiteSpace(sentenceArr, whiteSpaceArr) {
+    let adjustedParagraph = '';
+    let whiteSpaceIndex = 0; //note: we're not using shift here to see if this might be more efficient than constantly changing the whitespace array :)
+    sentenceArr.forEach(sentence => {
+        let spacing = ((whiteSpaceArr && whiteSpaceIndex < whiteSpaceArr.length) ? whiteSpaceArr[whiteSpaceIndex] : '');
+        whiteSpaceIndex++;
+        adjustedParagraph += sentence + spacing;
+    });
+    return adjustedParagraph;
 }
 
 //Lower case a string -- with an exception mask
-function convertToLowerCase(str, options=null) {
-    if(!options) {
+function convertToLowerCase(str, options = null) {
+    if (!options) {
         return str.toLowerCase();
     }
 
-    return str.split('').map(char=> {
+    return str.split('').map(char => {
         return (options.test(char) ? char : char.toLowerCase());
     }).join('');
 }
 
 //Capitalize a string -- with an exception mask
-function convertToUpperCase(str, options=null) {
-    if(!options) {
+function convertToUpperCase(str, options = null) {
+    if (!options) {
         return str.toUpperCase();
     }
 
-    return str.split('').map(char=> {
+    return str.split('').map(char => {
         return (options.test(char) ? char : char.toUpperCase());
     }).join('');
 }
@@ -78,7 +91,8 @@ module.exports = {
     escapeRegExpSpecials,
     capitalizeOneSentence,
     capitalizeSentences,
-    separateSentencesAndWhiteSpace, 
+    separateSentencesAndWhiteSpace,
     convertToLowerCase,
-    convertToUpperCase
+    convertToUpperCase,
+    recombineSentencesAndWhiteSpace
 };
