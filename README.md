@@ -80,6 +80,16 @@ Adds a custom string to separate the words of a sentence instead of spaces (the 
 <hr />
 <a href="enforce-case"></a>
 
+### enforceQuirkCase(caseType, _optional_ options)
+Enforces a specific case upon quirkified sentences. This will OVERRIDE the case of the original input. 
+
+* ```caseType```: (String) Specifies the case to convert strings to.
+    * ```uppercase```: Output will be all UPPERCASE.
+    * ```lowercase```: Output will be all lowercase.
+    * ```propercase```: Output will be lowercase sentences, beginning with capital letters. Personal pronouns (I, I'm) are capitalized.
+* ```options``` _(optional)_: (Object) Contains options to pass to case enforcement  
+    * ```exceptions```: 
+
 <hr />
 <a href="conversion"></a>
 
