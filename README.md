@@ -52,6 +52,7 @@ This collection of methods creates rules that define a typing quirk.
 
 Adds a set prefix to the beginning of every sentence. 
 
+Parameters:
 * ```prefix```: (String) A string to prepend at the start of every sentence.
 * ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
 
@@ -62,6 +63,7 @@ Adds a set prefix to the beginning of every sentence.
 
 Adds a set suffix at the end of every sentence. 
 
+Parameters:
 * ```suffix```: (String) A string to append at the end of every sentence.
 * ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
 
@@ -72,10 +74,71 @@ Adds a set suffix at the end of every sentence.
 
 Adds a custom string to separate the words of a sentence instead of spaces (the default). Every space (including tabs) will be replaced by this string.
 
-* ```separator```: (String) A string that will replace existing whitespace within a sentence
+Parameters:
+* ```separator```: (String) A string that will replace all existing whitespace within a sentence
 
 <hr />
 <a href="add-substitution"></a>
+
+### addSubstitution(plain, quirk, _optional_ options)
+
+Adds a regular substitution that consistently swaps one set of characters for another. 
+
+Parameters:
+* ```plain```: (Can be EITHER a string OR an object) The character(s) to search for in plain English sentences
+* ```quirk```: (Can be EITHER a string OR an object) What to replace the plain text with in quirkified sentences
+* ```options```: _(Optional)_ An object that contains options, set as key: value pairs
+    * ```ignoreCase```: (Boolean) If set to 'true', the substitution will work for any plain text that matches the pattern, regardless of capitalization
+
+
+Note:
+To allow developers maximum control, custom regular expressions can be passed in via objects of the following form:
+```
+{ 
+    patternToMatch: /regularexpression/gi
+    replaceWith: 'the string to swap in for any matches'
+}
+```
+
+**Examples:**
+
+_Creating a simple substitution_
+```
+const Quirk = require("./quirk");
+let taz = new Quirk();
+taz.addSubstitution('t', '+');
+console.log(taz.toQuirk("All these t's are now plus signs."));
+//outputs: All +hese +'s are now plus signs.
+```
+
+_Creating a substitution that matches both i and I in the original text_
+```
+const Quirk = require("quirk");
+let example = new Quirk();
+example.addSubstitution("e", "3",{ignoreCase: true});
+console.log(example.toQuirk("NICE!  I am getting the hang of this :)")); 
+//outputs: NIC3!  I am g3tting th3 hang of this :)
+
+```
+
+_Using substitution objects for fine control_
+```
+const Quirk = require("quirk");
+let eridan = new Quirk();
+eridan.addSubstitution(
+    {
+        patternToMatch: /in\b/g,
+        replaceWith: "ing"
+    },
+    {
+        patternToMatch: /ing\b/g,
+        replaceWith: "in"
+    }
+);
+console.log(eridan.toQuirk("trying out automatic clipping"));
+//outputs: tryin out automatic clippin
+
+```
 
 <hr />
 <a href="enforce-case"></a>
@@ -83,25 +146,45 @@ Adds a custom string to separate the words of a sentence instead of spaces (the 
 ### enforceQuirkCase(caseType, _optional_ options)
 Enforces a specific case upon quirkified sentences. This will OVERRIDE the case of the original input. 
 
+Parameters:
 * ```caseType```: (String) Specifies the case to convert strings to.
     * ```uppercase```: Output will be all UPPERCASE.
     * ```lowercase```: Output will be all lowercase.
     * ```propercase```: Output will be lowercase sentences, beginning with capital letters. Personal pronouns (I, I'm) are capitalized.
-* ```options``` _(optional)_: (Object) Contains options to pass to case enforcement  
-    * ```exceptions```: 
+* ```options``` _(optional)_: (Object) Contains options, passed as key-value pairs
+    * ```exceptions```: (String) A string containing all the individual characters that should not be affected by case enforcement
 
 <hr />
 <a href="conversion"></a>
 
 ## Text Conversion Methods
 
-These methods convert
+These methods convert strings to their 'quirked' versions and 'plain' versions.
 
 <hr />
 <a href="to-quirk"></a>
 
+### toQuirk(textToConvert) 
+Takes in a string and returns a quirkified version, based on the current ruleset provided.
+
+Parameters:
+* ```textToConvert``` (String) A string of plain English text
+
+Returns: 
+* A string containing a 'quirkified' version of the input
+
 <hr />
 <a href="to-plain"></a>
+
+### toPlain(textToConvert) 
+Takes in a quirkified string and returns a plain English version, based on the current ruleset provided. "Plain English" will attempt to separate sentences by standard English punctuation and capitalize the first word of every sentence. It will also capitalize first person pronouns (I, I'm).
+
+Parameters:
+* ```textToConvert``` (String) A quirkified string 
+
+Returns: 
+* A string containing a plain version of the input
+
 
 ## How to Install
 * Typing quirks is currently in pre-release, but the current project can be tested and used by forking this repository and cloning it to your local machine.
