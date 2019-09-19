@@ -9,16 +9,6 @@ console.log(sollux.toQuirk("and the answer is, I don't always remember it bc it'
  */
 
 const Quirk = require("./quirk");
-let eridan = new Quirk();
-eridan.addSubstitution(
-    {
-        patternToMatch: /in\b/g,
-        replaceWith: "ing"
-    },
-    {
-        patternToMatch: /ing\b/g,
-        replaceWith: "in"
-    }
-);
-console.log(eridan.toQuirk("trying out automatic clipping"));
-console.log(eridan.toPlain("tryin out automatic clippin"));
+let gamzee = new Quirk();
+gamzee.enforceQuirkCase('alternatingcaps');
+console.log(gamzee.toQuirk("what's up my motherfuckin best friend"));

@@ -35,16 +35,16 @@ function capitalizeSentences(paragraph) {
     return modifiedParagraph;
 }
 
-function capitalizeOneSentence(str, exceptions=null) {
+function capitalizeOneSentence(str, exceptions = null) {
     //takes in a single sentence and capitalizes the first letter
     //sentences can begin with ' " ` and ( -- these are ignored
     //exceptions are passed as a regular expression to check - if the start of the string is an exception, don't capitalize it!
     const initialPunctuation = str.match(/^["'`\("]*/)[0];
     str = str.replace(initialPunctuation, '');
-    
+
     let firstChar = str.charAt(0);
     //check if we have exceptions -- and if so, leave the first character alone if it matches!
-    firstChar = ( (exceptions && exceptions.test(firstChar)) ? firstChar : firstChar.toUpperCase());
+    firstChar = ((exceptions && exceptions.test(firstChar)) ? firstChar : firstChar.toUpperCase());
 
     return initialPunctuation + firstChar + str.slice(1);
 }
@@ -53,16 +53,16 @@ function hasPunctuation(str) {
     //takes in a string and detects if it has punctuation
     //TO-DO: account for custom punctuation (for quirks)
     const punctuation = /[\.\!\?\)]+[\s\W]*$/;
-    return punctuation.test(str); 
+    return punctuation.test(str);
 }
 
 function capitalizeFirstPerson(str) {
     //takes in a string and ensures that any first person pronouns are capitalized properly
     //personal pronouns are I, I'm
-    const firstPerson =/i\b/g;
+    const firstPerson = /i\b/g;
     const firstPersonPossessive = /i\'m\b/g
-    str =str.replace(firstPerson, "I");
-    str =str.replace(firstPersonPossessive, "I'm");
+    str = str.replace(firstPerson, "I");
+    str = str.replace(firstPersonPossessive, "I'm");
     return str;
 }
 
@@ -111,6 +111,29 @@ function convertToUpperCase(str, options = null) {
     }).join('');
 }
 
+function convertToAlternatingCase(str, exceptions = null) {
+    //exceptions are passed as a regular expression to check - if the letter is an exception, don't modify it!
+    let isCaps = false;
+    let allChars = str.split('');
+    let result = allChars
+        .map(char => {
+            if (exceptions && exceptions.test(char)) {
+                return char;
+            }
+
+            let result = char; 
+            if(/[a-zA-Z]/g.test(char)) {
+                result = (isCaps ? char.toUpperCase() : char.toLowerCase());
+                isCaps = !isCaps; //flip-flop the caps for next time
+            }
+
+            return result;
+        })
+        .join('');
+
+    return result;
+}
+
 module.exports = {
     escapeRegExpSpecials,
     capitalizeOneSentence,
@@ -118,7 +141,8 @@ module.exports = {
     separateSentencesAndWhiteSpace,
     convertToLowerCase,
     convertToUpperCase,
+    convertToAlternatingCase,
     recombineSentencesAndWhiteSpace,
-    hasPunctuation, 
+    hasPunctuation,
     capitalizeFirstPerson
 };

@@ -96,14 +96,14 @@ class Quirk {
     enforceQuirkCase(sentenceCase, options = null) {
         //enforces a specific case across all text when quirkified 
         //(default is that the algorithm attempts to match the existing case of the input as closely as possible)
-        if (!isString(sentenceCase) || ['lowercase', 'uppercase', 'propercase'].includes(sentenceCase.toLowerCase()) === false) {
-            throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase.");
+        if (!isString(sentenceCase) || ['lowercase', 'uppercase', 'propercase', 'alternatingcaps'].includes(sentenceCase.toLowerCase()) === false) {
+            throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase, and alternatingcaps.");
         }
 
         //if a value other than a string is provided as the (optional) second parameter, throw an error
-        if (options!== null) {
-            if(!options.hasOwnProperty('exceptions') || !isString(options.exceptions) || options.exceptions==='' )
-            throw new Error("Exceptions to enforceCase must be provided as an object { exceptions: <String of characters to exclude> }!");
+        if (options !== null) {
+            if (!options.hasOwnProperty('exceptions') || !isString(options.exceptions) || options.exceptions === '')
+                throw new Error("Exceptions to enforceCase must be provided as an object { exceptions: <String of characters to exclude> }!");
         }
 
         //set the overall quirk case
@@ -138,7 +138,10 @@ class Quirk {
                 sentence = utils.convertToLowerCase(sentence, this.quirkCase.exceptions);
             } else if (this.quirkCase.sentenceCase === 'uppercase') {
                 sentence = utils.convertToUpperCase(sentence, this.quirkCase.exceptions);
-            } else if (this.quirkCase.sentenceCase === 'propercase') {
+            } else if (this.quirkCase.sentenceCase === 'alternatingcaps') {
+                sentence = utils.convertToAlternatingCase(sentence, this.quirkCase.exceptions);
+            }
+            else if (this.quirkCase.sentenceCase === 'propercase') {
                 //note: we will only perform capitalization if this sentence is punctuated!
                 if (utils.hasPunctuation(sentence)) {
                     //First, forcibly perform lowercasing
@@ -184,7 +187,7 @@ class Quirk {
             //Now we should handle case (as best we can):
             //If we did an enforced case, reset to lowercase first
             //To-do: handle any exceptions
-            if (this.quirkCase.sentenceCase === 'uppercase' || this.quirkCase.sentenceCase ==='lowercase') {
+            if (this.quirkCase.sentenceCase === 'uppercase' || this.quirkCase.sentenceCase === 'lowercase' || this.quirkCase.sentenceCase === 'alternatingcaps') {
                 sentence = sentence.toLowerCase();
             }
             //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
