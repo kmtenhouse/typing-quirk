@@ -186,5 +186,7 @@ Returns:
 * A string containing a plain version of the input
 
 
+<hr />
+
 ## How to Install
 * Typing quirks is currently in pre-release, but the current project can be tested and used by forking this repository and cloning it to your local machine.
