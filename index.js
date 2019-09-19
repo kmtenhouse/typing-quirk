@@ -1,7 +1,24 @@
+/* 
 const Quirk = require("./quirk");
-const albion = new Quirk();
-albion.addSeparator("*");
-const output = albion.toQuirk("This  is     a test");
+let sollux = new Quirk();
+sollux.addSubstitution("i", "ii", {ignoreCase: true});
+sollux.addSubstitution("s", "2", {ignoreCase: true});
+sollux.addSubstitution("together", "twogether");
+sollux.addSubstitution("to", {patternToMatch: /\bto{1,2}\b/gi, replaceWith: 'two'});
+console.log(sollux.toQuirk("and the answer is, I don't always remember it bc it's nonsense, so I use the reference at www.regexr.com a lot"));
+ */
 
-console.log(output);
-console.log(albion.toPlain(output));
+const Quirk = require("./quirk");
+let eridan = new Quirk();
+eridan.addSubstitution(
+    {
+        patternToMatch: /in\b/g,
+        replaceWith: "ing"
+    },
+    {
+        patternToMatch: /ing\b/g,
+        replaceWith: "in"
+    }
+);
+console.log(eridan.toQuirk("trying out automatic clipping"));
+console.log(eridan.toPlain("tryin out automatic clippin"));
