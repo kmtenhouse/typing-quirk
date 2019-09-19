@@ -10,15 +10,22 @@ This package attempts to help readers and writers more easily manage their text 
 ```
 const Quirk = require("quirk");
 let example = new Quirk();
-example.addSubstitution("U", "u");
-example.enforceQuirkCase("uppercase", {exceptions: "u"});
-let quirkifiedText = example.toQuirk("You have to check this out!");
-let plainText = example.toPlain("YOu HAVE TO CHECK THIS OuT!");
+example.addPrefix("::");
+example.addSuffix("::");
+example.addSubstitution("i", "ii", {ignoreCase: true});
+example.addSubstitution("s", "2");
+example.enforceQuirkCase("lowercase");
+
+console.log(example.toQuirk("Check this stuff out! It even works for multiple sentences."));
+//Outputs: ::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::
+
+console.log(example.toPlain("::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::"));
+//Outputs: Check this stuff out! It even works for multiple sentences.
 ```
 
 Quirks are defined by invoking a new instance of the Quirk class and invoking its methods to configure a quirk's ruleset. Once configured, the quirk can be applied via the toQuirk() method. Quirkified text can be converted via the toPlain() method.
 
-## Methods
+## Table of Contents
 1. [ Quirk Ruleset Methods ](#ruleset)
     * [ addPrefix ](#add-prefix)
     * [ addSuffix ](#add-suffix)
@@ -31,17 +38,69 @@ Quirks are defined by invoking a new instance of the Quirk class and invoking it
     * [ toPlain ](#to-plain)
 
 <a href="ruleset"></a>
-### Quirk Ruleset Methods
+
+<hr />
+
+## Quirk Ruleset Methods
+This collection of methods creates rules that define a typing quirk. 
+
+<hr />
 
 <a href="add-prefix"></a>
+
+### addPrefix(prefix, _optional_ patternToMatch)
+
+Adds a set prefix to the beginning of every sentence. 
+
+* ```prefix```: (String) A string to prepend at the start of every sentence.
+* ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
+
+<hr />
 <a href="add-suffix"></a>
+
+### addSuffix(suffix, _optional_ patternToMatch)
+
+Adds a set suffix at the end of every sentence. 
+
+* ```suffix```: (String) A string to append at the end of every sentence.
+* ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
+
+<hr />
 <a href="add-separator"></a>
+
+### addSeparator(separator)
+
+Adds a custom string to separate the words of a sentence instead of spaces (the default). Every space (including tabs) will be replaced by this string.
+
+* ```separator```: (String) A string that will replace existing whitespace within a sentence
+
+<hr />
 <a href="add-substitution"></a>
+
+<hr />
 <a href="enforce-case"></a>
 
+### enforceQuirkCase(caseType, _optional_ options)
+Enforces a specific case upon quirkified sentences. This will OVERRIDE the case of the original input. 
+
+* ```caseType```: (String) Specifies the case to convert strings to.
+    * ```uppercase```: Output will be all UPPERCASE.
+    * ```lowercase```: Output will be all lowercase.
+    * ```propercase```: Output will be lowercase sentences, beginning with capital letters. Personal pronouns (I, I'm) are capitalized.
+* ```options``` _(optional)_: (Object) Contains options to pass to case enforcement  
+    * ```exceptions```: 
+
+<hr />
 <a href="conversion"></a>
-### Text Conversion Methods
+
+## Text Conversion Methods
+
+These methods convert
+
+<hr />
 <a href="to-quirk"></a>
+
+<hr />
 <a href="to-plain"></a>
 
 ## How to Install

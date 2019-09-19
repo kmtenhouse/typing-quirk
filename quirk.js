@@ -87,9 +87,8 @@ class Quirk {
             throw new Error("Must provide a valid separator!");
         }
 
-        // Note: assumes that all whitespace will be concatenated into a single separator (TO-DO: add a flag to make that an option)
         this.separator = new Substitution(' ', {
-            patternToMatch: /\s+/g,
+            patternToMatch: /\s/g,
             replaceWith: separator
         });
     }
