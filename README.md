@@ -14,7 +14,7 @@ example.addPrefix("::");
 example.addSuffix("::");
 example.addSubstitution("i", "ii", {ignoreCase: true});
 example.addSubstitution("s", "2");
-example.enforceQuirkCase("lowercase");
+example.setSentenceCase("lowercase");
 
 console.log(example.toQuirk("Check this stuff out! It even works for multiple sentences."));
 //Outputs: ::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::
@@ -143,7 +143,7 @@ console.log(eridan.toQuirk("trying out automatic clipping"));
 <hr />
 <a href="enforce-case"></a>
 
-### enforceQuirkCase(caseType, _optional_ options)
+### setSentenceCase(caseType, _optional_ options)
 Enforces a specific case upon quirkified sentences. This will OVERRIDE the case of the original input. 
 
 Parameters:

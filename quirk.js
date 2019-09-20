@@ -93,7 +93,7 @@ class Quirk {
         });
     }
 
-    enforceQuirkCase(sentenceCase, options = null) {
+    setSentenceCase(sentenceCase, options = null) {
         //enforces a specific case across all text when quirkified 
         //(default is that the algorithm attempts to match the existing case of the input as closely as possible)
         if (!isString(sentenceCase) || ['lowercase', 'uppercase', 'propercase', 'alternatingcaps'].includes(sentenceCase.toLowerCase()) === false) {
