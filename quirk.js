@@ -211,7 +211,7 @@ class Quirk {
 
             //Remove the caps from enforced caps
             if(this.quirkCase.wordCase === 'capitalize') {
-                console.log("removing caps");
+                sentence = sentence.toLowerCase();
             }
             //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
             sentence = utils.capitalizeFirstPerson(sentence);

@@ -7,13 +7,12 @@ sollux.addSubstitution("together", "twogether");
 sollux.addSubstitution("to", {patternToMatch: /\bto{1,2}\b/gi, replaceWith: 'two'});
 console.log(sollux.toQuirk("and the answer is, I don't always remember it bc it's nonsense, so I use the reference at www.regexr.com a lot"));
  */
-const utils = require('./utils');
 const Quirk = require("./quirk");
 
  let kanaya = new Quirk();
 kanaya.setWordCase('capitalize');
 console.log(kanaya.toQuirk("This is really very ridiculous."))
-
+console.log(kanaya.toPlain("This Is All Very Quaint."))
 /* const Quirk = require("./quirk");
 let gamzee = new Quirk();
 gamzee.setSentenceCase('alternatingcaps');
