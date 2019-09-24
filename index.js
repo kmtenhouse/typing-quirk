@@ -12,9 +12,14 @@ console.log(sollux.toQuirk("and the answer is, I don't always remember it bc it'
  const Quirk = require("./quirk");
 
 let dave = new Quirk();
+dave.addSubstitution("what's", "whats", {ignoreCase: true});
+dave.addSubstitution("don't", "dont", {ignoreCase: true});
+dave.addSubstitution("shouldn't", "shouldnt", {ignoreCase: true});
 dave.addStripPattern("'");
 dave.setSentenceCase("lowercase");
-console.log(dave.toQuirk("I don't think anything is going to come of this lol what's up"));
+const result = dave.toQuirk("I don't think anything is going to come of this lol what's up");
+console.log(result);
+console.log(dave.toPlain(result));
 
 /*  let kanaya = new Quirk();
 kanaya.setWordCase('capitalize');
