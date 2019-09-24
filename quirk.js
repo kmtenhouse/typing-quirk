@@ -6,6 +6,7 @@ class Quirk {
     constructor() {
         //initialize the number of substitutions to nothing
         this.substitutions = [];
+        this.strip = [];
         this.suffix = null; //default: no suffix
         this.prefix = null; //default: no prefix
         this.separator = null; //default word separator is a space
@@ -129,6 +130,12 @@ class Quirk {
         }
     }
 
+    addStripPattern(plain, options = null) {
+        //To-Do: accept a regexp too
+        let newStrip = new RegExp(utils.escapeRegExpSpecials(plain), "g");
+        this.strip.push(newStrip);
+    }
+
     addSubstitution(plain, quirk, options = null) {
         //options: case-sensitive substitutions; apply to full sentences or individual words (default)
         let newSub = new Substitution(plain, quirk, options);
@@ -144,6 +151,8 @@ class Quirk {
 
             //perform substitutions (currently: across the entire sentence at once)
             this.substitutions.forEach(sub => sentence = sub.toQuirk(sentence));
+            //perform any stripping
+            this.strip.forEach(strip => sentence = sentence.replace(strip, ""));
             //join the sentence with prefix and suffix
             sentence = (this.prefix ? this.prefix.text : '') + sentence + (this.suffix ? this.suffix.text : '');
             //next enforce sentence case
