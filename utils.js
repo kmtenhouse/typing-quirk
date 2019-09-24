@@ -8,6 +8,28 @@ function escapeRegExpSpecials(str) {
         .join("");
 }
 
+//WORD CASE ADJUSTMENT
+//
+//
+//Takes in a single sentence and adjusts the case of specific letters
+//Defaults to capitalizing the first word
+function capitalizeWords(sentence) {
+    let nextCharToCaps = true;
+    let newStr = "";
+    for(let i = 0; i<sentence.length; i++) {
+        if(/\s/.test(sentence[i])===true) {
+            nextCharToCaps = true;
+            newStr+=sentence[i];
+        } else if(nextCharToCaps) {
+            newStr+=sentence[i].toUpperCase();
+            nextCharToCaps = false;
+        } else {
+            newStr+=sentence[i];
+        }
+    }
+    return newStr;
+}
+
 //SENTENCE CASE ADJUSTMENT
 //
 //
@@ -138,6 +160,7 @@ module.exports = {
     escapeRegExpSpecials,
     capitalizeOneSentence,
     capitalizeSentences,
+    capitalizeWords,
     separateSentencesAndWhiteSpace,
     convertToLowerCase,
     convertToUpperCase,

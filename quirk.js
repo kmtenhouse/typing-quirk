@@ -11,6 +11,7 @@ class Quirk {
         this.separator = null; //default word separator is a space
         this.quirkCase = {
             sentenceCase: "default", //default: attempt to follow the input as closely as possible,
+            wordCase: "default",
             exceptions: null //regular expression to trap any letters that should be exempt from case enforcement
         };
 
@@ -93,6 +94,18 @@ class Quirk {
         });
     }
 
+    setWordCase(wordCase, options = null) {
+        //enforces a specific case on each word within a sentence
+        //(To do): add an option to set a pattern for caps 
+        //(To do): make this play nicely with exceptions for sentence case as well
+        //Right now the default for 'capitalize' is the first char of every word
+        if(!isString(wordCase) || ['capitalize'].includes(wordCase.toLowerCase())===false) {
+            throw new Error("Must provide a valid word case!  Options are: capitalize");
+        }
+
+        this.quirkCase.wordCase = wordCase.toLowerCase();
+    }
+
     setSentenceCase(sentenceCase, options = null) {
         //enforces a specific case across all text when quirkified 
         //(default is that the algorithm attempts to match the existing case of the input as closely as possible)
@@ -133,7 +146,7 @@ class Quirk {
             this.substitutions.forEach(sub => sentence = sub.toQuirk(sentence));
             //join the sentence with prefix and suffix
             sentence = (this.prefix ? this.prefix.text : '') + sentence + (this.suffix ? this.suffix.text : '');
-            //lastly, enforce case
+            //next enforce sentence case
             if (this.quirkCase.sentenceCase === 'lowercase') {
                 sentence = utils.convertToLowerCase(sentence, this.quirkCase.exceptions);
             } else if (this.quirkCase.sentenceCase === 'uppercase') {
@@ -151,6 +164,11 @@ class Quirk {
                     sentence = utils.capitalizeFirstPerson(sentence);
                 }
             }
+            //next, enforce any word casing
+            if(this.quirkCase.wordCase === 'capitalize') {
+                sentence = utils.capitalizeWords(sentence);
+            }
+
             //lastly, if there is a custom separator, add that
             if (this.separator) {
                 sentence = this.separator.toQuirk(str);
@@ -189,6 +207,11 @@ class Quirk {
             //To-do: handle any exceptions
             if (this.quirkCase.sentenceCase === 'uppercase' || this.quirkCase.sentenceCase === 'lowercase' || this.quirkCase.sentenceCase === 'alternatingcaps') {
                 sentence = sentence.toLowerCase();
+            }
+
+            //Remove the caps from enforced caps
+            if(this.quirkCase.wordCase === 'capitalize') {
+                console.log("removing caps");
             }
             //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
             sentence = utils.capitalizeFirstPerson(sentence);

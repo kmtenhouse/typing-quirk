@@ -27,11 +27,11 @@ Quirks are defined by invoking a new instance of the Quirk class and invoking it
 
 ## Table of Contents
 1. [ Quirk Ruleset Methods ](#ruleset)
-    * [ setPrefix ](#add-prefix)
-    * [ setSuffix ](#add-suffix)
-    * [ setSeparator ](#add-separator)
-    * [ addSubstitution ](#add-substitution)
-    * [ enforceSentenceCase ](#enforce-case)
+    * [ setPrefix ](#set-prefix)
+    * [ setSuffix ](#set-suffix)
+    * [ setSeparator ](#set-separator)
+    * [ addSubstitution ](#set-substitution)
+    * [ setSentenceCase ](#set-sentence-case)
 
 2. [ Text Conversion Methods ](#conversion)
     * [ toQuirk ](#to-quirk)
@@ -46,7 +46,7 @@ This collection of methods creates rules that define a typing quirk.
 
 <hr />
 
-<a href="add-prefix"></a>
+<a href="set-prefix"></a>
 
 ### setPrefix(prefix, _optional_ patternToMatch)
 
@@ -57,7 +57,7 @@ Parameters:
 * ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
 
 <hr />
-<a href="add-suffix"></a>
+<a href="set-suffix"></a>
 
 ### setSuffix(suffix, _optional_ patternToMatch)
 
@@ -68,7 +68,7 @@ Parameters:
 * ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
 
 <hr />
-<a href="add-separator"></a>
+<a href="set-separator"></a>
 
 ### setSeparator(separator)
 
@@ -78,7 +78,7 @@ Parameters:
 * ```separator```: (String) A string that will replace all existing whitespace within a sentence
 
 <hr />
-<a href="add-substitution"></a>
+<a href="set-substitution"></a>
 
 ### addSubstitution(plain, quirk, _optional_ options)
 
@@ -141,7 +141,7 @@ console.log(eridan.toQuirk("trying out automatic clipping"));
 ```
 
 <hr />
-<a href="enforce-case"></a>
+<a href="set-sentence-case"></a>
 
 ### setSentenceCase(caseType, _optional_ options)
 Enforces a specific case upon quirkified sentences. This will OVERRIDE the case of the original input. 
