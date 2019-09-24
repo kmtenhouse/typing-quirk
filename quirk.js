@@ -34,7 +34,7 @@ class Quirk {
 
     }
 
-    addPrefix(prefix, pattern = '') {
+    setPrefix(prefix, pattern = '') {
         if (!isString(prefix) || prefix === '') {
             throw new Error("Prefix must be a non-empty string!");
         }
@@ -57,7 +57,7 @@ class Quirk {
         };
     }
 
-    addSuffix(suffix, pattern = '') {
+    setSuffix(suffix, pattern = '') {
         if (!isString(suffix) || suffix === '') {
             throw new Error("Suffix must be a non-empty string!");
         }
@@ -80,7 +80,7 @@ class Quirk {
         };
     }
 
-    addSeparator(separator) {
+    setSeparator(separator) {
         // Registers a custom word separator (ex: the*asterisk*is*the*separator*.)
         // Only disallowed separator is ''
         if (typeof separator !== 'string' || separator === '') {

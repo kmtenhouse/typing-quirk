@@ -3,23 +3,23 @@ const Quirk = require('../../quirk');
 
 describe('suffixes', function () {
 
-    it('should create a valid quirk from suffixes added via addSuffix', function () {
+    it('should create a valid quirk from suffixes added via setSuffix', function () {
         let testSub = new Quirk();
-        testSub.addSuffix('///');
+        testSub.setSuffix('///');
         expect(testSub.toPlain("this is nonsense///")).to.equal('this is nonsense');
         expect(testSub.toQuirk("this is nonsense")).to.equal('this is nonsense///');
     });
 
     it('should create a valid quirk from suffixes with a custom regexp', function () {
         let testSub = new Quirk();
-        testSub.addSuffix('///', /\/{3}$/);
+        testSub.setSuffix('///', /\/{3}$/);
         expect(testSub.toPlain("this is nonsense///")).to.equal('this is nonsense');
         expect(testSub.toQuirk("this is nonsense")).to.equal('this is nonsense///');
     });
 
-    it('should create a valid quirk from suffixes added via addSuffix even when special characters are included', function () {
+    it('should create a valid quirk from suffixes added via setSuffix even when special characters are included', function () {
         let testSub = new Quirk();
-        testSub.addSuffix('$');
+        testSub.setSuffix('$');
         expect(testSub.toPlain("this is nonsense$")).to.equal('this is nonsense');
         expect(testSub.toQuirk("this is nonsense")).to.equal('this is nonsense$');
     });
@@ -27,7 +27,7 @@ describe('suffixes', function () {
     it('should throw an error when given an invalid suffix', function () {
         const badFn = () => {
             let testSub = new Quirk();
-            testSub.addSuffix('');
+            testSub.setSuffix('');
         }
         expect(badFn).to.throw();
     });
@@ -35,7 +35,7 @@ describe('suffixes', function () {
     it('should throw an error when given an invalid suffix regexp', function () {
         const badFn = () => {
             let testSub = new Quirk();
-            testSub.addSuffix('///', /g/);
+            testSub.setSuffix('///', /g/);
         }
         expect(badFn).to.throw();
     });

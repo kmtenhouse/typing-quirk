@@ -4,7 +4,7 @@ const Quirk = require('../../quirk');
 describe('separator', function () {
     it('should create a valid quirk from a separator', function () {
         let testSub = new Quirk();
-        testSub.addSeparator('*');
+        testSub.setSeparator('*');
         expect(testSub.toPlain("this*is*nonsense")).to.equal('this is nonsense');
         expect(testSub.toQuirk("this is nonsense")).to.equal('this*is*nonsense');
     });
@@ -12,7 +12,7 @@ describe('separator', function () {
     it('should throw an error when given an invalid separator', function () {
         const badFn = () => {
             let testSub = new Quirk();
-            testSub.addSeparator(2);
+            testSub.setSeparator(2);
         }
         expect(badFn).to.throw();
     });
