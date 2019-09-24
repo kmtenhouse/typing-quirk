@@ -8,10 +8,20 @@ sollux.addSubstitution("to", {patternToMatch: /\bto{1,2}\b/gi, replaceWith: 'two
 console.log(sollux.toQuirk("and the answer is, I don't always remember it bc it's nonsense, so I use the reference at www.regexr.com a lot"));
  */
 
+const Quirk = require("./quirk");
+//const utils = require("./utils");
+let test = new Quirk();
+test.addPlainException("+o+");
+test.addQuirkException("tot");
+test.addSubstitution("t", "+", {ignoreCase: true});
 
- const Quirk = require("./quirk");
-
-let dave = new Quirk();
+const str = "This is an ATTACK WARNING! +o+";
+const quirkedStr = test.toQuirk(str);
+const plainStr = test.toPlain(quirkedStr);
+console.log("Original", str);
+console.log("Quirk", quirkedStr);
+console.log("Plain", plainStr);
+/* let dave = new Quirk();
 dave.addSubstitution("what's", "whats", {ignoreCase: true});
 dave.addSubstitution("don't", "dont", {ignoreCase: true});
 dave.addSubstitution("shouldn't", "shouldnt", {ignoreCase: true});
@@ -20,6 +30,7 @@ dave.setSentenceCase("lowercase");
 const result = dave.toQuirk("I don't think anything is going to come of this lol what's up");
 console.log(result);
 console.log(dave.toPlain(result));
+ */
 
 /*  let kanaya = new Quirk();
 kanaya.setWordCase('capitalize');

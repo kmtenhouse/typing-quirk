@@ -89,18 +89,37 @@ function capitalizeFirstPerson(str) {
 }
 
 //Separating and recombining sentences
-function separateSentencesAndWhiteSpace(paragraph) {
+function cleave(str, pattern) {
+    //accepts a string and a pattern to cleave on 
+    //returns an object with an array of the resulting strings, as well as the original whitespace
+    //first, grab the whitespace so we can preserve it
+    const whiteSpace = str.match(pattern);
+    //next, split the paragraph into discrete sentences
+    const strings = str.split(pattern);
+    return { strings, whiteSpace };
+}
+
+function cleaveSentences(paragraph) {
     //TO-DO: accept any characters that might need to be added to boundary detection due to custom punctuation / suffixes
     const sentenceBoundaries = /(?<=[\.!\?]+[\W]*)\s+/g;
-    //first, grab the whitespace so we can preserve it
-    const whiteSpace = paragraph.match(sentenceBoundaries);
-    //next, split the paragraph into discrete sentences
-    const sentences = paragraph.split(sentenceBoundaries);
-    return { sentences, whiteSpace };
+    const results = cleave(paragraph, sentenceBoundaries);
+    return {
+        sentences: results.strings,
+        whiteSpace: results.whiteSpace
+    };
+}
+
+function cleaveWords(sentence) {
+    const wordBoundaries = /(?<!^)\s/g;
+    const results = cleave(sentence, wordBoundaries);
+    return {
+        words: results.strings,
+        whiteSpace: results.whiteSpace
+    };
 }
 
 //Function to rejoin a sentence, given two parts
-function recombineSentencesAndWhiteSpace(sentenceArr, whiteSpaceArr) {
+function recombineWhitespace(sentenceArr, whiteSpaceArr) {
     let adjustedParagraph = '';
     let whiteSpaceIndex = 0; //note: we're not using shift here to see if this might be more efficient than constantly changing the whitespace array :)
     sentenceArr.forEach(sentence => {
@@ -156,16 +175,36 @@ function convertToAlternatingCase(str, exceptions = null) {
     return result;
 }
 
+
+//Validators
+function isSpecialCharacter(letter) {
+    return (/[\’\.~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?0123456789]/g.test(letter));
+
+}
+
+//takes in a character and determines if it is an uppercase alphabet letter [A-Z]
+//returns false for lowercase alphabet letters, numbers, special characters 
+function isUpperCaseLetter(letter) {
+    if (letter === letter.toUpperCase()
+        && letter !== letter.toLowerCase()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
 module.exports = {
     escapeRegExpSpecials,
     capitalizeOneSentence,
     capitalizeSentences,
     capitalizeWords,
-    separateSentencesAndWhiteSpace,
     convertToLowerCase,
     convertToUpperCase,
     convertToAlternatingCase,
-    recombineSentencesAndWhiteSpace,
     hasPunctuation,
-    capitalizeFirstPerson
+    capitalizeFirstPerson,
+    cleaveSentences,
+    cleaveWords,
+    recombineWhitespace
 };

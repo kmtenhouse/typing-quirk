@@ -15,6 +15,10 @@ class Quirk {
             wordCase: "default",
             exceptions: null //regular expression to trap any letters that should be exempt from case enforcement
         };
+        this.exceptions = {
+            plain: [],
+            quirk: []
+        };
 
         //check if we received a possible config object with valid items
         if (arguments.length > 0) {
@@ -100,7 +104,7 @@ class Quirk {
         //(To do): add an option to set a pattern for caps 
         //(To do): make this play nicely with exceptions for sentence case as well
         //Right now the default for 'capitalize' is the first char of every word
-        if(!isString(wordCase) || ['capitalize'].includes(wordCase.toLowerCase())===false) {
+        if (!isString(wordCase) || ['capitalize'].includes(wordCase.toLowerCase()) === false) {
             throw new Error("Must provide a valid word case!  Options are: capitalize");
         }
 
@@ -126,7 +130,7 @@ class Quirk {
         //lastly, if we have passed a string of letters that should not be affected by case enforcement, create a match pattern for them
         if (options) {
             let matchPattern = options.exceptions;
-            this.quirkCase.exceptions = new RegExp("[" + matchPattern + "]", 'g');
+            this.quirkCase.exceptions = new RegExp("[" + utils.escapeRegExpSpecials(matchPattern) + "]", 'g');
         }
     }
 
@@ -142,17 +146,68 @@ class Quirk {
         this.substitutions.push(newSub);
     }
 
+    addQuirkException(word, options = null) {
+        //Accepts entire words that should be excluded from quirk substitutions
+        if (!isString(word) || word === "") {
+            throw new Error("Exceptions must be words!");
+        }
+        //check if we should ignore case when matching
+        const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
+
+        //create a pattern for the word
+        this.exceptions.quirk.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+    }
+
+    addPlainException(word, options = null) {
+        //Accepts entire words that should be excluded from plain substitutions (ex: emoji that we don't want to decode)
+        if (!isString(word) || word === "") {
+            throw new Error("Exceptions must be words!");
+        }
+        //check if we should ignore case when matching
+        const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
+
+        //create a pattern for the word
+        this.exceptions.plain.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+    }
+
     //the fun part - encoding their speech!!
     toQuirk(str) {
         //we will do this sentence by sentence within a paragraph
         //first, split up the sentences
-        const { sentences, whiteSpace } = utils.separateSentencesAndWhiteSpace(str);
+        const { sentences, whiteSpace } = utils.cleaveSentences(str);
         const adjustedSentences = sentences.map(sentence => {
 
-            //perform substitutions (currently: across the entire sentence at once)
-            this.substitutions.forEach(sub => sentence = sub.toQuirk(sentence));
-            //perform any stripping
-            this.strip.forEach(strip => sentence = sentence.replace(strip, ""));
+            //if we have exceptions, temporarily cleave them (so we can recombine later)
+            if (this.exceptions.quirk.length > 0) {
+                //cleave the words apart
+                let { words, whiteSpace } = utils.cleaveWords(sentence);
+
+                //function to test if something is an exception
+                const isQuirkException = (word) => {
+                    for (let i = 0; i < this.exceptions.quirk.length; i++) {
+                        if (this.exceptions.quirk[i].test(word) === true) {
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+                //perform subs on one word at a time
+                for(let k = 0; k < words.length; k++) {
+                    if(!isQuirkException(words[k])) {
+                        this.substitutions.forEach(sub => words[k] = sub.toQuirk(words[k]));
+                        this.strip.forEach(strip => words[k] = words[k].replace(strip, ""));
+                    }
+                }
+
+                //recombine 
+                sentence = utils.recombineWhitespace(words, whiteSpace);
+            } else {
+                //perform substitutions (currently: across the entire sentence at once)
+                this.substitutions.forEach(sub => sentence = sub.toQuirk(sentence));
+                //perform any stripping
+                this.strip.forEach(strip => sentence = sentence.replace(strip, ""));
+            }
+
             //join the sentence with prefix and suffix
             sentence = (this.prefix ? this.prefix.text : '') + sentence + (this.suffix ? this.suffix.text : '');
             //next enforce sentence case
@@ -174,7 +229,7 @@ class Quirk {
                 }
             }
             //next, enforce any word casing
-            if(this.quirkCase.wordCase === 'capitalize') {
+            if (this.quirkCase.wordCase === 'capitalize') {
                 sentence = utils.capitalizeWords(sentence);
             }
 
@@ -187,14 +242,14 @@ class Quirk {
         });
 
         //lastly, recombine the sentences with their original whitespace
-        const adjustedParagraph = utils.recombineSentencesAndWhiteSpace(adjustedSentences, whiteSpace);
+        const adjustedParagraph = utils.recombineWhitespace(adjustedSentences, whiteSpace);
         return adjustedParagraph;
     }
 
     //(TO-DO) Adjust to support paragraphs properly
     toPlain(str) {
         //first, split up the sentences
-        const { sentences, whiteSpace } = utils.separateSentencesAndWhiteSpace(str);
+        const { sentences, whiteSpace } = utils.cleaveSentences(str);
         const adjustedSentences = sentences.map(sentence => {
 
             //start by removing prefix and suffix from the whole string
@@ -209,19 +264,44 @@ class Quirk {
             if (this.separator) {
                 sentence = this.separator.toPlain(sentence);
             }
-            this.substitutions.forEach(sub => sentence = sub.toPlain(sentence));
 
+            //check if we have any plain exceptions
+            if (this.exceptions.plain.length > 0) {
+                //function to test if something is an exception
+                const isPlainException = (word) => {
+                    for (let i = 0; i < this.exceptions.plain.length; i++) {
+                        if (this.exceptions.plain[i].test(word) === true) {
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+
+                //cleave the words apart
+                let { words, whiteSpace } = utils.cleaveWords(sentence);
+
+                //perform the plain fix if and only if it's not an exception
+                for (let j = 0; j < words.length; j++) {
+                    if (!isPlainException(words[j])) {
+                        this.substitutions.forEach(sub => words[j] = sub.toPlain(words[j]));
+                    }
+                }
+
+                //recombine 
+                sentence = utils.recombineWhitespace(words, whiteSpace);
+
+            } else {
+                this.substitutions.forEach(sub => sentence = sub.toPlain(sentence));
+            }
             //Now we should handle case (as best we can):
             //If we did an enforced case, reset to lowercase first
             //To-do: handle any exceptions
-            if (this.quirkCase.sentenceCase === 'uppercase' || this.quirkCase.sentenceCase === 'lowercase' || this.quirkCase.sentenceCase === 'alternatingcaps') {
+            if (['uppercase', 'lowercase','alternatingcaps'].includes(this.quirkCase.sentenceCase) || this.quirkCase.wordCase === 'capitalize') {
                 sentence = sentence.toLowerCase();
+            } else { //otherwise, we attempt to fix any case issues cause by special character substitution
+                
             }
 
-            //Remove the caps from enforced caps
-            if(this.quirkCase.wordCase === 'capitalize') {
-                sentence = sentence.toLowerCase();
-            }
             //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
             sentence = utils.capitalizeFirstPerson(sentence);
 
@@ -234,7 +314,7 @@ class Quirk {
             return sentence;
         });
         //lastly, recombine the sentences with their original whitespace
-        const adjustedParagraph = utils.recombineSentencesAndWhiteSpace(adjustedSentences, whiteSpace);
+        const adjustedParagraph = utils.recombineWhitespace(adjustedSentences, whiteSpace);
         return adjustedParagraph;
     }
 }
