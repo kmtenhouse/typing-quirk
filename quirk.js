@@ -148,7 +148,6 @@ class Quirk {
     setCapitalizeFragments(val) {
         //sets whether or not the algorithm should attempt to capitalize sentence fragments when decoding
         //(Default is false)
-        console.log(typeof val);
         if (typeof val !== "boolean") {
             throw new Error("setCapitalizeFragments must be true or false!");
         }
@@ -232,7 +231,7 @@ class Quirk {
             const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
 
             //create a pattern for the word
-            this.plain.exceptions.push(new RegExp( "^" + utils.escapeRegExpSpecials(word) + "$", flags));
+            this.plain.exceptions.push(new RegExp("^" + utils.escapeRegExpSpecials(word) + "$", flags));
         }
     }
 
@@ -244,7 +243,7 @@ class Quirk {
         if ((!isRegExp(emoji) && !isString(emoji)) || emoji === "") {
             throw new Error("Must provide an input string or regexp for the emoji!")
         }
-       
+
         //add the emoji to both plain and quirk exception lists
         this.addQuirkException(emoji);
         this.addPlainException(emoji);
@@ -291,23 +290,22 @@ class Quirk {
             //join the sentence with prefix and suffix
             sentence = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence + (this.quirk.suffix ? this.quirk.suffix.text : '');
             //next enforce sentence case
-            if (this.quirk.caseEnforcement.sentence === 'lowercase') {
-                sentence = utils.convertToLowerCase(sentence, this.quirk.caseEnforcement.exceptions);
-            } else if (this.quirk.caseEnforcement.sentence === 'uppercase') {
-                sentence = utils.convertToUpperCase(sentence, this.quirk.caseEnforcement.exceptions);
-            } else if (this.quirk.caseEnforcement.sentence === 'alternatingcaps') {
-                sentence = utils.convertToAlternatingCase(sentence, this.quirk.caseEnforcement.exceptions);
-            }
-            else if (this.quirk.caseEnforcement.sentence === 'propercase') {
-                //note: we will only perform capitalization if this sentence is punctuated!
-                if (utils.hasPunctuation(sentence)) {
-                    //First, forcibly perform lowercasing
-                    //TO-DO: handle exception WORDS (?)
+            switch (this.quirk.caseEnforcement.sentence) {
+                case "lowercase":
                     sentence = utils.convertToLowerCase(sentence, this.quirk.caseEnforcement.exceptions);
-                    sentence = utils.capitalizeOneSentence(sentence, this.quirk.caseEnforcement.exceptions);
-                    sentence = utils.capitalizeFirstPerson(sentence);
-                }
+                    break;
+                case "uppercase":
+                    sentence = utils.convertToUpperCase(sentence, this.quirk.caseEnforcement.exceptions);
+                    break;
+                case "alternatingcaps":
+                    sentence = utils.convertToAlternatingCase(sentence, this.quirk.caseEnforcement.exceptions);
+                    break;
+                case "propercase":
+                    sentence = utils.convertToProperCase(sentence, this.quirk.caseEnforcement.exceptions);
+                    break;
+                default: break;
             }
+     
             //next, enforce any word casing
             if (this.quirk.caseEnforcement.word === 'capitalize') {
                 sentence = utils.capitalizeWords(sentence);

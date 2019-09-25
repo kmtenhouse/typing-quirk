@@ -1,9 +1,9 @@
 const Quirk = require("./quirk");
 
-
 let testSub = new Quirk();
-testSub.addEmoji("+o+");
-testSub.addSubstitution("t", "+", {ignoreCase: true});
+testSub.addEmoji(":U");
+testSub.setSentenceCase("lowercase");
+testSub.addSubstitution("U", "u");
 const troll=testSub;
 /* let aradia = new Quirk();
 aradia.addSubstitution("o", "0", {ignoreCase: true});
@@ -67,7 +67,7 @@ test.setCapitalizeFragments(true); */
 
 
 
-[ "this is totally ridiculous +o+", "rubber baby buggy bumpers", "I'm so sleepy?", "I AM YELLING HERE! +o+", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
+[ "I love you :U", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
     console.group("===========");
     const quirkified = troll.toQuirk(word);
     console.log(`Original: ${word}`);

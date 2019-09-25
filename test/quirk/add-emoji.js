@@ -10,6 +10,15 @@ describe("add emoji", function () {
         expect(testSub.toPlain("+his is +o+ally ridiculous +oo +o+")).to.equal("this is totally ridiculous too +o+");
     });
 
+    it("should except emoji even when dealing with case changes", function () {
+        let testSub = new Quirk();
+        testSub.addEmoji(":U");
+        testSub.setSentenceCase("lowercase");
+        testSub.addSubstitution("U", "u");
+        expect(testSub.toQuirk("I love you :U")).to.equal("i love yoU :U");
+        expect(testSub.toPlain("i love yoU :U")).to.equal("I love you :U");
+    });
+
     it("should throw an error when given an invalid type", function () {
         const badFn = () => {
             let testSub = new Quirk();

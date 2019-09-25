@@ -16,15 +16,15 @@ function escapeRegExpSpecials(str) {
 function capitalizeWords(sentence) {
     let nextCharToCaps = true;
     let newStr = "";
-    for(let i = 0; i<sentence.length; i++) {
-        if(/\s/.test(sentence[i])===true) {
+    for (let i = 0; i < sentence.length; i++) {
+        if (/\s/.test(sentence[i]) === true) {
             nextCharToCaps = true;
-            newStr+=sentence[i];
-        } else if(nextCharToCaps) {
-            newStr+=sentence[i].toUpperCase();
+            newStr += sentence[i];
+        } else if (nextCharToCaps) {
+            newStr += sentence[i].toUpperCase();
             nextCharToCaps = false;
         } else {
-            newStr+=sentence[i];
+            newStr += sentence[i];
         }
     }
     return newStr;
@@ -138,13 +138,13 @@ function convertToLowerCase(str, options = null) {
 
     let result = ""
     //loop through the string and figure out if we should change the case (or not)
-    for(let i=0; i<str.length; i++) {
-       let char = str[i];
-       if(options.test(char)) { 
-           result+=char;
-       } else {
-           result+=char.toLowerCase();
-       }
+    for (let i = 0; i < str.length; i++) {
+        let char = str[i];
+        if (options.test(char)) {
+            result += char;
+        } else {
+            result += char.toLowerCase();
+        }
     }
 
     return result;
@@ -158,16 +158,28 @@ function convertToUpperCase(str, options = null) {
 
     let result = ""
     //loop through the string and figure out if we should change the case (or not)
-    for(let i=0; i<str.length; i++) {
-       let char = str[i];
-       if(options.test(char)) { 
-           result+=char;
-       } else {
-           result+=char.toUpperCase();
-       }
+    for (let i = 0; i < str.length; i++) {
+        let char = str[i];
+        if (options.test(char)) {
+            result += char;
+        } else {
+            result += char.toUpperCase();
+        }
     }
 
     return result;
+}
+
+//Change a string to propercase -- with an exception mask
+function convertToProperCase(sentence, exceptions = null) {
+    if (hasPunctuation(sentence)) {
+        //First, forcibly perform lowercasing
+        //TO-DO: handle exception WORDS (?)
+        sentence = convertToLowerCase(sentence, exceptions);
+        sentence = capitalizeOneSentence(sentence, exceptions);
+        sentence = capitalizeFirstPerson(sentence);
+    }
+    return sentence;
 }
 
 function convertToAlternatingCase(str, exceptions = null) {
@@ -180,8 +192,8 @@ function convertToAlternatingCase(str, exceptions = null) {
                 return char;
             }
 
-            let result = char; 
-            if(/[a-zA-Z]/g.test(char)) {
+            let result = char;
+            if (/[a-zA-Z]/g.test(char)) {
                 result = (isCaps ? char.toUpperCase() : char.toLowerCase());
                 isCaps = !isCaps; //flip-flop the caps for next time
             }
@@ -212,6 +224,7 @@ module.exports = {
     capitalizeWords,
     convertToLowerCase,
     convertToUpperCase,
+    convertToProperCase,
     convertToAlternatingCase,
     hasPunctuation,
     capitalizeFirstPerson,
