@@ -13,7 +13,8 @@ class Quirk {
             caseEnforcement: {
                 sentence: null, //default: none
                 word: null, //default: none
-                exceptions: null //default: no exceptions to case
+                exceptions: null, //default: no exceptions to case
+                capitalizeFragments: false //defaults to false
             },
             exceptions: [],
             strip: [],
@@ -152,7 +153,8 @@ class Quirk {
             throw new Error("setCapitalizeFragments must be true or false!");
         }
         this.plain.caseEnforcement.capitalizeFragments = val;
-
+        //TO-DO: decide if these will be different behaviors in the future!
+        this.quirk.caseEnforcement.capitalizeFragments = val;
     }
 
     addSubstitution(plain, quirk, options = null) {
@@ -299,7 +301,7 @@ class Quirk {
             sentence = utils.recombineWhitespace(words, whiteSpace);
 
             //do one more final check for case, as certain cases affect the entire sentence
-            //To-Do: figure out how this affects emoji
+            //To-Do: figure out how this one affects emoji
             if (this.quirk.caseEnforcement.sentence === "alternatingcaps") {
                 sentence = utils.convertToAlternatingCase(sentence, this.quirk.caseEnforcement.exceptions);
             }
@@ -311,29 +313,34 @@ class Quirk {
                 sentence = utils.capitalizeFirstPerson(sentence);
             }
 
-            //join the sentence with prefix and suffix
+            //If capitalize fragments is on, we also caps the sentence
+            if (this.quirk.caseEnforcement.capitalizeFragments) {
+                sentence = utils.capitalizeOneSentence(sentence, this.quirk.caseEnforcement.exceptions);
+            }
+
+            //nex, join the prepared sentence with prefix and suffix
             sentence = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence + (this.quirk.suffix ? this.quirk.suffix.text : '');
 
             //lastly, if there is a custom separator, add that
             if (this.separator) {
                 sentence = this.separator.toQuirk(str);
             }
-            //return the sentence to our map
+            //AT LAST!  we return the sentence to our map
             return sentence;
         });
 
-        //lastly, recombine the sentences with their original whitespace
+        //at the very end, we recombine the sentences with their original whitespace to reform a paragraph
         const adjustedParagraph = utils.recombineWhitespace(adjustedSentences, whiteSpace);
         return adjustedParagraph;
     }
 
     //(TO-DO) Adjust to support paragraphs properly
     toPlain(str) {
-        //first, split up the sentences
+        //first, split up the sentences from the paragraph
         const { sentences, whiteSpace } = utils.cleaveSentences(str);
         const adjustedSentences = sentences.map(sentence => {
-
-            //start by removing prefix and suffix from the whole string
+            //perform the same steps on every sentence
+            //start by removing any prefixes and suffixes
             if (this.quirk.prefix) {
                 sentence = sentence.replace(this.quirk.prefix.patternToStrip, '');
             }
@@ -342,49 +349,42 @@ class Quirk {
                 sentence = sentence.replace(this.quirk.suffix.patternToStrip, '');
             }
 
+            //next, remove any weird separators if we have them
             if (this.separator) {
                 sentence = this.separator.toPlain(sentence);
             }
 
-            //check if we have any plain exceptions
-            if (this.plain.exceptions.length > 0) {
-                //start by cleaving the words apart from the whitespace
-                let { words, whiteSpace } = utils.cleaveWords(sentence);
+            //now, cleave the words themselves
+            let { words, whiteSpace } = utils.cleaveWords(sentence);
 
-                //function to test if something is an exception
-                const isPlainException = (word) => {
-                    for (let i = 0; i < this.plain.exceptions.length; i++) {
-                        if (this.plain.exceptions[i].test(word) === true) {
-                            return true;
-                        }
-                    }
-                    return false;
-                };
-
-                //perform the plain fix if and only if it's not an exception
-                for (let j = 0; j < words.length; j++) {
-                    if (!isPlainException(words[j])) {
-                        this.substitutions.forEach(sub => words[j] = sub.toPlain(words[j]));
-                        this.plain.strip.forEach(strip => words[j] = words[j].replace(strip, ""));
-                        //TO-DO lastly, attempt to fix the case (if we can)
+            //(helper function to test if something is an exception)
+            const isPlainException = (word) => {
+                for (let i = 0; i < this.plain.exceptions.length; i++) {
+                    if (this.plain.exceptions[i].test(word) === true) {
+                        return true;
                     }
                 }
+                return false;
+            };
 
-                //recombine 
-                sentence = utils.recombineWhitespace(words, whiteSpace);
-
-            } else {
-                this.substitutions.forEach(sub => sentence = sub.toPlain(sentence));
-                this.plain.strip.forEach(strip => sentence = sentence.replace(strip, ""));
+            for (let j = 0; j < words.length; j++) {
+                if (!isPlainException(words[j])) {
+                    this.substitutions.forEach(sub => words[j] = sub.toPlain(words[j]));
+                    this.plain.strip.forEach(strip => words[j] = words[j].replace(strip, ""));
+                    //If there was an overall case set, we then just sent the word to lowercase
+                    if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
+                        words[j]= words[j].toLowerCase();
+                    } else {
+                        //TO-DO: attempt to fix SHOUTING (as best we can)
+                    }
+                }
             }
-            //Now we should handle case (as best we can):
-            //If we did an enforced case, reset to lowercase first
-            //To-do: handle any exceptions
-            if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
-                sentence = sentence.toLowerCase();
-            }
 
-            //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
+            //now, recombine the words with their whitespace
+            sentence = utils.recombineWhitespace(words, whiteSpace);
+
+            //A few final tweaks!
+            //Ex: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
             sentence = utils.capitalizeFirstPerson(sentence);
 
             //Finally, check if this chunk is a sentence that we need to capitalize
