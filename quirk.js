@@ -7,20 +7,30 @@ class Quirk {
         //initialize the number of substitutions to nothing
         this.substitutions = [];
         this.strip = [];
-        this.suffix = null; //default: no suffix
-        this.prefix = null; //default: no prefix
         this.separator = null; //default word separator is a space
-        this.quirkCase = {
-            sentenceCase: "default", //default: attempt to follow the input as closely as possible,
-            wordCase: "default",
-            exceptions: null //regular expression to trap any letters that should be exempt from case enforcement
-        };
+
+        //DATA THAT APPLIES TO QUIRK
+        this.quirk = {
+            caseEnforcement: {
+                sentence: null, //default: none
+                word: null, //default: none
+                exceptions: null //default: no exceptions to case
+            },
+            suffix: null, //default: no suffix
+            prefix: null, //default: no prefix
+        }
+
         this.plainCase = {
             capitalizeFragments: false //defaults to false
         }
         this.exceptions = {
             plain: [],
             quirk: []
+        };
+
+        //DATA THAT APPLIES TO PLAIN TEXT
+        this.plain = {
+
         };
 
         //check if we received a possible config object with valid items
@@ -60,7 +70,7 @@ class Quirk {
         //create the proper regexp for the prefix (if necessary)
         let prefixRegExp = (pattern ? pattern : new RegExp("^" + utils.escapeRegExpSpecials(prefix)));
 
-        this.prefix = {
+        this.quirk.prefix = {
             text: prefix,
             patternToStrip: prefixRegExp
         };
@@ -83,7 +93,7 @@ class Quirk {
         //create the proper regexp for the suffix (if necessary)
         let suffixRegExp = (pattern ? pattern : new RegExp(utils.escapeRegExpSpecials(suffix) + "$"));
 
-        this.suffix = {
+        this.quirk.suffix = {
             text: suffix,
             patternToStrip: suffixRegExp
         };
@@ -111,7 +121,7 @@ class Quirk {
             throw new Error("Must provide a valid word case!  Options are: capitalize");
         }
 
-        this.quirkCase.wordCase = wordCase.toLowerCase();
+        this.quirk.caseEnforcement.word = wordCase.toLowerCase();
     }
 
     setSentenceCase(sentenceCase, options = null) {
@@ -128,12 +138,13 @@ class Quirk {
         }
 
         //set the overall quirk case
-        this.quirkCase.sentenceCase = sentenceCase.toLowerCase();
+        this.quirk.caseEnforcement.sentence = sentenceCase.toLowerCase();
 
         //lastly, if we have passed a string of letters that should not be affected by case enforcement, create a match pattern for them
         if (options) {
             let matchPattern = options.exceptions;
-            this.quirkCase.exceptions = new RegExp("[" + utils.escapeRegExpSpecials(matchPattern) + "]");
+            //(TO-DO): add these to any that are coming from word
+            this.quirk.caseEnforcement.exceptions = new RegExp("[" + utils.escapeRegExpSpecials(matchPattern) + "]");
         }
     }
 
@@ -239,27 +250,27 @@ class Quirk {
             }
 
             //join the sentence with prefix and suffix
-            sentence = (this.prefix ? this.prefix.text : '') + sentence + (this.suffix ? this.suffix.text : '');
+            sentence = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence + (this.quirk.suffix ? this.quirk.suffix.text : '');
             //next enforce sentence case
-            if (this.quirkCase.sentenceCase === 'lowercase') {
-                sentence = utils.convertToLowerCase(sentence, this.quirkCase.exceptions);
-            } else if (this.quirkCase.sentenceCase === 'uppercase') {
-                sentence = utils.convertToUpperCase(sentence, this.quirkCase.exceptions);
-            } else if (this.quirkCase.sentenceCase === 'alternatingcaps') {
-                sentence = utils.convertToAlternatingCase(sentence, this.quirkCase.exceptions);
+            if (this.quirk.caseEnforcement.sentence === 'lowercase') {
+                sentence = utils.convertToLowerCase(sentence, this.quirk.caseEnforcement.exceptions);
+            } else if (this.quirk.caseEnforcement.sentence === 'uppercase') {
+                sentence = utils.convertToUpperCase(sentence, this.quirk.caseEnforcement.exceptions);
+            } else if (this.quirk.caseEnforcement.sentence === 'alternatingcaps') {
+                sentence = utils.convertToAlternatingCase(sentence, this.quirk.caseEnforcement.exceptions);
             }
-            else if (this.quirkCase.sentenceCase === 'propercase') {
+            else if (this.quirk.caseEnforcement.sentence === 'propercase') {
                 //note: we will only perform capitalization if this sentence is punctuated!
                 if (utils.hasPunctuation(sentence)) {
                     //First, forcibly perform lowercasing
                     //TO-DO: handle exception WORDS (?)
-                    sentence = utils.convertToLowerCase(sentence, this.quirkCase.exceptions);
-                    sentence = utils.capitalizeOneSentence(sentence, this.quirkCase.exceptions);
+                    sentence = utils.convertToLowerCase(sentence, this.quirk.caseEnforcement.exceptions);
+                    sentence = utils.capitalizeOneSentence(sentence, this.quirk.caseEnforcement.exceptions);
                     sentence = utils.capitalizeFirstPerson(sentence);
                 }
             }
             //next, enforce any word casing
-            if (this.quirkCase.wordCase === 'capitalize') {
+            if (this.quirk.caseEnforcement.word === 'capitalize') {
                 sentence = utils.capitalizeWords(sentence);
             }
 
@@ -283,12 +294,12 @@ class Quirk {
         const adjustedSentences = sentences.map(sentence => {
 
             //start by removing prefix and suffix from the whole string
-            if (this.prefix) {
-                sentence = sentence.replace(this.prefix.patternToStrip, '');
+            if (this.quirk.prefix) {
+                sentence = sentence.replace(this.quirk.prefix.patternToStrip, '');
             }
 
-            if (this.suffix) {
-                sentence = sentence.replace(this.suffix.patternToStrip, '');
+            if (this.quirk.suffix) {
+                sentence = sentence.replace(this.quirk.suffix.patternToStrip, '');
             }
 
             if (this.separator) {
@@ -327,7 +338,7 @@ class Quirk {
             //Now we should handle case (as best we can):
             //If we did an enforced case, reset to lowercase first
             //To-do: handle any exceptions
-            if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirkCase.sentenceCase) || this.quirkCase.wordCase === 'capitalize') {
+            if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
                 sentence = sentence.toLowerCase();
             }
 
