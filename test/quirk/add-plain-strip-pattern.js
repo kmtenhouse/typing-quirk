@@ -5,14 +5,14 @@ describe('add plain strip pattern', function () {
 
     it("should strip characters when fed an input string", function () {
         let testSub = new Quirk();
-        testSub.addPlainStripPattern("y y y ");
-        expect(testSub.toPlain("y y y you gonna dig that?")).to.equal("You gonna dig that?");
+        testSub.addPlainStripPattern("yyy");
+        expect(testSub.toPlain("yyyyou gonna dig that?")).to.equal("You gonna dig that?");
     });
 
     it("should strip characters when fed an input regexp", function () {
         let testSub = new Quirk();
-        testSub.addPlainStripPattern(/(.\s)\1{1,}/g);
-        expect(testSub.toPlain("y y y you gonna dig that?")).to.equal("You gonna dig that?");
+        testSub.addPlainStripPattern(/y{3}/g);
+        expect(testSub.toPlain("yyyyou gonna dig that?")).to.equal("You gonna dig that?");
     });
 
     it('should throw an error when given an invalid input', function () {

@@ -10,6 +10,15 @@ describe("add emoji", function () {
         expect(testSub.toPlain("+his is +o+ally ridiculous +oo +o+")).to.equal("this is totally ridiculous too +o+");
     });
 
+    it("should cause emoji to work even across multiple sentences", function () {
+        let testSub = new Quirk();
+        testSub.addEmoji("+o+");
+        testSub.addSubstitution("t", "+", {ignoreCase: true});
+        expect(testSub.toQuirk("This is totally ridiculous +o+")).to.equal("+his is +o+ally ridiculous +o+");
+        expect(testSub.toPlain("+his is +o+ally ridiculous +oo +o+")).to.equal("this is totally ridiculous too +o+");
+    });
+
+
     it("should except emoji even when dealing with case changes", function () {
         let testSub = new Quirk();
         testSub.addEmoji(":U");

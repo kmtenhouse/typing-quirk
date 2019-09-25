@@ -7,6 +7,7 @@ class Quirk {
         //DATA THAT APPLIES TO BOTH QUIRKS AND PLAIN TEXT
         this.substitutions = [];
         this.separator = null; //default word separator is a space
+        this.punctuation = [];
 
         //DATA THAT APPLIES ONLY TO QUIRK
         this.quirk = {
@@ -241,21 +242,24 @@ class Quirk {
     //Register an emoji so the code knows that it counts as 'punctuation'
     //Emoji are excepted from both plain and quirk
     addEmoji(emoji) {
-        //Accepts a string or a regexp
-        if ((!isRegExp(emoji) && !isString(emoji)) || emoji === "") {
-            throw new Error("Must provide an input string or regexp for the emoji!")
+        //Accepts a string only, because we have to do some gnarly regexp stuff
+        if (!isString(emoji) || emoji === "") {
+            throw new Error("Must provide a string for the emoji!") 
         }
 
         //add the emoji to both plain and quirk exception lists
         this.addQuirkException(emoji);
         this.addPlainException(emoji);
+
+        //Register the emoji as a form of punctuation!
+        this.punctuation.push(emoji);
     }
 
     //the fun part - encoding their speech!!
     toQuirk(str) {
         //we will do this sentence by sentence within a paragraph
         //first, split up the sentences
-        const { sentences, whiteSpace } = utils.cleaveSentences(str);
+        const { sentences, whiteSpace } = utils.cleaveSentences(str, this.punctuation);
         const adjustedSentences = sentences.map(sentence => {
             //Now we dive into the sentence itself!
             //Start by cleaving the words apart
@@ -337,7 +341,7 @@ class Quirk {
     //(TO-DO) Adjust to support paragraphs properly
     toPlain(str) {
         //first, split up the sentences from the paragraph
-        const { sentences, whiteSpace } = utils.cleaveSentences(str);
+        const { sentences, whiteSpace } = utils.cleaveSentences(str, this.punctuation);
         const adjustedSentences = sentences.map(sentence => {
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
@@ -370,6 +374,7 @@ class Quirk {
             for (let j = 0; j < words.length; j++) {
                 if (!isPlainException(words[j])) {
                     this.substitutions.forEach(sub => words[j] = sub.toPlain(words[j]));
+                    //TO-DO: decide how to handle strips for entire sentence
                     this.plain.strip.forEach(strip => words[j] = words[j].replace(strip, ""));
                     //If there was an overall case set, we then just sent the word to lowercase
                     if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
@@ -380,6 +385,12 @@ class Quirk {
                 }
             }
 
+            //TO-DO: RETHINK CLEAVING
+            //GOAL: A SINGLE ARRAY THAT HAS THE SENTENCE BROKEN INTO:
+            // 1) STRINGS TO MODIFY
+            // 2) WHITESPACE IN THE CORRECT ORDER
+            // 3) STRINGS THAT SHOULD NOT BE MODIFIED
+            // 4) RECOMBINE SAME
             //now, recombine the words with their whitespace
             sentence = utils.recombineWhitespace(words, whiteSpace);
 

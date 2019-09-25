@@ -99,9 +99,15 @@ function cleave(str, pattern) {
     return { strings, whiteSpace };
 }
 
-function cleaveSentences(paragraph) {
+function cleaveSentences(paragraph, exceptions = []) {
     //TO-DO: accept any characters that might need to be added to boundary detection due to custom punctuation / suffixes
-    const sentenceBoundaries = /(?<=[\.!\?]+[\W]*)\s+/g;
+    //MODIFIERS WILL GO IN THE FIRST BIT:
+    //EX: (?<=[\.!\?:\)]|\:U|\+o\+)\s+(?!\:|\s)
+    let masks = "";
+    exceptions.forEach(exception => masks += "|" + escapeRegExpSpecials(exception));
+    const sentenceBoundaryPattern = "(?<=[\\.!\\?:\\)]" + masks + ")\\s+(?!\\:\\s)";
+    const sentenceBoundaries = new RegExp(sentenceBoundaryPattern, "g");
+
     const results = cleave(paragraph, sentenceBoundaries);
     return {
         sentences: results.strings,
