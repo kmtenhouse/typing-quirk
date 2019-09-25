@@ -71,10 +71,14 @@ function capitalizeOneSentence(str, exceptions = null) {
     return initialPunctuation + firstChar + str.slice(1);
 }
 
-function hasPunctuation(str) {
+function hasPunctuation(str, customPunctuation=[]) {
     //takes in a string and detects if it has punctuation
-    //TO-DO: account for custom punctuation (for quirks)
-    const punctuation = /[\.\!\?\)]+[\s\W]*$/;
+    //NOTE: this may need additional tuning
+    //[\.\!\?\)]+[\s]*(\+o\+)*[\s]*$
+    let punctuationPattern = "[\.\!\?\)]+[\s]*"; 
+    customPunctuation.forEach(punctuation => punctuationPattern+= "(" + escapeRegExpSpecials(punctuation) + ")*[\s]*")
+    punctuationPattern+="$";
+    const punctuation = new RegExp(punctuationPattern);
     return punctuation.test(str);
 }
 

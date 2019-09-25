@@ -311,7 +311,7 @@ class Quirk {
             }
 
             if (this.quirk.caseEnforcement.sentence === "propercase") {
-                if (utils.hasPunctuation(sentence)) {
+                if (utils.hasPunctuation(sentence, this.punctuation)) {
                     sentence = utils.capitalizeOneSentence(sentence, this.quirk.caseEnforcement.exceptions);
                 }
                 sentence = utils.capitalizeFirstPerson(sentence);
@@ -343,6 +343,7 @@ class Quirk {
         //first, split up the sentences from the paragraph
         const { sentences, whiteSpace } = utils.cleaveSentences(str, this.punctuation);
         const adjustedSentences = sentences.map(sentence => {
+            console.log(sentence);
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
             if (this.quirk.prefix) {
@@ -385,12 +386,6 @@ class Quirk {
                 }
             }
 
-            //TO-DO: RETHINK CLEAVING
-            //GOAL: A SINGLE ARRAY THAT HAS THE SENTENCE BROKEN INTO:
-            // 1) STRINGS TO MODIFY
-            // 2) WHITESPACE IN THE CORRECT ORDER
-            // 3) STRINGS THAT SHOULD NOT BE MODIFIED
-            // 4) RECOMBINE SAME
             //now, recombine the words with their whitespace
             sentence = utils.recombineWhitespace(words, whiteSpace);
 
@@ -400,7 +395,7 @@ class Quirk {
 
             //Finally, check if this chunk is a sentence that we need to capitalize
             //(Default assumption is that a proper sentence will have punctuation at the end; otherwise it's a fragment)
-            if (this.plain.caseEnforcement.capitalizeFragments || utils.hasPunctuation(sentence)) {
+            if (this.plain.caseEnforcement.capitalizeFragments || utils.hasPunctuation(sentence, this.punctuation)) {
                 sentence = utils.capitalizeOneSentence(sentence);
             }
 

@@ -5,7 +5,7 @@ testSub.addEmoji("+o+");
 testSub.addSubstitution("t", "+", {ignoreCase: true});
 const troll = testSub;
 
-[ "this is totally incredible. +o+ seriously who is going to use this feature? +o+  I am so mad right now! +o+" ].forEach(word => {
+[ "This is totally ridiculous +o+ who is going to use this feature? +o+ I AM SO MAD RN +o+" ].forEach(word => {
     console.group("===========");
     const quirkified = troll.toQuirk(word);
     console.log(`Original: ${word}`);
