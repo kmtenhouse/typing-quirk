@@ -9,6 +9,14 @@ describe('add plain exception', function () {
         expect(testSub.toPlain("+his is so dumb +o+")).to.equal("this is so dumb +o+");
     });
 
+    it("should allow input as regexp", function () {
+        let testSub = new Quirk();
+        testSub.addPlainException(/\+o\+/ig);
+        testSub.addSubstitution("t", "+", {ignoreCase: true});
+        expect(testSub.toPlain("+his is so dumb +o+")).to.equal("this is so dumb +o+");
+        expect(testSub.toPlain("+his is so dumb +O+")).to.equal("this is so dumb +O+");
+    });
+
     it("should ignore words that are listed as exceptions in a case-sensitive fashion when passed the correct option", function () {
         let testSub = new Quirk();
         testSub.addPlainException("STRONG", {ignoreCase: true});

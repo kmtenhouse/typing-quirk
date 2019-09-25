@@ -172,46 +172,78 @@ class Quirk {
         });
     }
 
-    addQuirkStripPattern(text, options = null) {
-        //To-Do: accept a regexp too
-        if (!isString(text) || text === "") {
-            throw new Error("Must provide an input string for the strip pattern!")
+    //STRIPPING PATTERNS
+    //PURELY DESTRUCTIVE SUBSTITUTIONS THAT REMOVE MATCHES COMPLETELY FROM THE TEXT
+    addQuirkStripPattern(patternInput) {
+        //Accepts a string or a regexp
+        if ((!isRegExp(patternInput) && !isString(patternInput)) || patternInput === "") {
+            throw new Error("Must provide an input string or regexp for the strip pattern!")
         }
-        let newStrip = new RegExp(utils.escapeRegExpSpecials(text), "g");
-        this.quirk.strip.push(newStrip);
+
+        //now we just push the regexp
+        const newPattern = (isRegExp(patternInput) ? patternInput : new RegExp(utils.escapeRegExpSpecials(patternInput), "g"));
+        this.quirk.strip.push(newPattern);
     }
 
-    addPlainStripPattern(text, options = null) {
-        //To-Do: accept a regexp too
-        if (!isString(text) || text === "") {
+    addPlainStripPattern(patternInput) {
+        //Accepts a string or a regexp
+        if ((!isRegExp(patternInput) && !isString(patternInput)) || patternInput === "") {
             throw new Error("Must provide an input string for the strip pattern!")
         }
-        let newStrip = new RegExp(utils.escapeRegExpSpecials(text), "g");
-        this.plain.strip.push(newStrip);
+
+        //now we just push the regexp
+        const newPattern = (isRegExp(patternInput) ? patternInput : new RegExp(utils.escapeRegExpSpecials(patternInput), "g"));
+        this.plain.strip.push(newPattern);
     }
 
+
+    //SUBSTITUTION EXCEPTIONS
+    //ACCEPTS ENTIRE WORDS THAT SHOULD BE IGNORED WHEN PERFORMING SUBSTITUTIONS AND STRIPS
     addQuirkException(word, options = null) {
         //Accepts entire words that should be excluded from quirk substitutions
-        if (!isString(word) || word === "") {
-            throw new Error("Exceptions must be words!");
+        //Accepts a string or a regexp
+        if ((!isRegExp(word) && !isString(word)) || word === "") {
+            throw new Error("Must provide an input string or regexp for the word!")
         }
-        //check if we should ignore case when matching
-        const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
 
-        //create a pattern for the word
-        this.quirk.exceptions.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+        if (isRegExp(word)) {
+            //TO-DO: check if they shot themselves in the foot?
+            this.quirk.exceptions.push(word);
+        } else {
+            //check if we should ignore case when matching
+            const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
+
+            //create a pattern for the word
+            this.quirk.exceptions.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+        }
     }
 
     addPlainException(word, options = null) {
-        //Accepts entire words that should be excluded from plain substitutions (ex: emoji that we don't want to decode)
-        if (!isString(word) || word === "") {
-            throw new Error("Exceptions must be words!");
+        //Accepts entire words that should be excluded from plain substitutions and strips
+        //Accepts a string or a regexp
+        if ((!isRegExp(word) && !isString(word)) || word === "") {
+            throw new Error("Must provide an input string or regexp for the word!")
         }
-        //check if we should ignore case when matching
-        const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
+        if (isRegExp(word)) {
+            //TO-DO: check if they shot themselves in the foot?
+            this.plain.exceptions.push(word);
+        } else {
+            //check if we should ignore case when matching
+            const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
 
-        //create a pattern for the word
-        this.plain.exceptions.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+            //create a pattern for the word
+            this.plain.exceptions.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+        }
+    }
+
+    //HELPFUL ADDITIONS
+    //Register an emoji so the code knows that it counts as 'punctuation'
+    //Emoji are excepted from both plain and quirk
+    addEmoji(emoji) {
+        if (!isString(emoji) || emoji === "") {
+            throw new Error("Emoji must be strings!");
+        }
+
     }
 
     //the fun part - encoding their speech!!

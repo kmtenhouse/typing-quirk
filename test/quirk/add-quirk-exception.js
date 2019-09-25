@@ -9,6 +9,14 @@ describe('add quirk exception', function () {
         expect(testSub.toQuirk("hello can you hear me")).to.equal("hello can you h3ar m3");
     });
 
+    it("should allow input as regexp", function () {
+        let testSub = new Quirk();
+        testSub.addQuirkException(/hel[a-z]*/i);
+        testSub.addSubstitution("e", "3", {ignoreCase: true});
+        expect(testSub.toQuirk("hello can you hear me")).to.equal("hello can you h3ar m3");
+        expect(testSub.toQuirk("HELP I NEED HELP!")).to.equal("HELP I N33D HELP!");
+    });
+
     it("should ignore words that are listed as exceptions in a case-sensitive fashion when passed the correct option", function () {
         let testSub = new Quirk();
         testSub.addQuirkException("hello", {ignoreCase: true});

@@ -9,6 +9,12 @@ describe('add quirk strip pattern', function () {
         expect(testSub.toQuirk("That's what she said, isn't it?")).to.equal("Thats what she said, isnt it?");
     });
 
+    it("should strip characters when fed an input regexp", function () {
+        let testSub = new Quirk();
+        testSub.addQuirkStripPattern(/'/g);
+        expect(testSub.toQuirk("That's what she said, isn't it?")).to.equal("Thats what she said, isnt it?");
+    });
+
     it('should throw an error when given an invalid input', function () {
         const badFn = () => {
             let testSub = new Quirk();
