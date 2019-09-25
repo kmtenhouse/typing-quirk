@@ -255,61 +255,64 @@ class Quirk {
         //first, split up the sentences
         const { sentences, whiteSpace } = utils.cleaveSentences(str);
         const adjustedSentences = sentences.map(sentence => {
+            //Now we dive into the sentence itself!
+            //Start by cleaving the words apart
+            let { words, whiteSpace } = utils.cleaveWords(sentence);
 
-            //if we have exceptions, temporarily cleave them (so we can recombine later)
-            if (this.quirk.exceptions.length > 0) {
-                //cleave the words apart
-                let { words, whiteSpace } = utils.cleaveWords(sentence);
-
-                //function to test if something is an exception
-                const isQuirkException = (word) => {
-                    for (let i = 0; i < this.quirk.exceptions.length; i++) {
-                        if (this.quirk.exceptions[i].test(word) === true) {
-                            return true;
-                        }
-                    }
-                    return false;
-                };
-                //perform subs on one word at a time
-                for (let k = 0; k < words.length; k++) {
-                    if (!isQuirkException(words[k])) {
-                        this.substitutions.forEach(sub => words[k] = sub.toQuirk(words[k]));
-                        this.quirk.strip.forEach(strip => words[k] = words[k].replace(strip, ""));
+            //(helper function to test if something is an exception)
+            const isQuirkException = (word) => {
+                for (let i = 0; i < this.quirk.exceptions.length; i++) {
+                    if (this.quirk.exceptions[i].test(word) === true) {
+                        return true;
                     }
                 }
+                return false;
+            };
 
-                //recombine 
-                sentence = utils.recombineWhitespace(words, whiteSpace);
-            } else {
-                //perform substitutions (currently: across the entire sentence at once)
-                this.substitutions.forEach(sub => sentence = sub.toQuirk(sentence));
-                //perform any stripping
-                this.quirk.strip.forEach(strip => sentence = sentence.replace(strip, ""));
+            //next perform subs/strips/case adjustment on one word at a time
+            for (let k = 0; k < words.length; k++) {
+                if (!isQuirkException(words[k])) {
+                    //perform any substitutions and strips
+                    this.substitutions.forEach(sub => words[k] = sub.toQuirk(words[k]));
+                    this.quirk.strip.forEach(strip => words[k] = words[k].replace(strip, ""));
+                    //deal with sentence case
+                    switch (this.quirk.caseEnforcement.sentence) {
+                        case "lowercase":
+                            words[k] = utils.convertToLowerCase(words[k], this.quirk.caseEnforcement.exceptions);
+                            break;
+                        case "uppercase":
+                            words[k] = utils.convertToUpperCase(words[k], this.quirk.caseEnforcement.exceptions);
+                            break;
+                        case "propercase": //Note: propercase starts by making the words lower case; final adjustment happens later
+                            words[k] = utils.convertToLowerCase(words[k], this.quirk.caseEnforcement.exceptions);
+                            break;
+                        default: break;
+                    }
+                    //lastly, check if we need to enforce caps on this word in particular
+                    if (this.quirk.caseEnforcement.word === 'capitalize') {
+                        words[k] = utils.capitalizeOneSentence(words[k], this.quirk.caseEnforcement.exceptions);
+                    }
+                }
+            }
+
+            //time to recombine so we can perform our final operations on the sentence as a whole
+            sentence = utils.recombineWhitespace(words, whiteSpace);
+
+            //do one more final check for case, as certain cases affect the entire sentence
+            //To-Do: figure out how this affects emoji
+            if (this.quirk.caseEnforcement.sentence === "alternatingcaps") {
+                sentence = utils.convertToAlternatingCase(sentence, this.quirk.caseEnforcement.exceptions);
+            }
+
+            if (this.quirk.caseEnforcement.sentence === "propercase") {
+                if (utils.hasPunctuation(sentence)) {
+                    sentence = utils.capitalizeOneSentence(sentence, this.quirk.caseEnforcement.exceptions);
+                }
+                sentence = utils.capitalizeFirstPerson(sentence);
             }
 
             //join the sentence with prefix and suffix
             sentence = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence + (this.quirk.suffix ? this.quirk.suffix.text : '');
-            //next enforce sentence case
-            switch (this.quirk.caseEnforcement.sentence) {
-                case "lowercase":
-                    sentence = utils.convertToLowerCase(sentence, this.quirk.caseEnforcement.exceptions);
-                    break;
-                case "uppercase":
-                    sentence = utils.convertToUpperCase(sentence, this.quirk.caseEnforcement.exceptions);
-                    break;
-                case "alternatingcaps":
-                    sentence = utils.convertToAlternatingCase(sentence, this.quirk.caseEnforcement.exceptions);
-                    break;
-                case "propercase":
-                    sentence = utils.convertToProperCase(sentence, this.quirk.caseEnforcement.exceptions);
-                    break;
-                default: break;
-            }
-     
-            //next, enforce any word casing
-            if (this.quirk.caseEnforcement.word === 'capitalize') {
-                sentence = utils.capitalizeWords(sentence);
-            }
 
             //lastly, if there is a custom separator, add that
             if (this.separator) {

@@ -4,7 +4,7 @@ let testSub = new Quirk();
 testSub.addEmoji(":U");
 testSub.setSentenceCase("lowercase");
 testSub.addSubstitution("U", "u");
-const troll=testSub;
+const troll = testSub;
 /* let aradia = new Quirk();
 aradia.addSubstitution("o", "0", {ignoreCase: true});
 
@@ -67,7 +67,7 @@ test.setCapitalizeFragments(true); */
 
 
 
-[ "I love you :U", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
+["I love you :U", "really? this is so silly. I can't believe I'm doing this!", "The quick brown fox jumps over the lazy dog."].forEach(word => {
     console.group("===========");
     const quirkified = troll.toQuirk(word);
     console.log(`Original: ${word}`);
