@@ -2,7 +2,48 @@ const expect = require("chai").expect;
 const Quirk = require("../../quirk");
 
 describe("setSentenceCase", function () {
+    it('should enforce lowercase', function () {
+        let testSub = new Quirk();
+        testSub.setSentenceCase('lowercase');
+        expect(testSub.toQuirk("HELLO")).to.equal('hello');
+        expect(testSub.toQuirk("hello")).to.equal('hello');
+        expect(testSub.toQuirk("HEllO")).to.equal('hello');
+        expect(testSub.toQuirk("H3lLO")).to.equal('h3llo');
+    });
 
+    it('should enforce lowercase even if spelled with weird caps', function () {
+        let testSub = new Quirk();
+        testSub.setSentenceCase('lowercASe');
+        expect(testSub.toQuirk("HELLO")).to.equal('hello');
+        expect(testSub.toQuirk("hello")).to.equal('hello');
+        expect(testSub.toQuirk("HEllO")).to.equal('hello');
+        expect(testSub.toQuirk("H3lLO")).to.equal('h3llo');
+    });
+
+    it('should enforce uppercase', function () {
+        let testSub = new Quirk();
+        testSub.setSentenceCase('uppercase');
+        expect(testSub.toQuirk("hello")).to.equal('HELLO');
+        expect(testSub.toQuirk("HELLO")).to.equal('HELLO');
+        expect(testSub.toQuirk("H3lL0")).to.equal('H3LL0');
+    });
+
+    it('should enforce uppercase even if spelled with weird caps', function () {
+        let testSub = new Quirk();
+        testSub.setSentenceCase('uppeRCase');
+        expect(testSub.toQuirk("hello")).to.equal('HELLO');
+        expect(testSub.toQuirk("HELLO")).to.equal('HELLO');
+        expect(testSub.toQuirk("H3lL0")).to.equal('H3LL0');
+    });
+
+    it('should throw an error when given an invalid case', function () {
+        const badFn = () => {
+            let testSub = new Quirk();
+            testSub.enforceCase('foo');
+        }
+        expect(badFn).to.throw();
+    });
+    
     it("should not propercase sentence fragments", function () {
         let testSub = new Quirk();
         testSub.setSentenceCase("propercase");
@@ -19,18 +60,18 @@ describe("setSentenceCase", function () {
 
     it("should create valid propercase enforcement with a lowercase exception", function () {
         let testSub = new Quirk();
-        testSub.setSentenceCase("propercase", {exceptions: "t"});
+        testSub.setSentenceCase("propercase", { exceptions: "t" });
         expect(testSub.toQuirk("this is so silly.")).to.equal("this is so silly.");
         expect(testSub.toPlain("this is so silly.")).to.equal("This is so silly.");
     });
 
     it("should create valid propercase that ignores uppercase exceptions (as those don't make sense)", function () {
         let testSub = new Quirk();
-        testSub.setSentenceCase("propercase", {exceptions: "T"});
+        testSub.setSentenceCase("propercase", { exceptions: "T" });
         expect(testSub.toQuirk("this is so silly.")).to.equal("This is so silly.");
         expect(testSub.toPlain("This is so silly.")).to.equal("This is so silly.");
     });
- 
+
     it("should create valid simple propercase enforcement in a paragraph with mixed punctuation", function () {
         let testSub = new Quirk();
         testSub.setSentenceCase("propercase");
@@ -38,7 +79,7 @@ describe("setSentenceCase", function () {
         expect(testSub.toPlain("Really? This is so silly. I can't believe I'm doing this!")).to.equal("Really? This is so silly. I can't believe I'm doing this!");
     });
 
-    
+
     it("should create valid simple propercase enforcement in a paragraph first person pronouns of mixed case", function () {
         let testSub = new Quirk();
         testSub.setSentenceCase("propercase");
@@ -55,22 +96,22 @@ describe("setSentenceCase", function () {
 
     it("should create valid lowercase enforcement with uppercase exception", function () {
         let testSub = new Quirk();
-        testSub.setSentenceCase("lowercase", {exceptions: "U"});
+        testSub.setSentenceCase("lowercase", { exceptions: "U" });
         expect(testSub.toQuirk("I LOVE YOU SO MUCH!")).to.equal("i love yoU so mUch!");
         expect(testSub.toPlain("i love yoU so mUch too!")).to.equal("I love you so much too!");
     });
 
     it("should create valid lowercase enforcement with multiple adjacent uppercase exceptions", function () {
         let testSub = new Quirk();
-        testSub.setSentenceCase("lowercase", {exceptions: "SEA"});
+        testSub.setSentenceCase("lowercase", { exceptions: "SEA" });
         expect(testSub.toQuirk("SHE SELLS SEA SHELLS BY THE SEA SHORE.")).to.equal("ShE SEllS SEA ShEllS by thE SEA ShorE.");
         expect(testSub.toPlain("ShE SEllS SEA ShEllS by the SEA ShorE.")).to.equal("She sells sea shells by the sea shore.");
     });
-    
+
 
     it("should have no effect on a lowercase enforcement with lowercase exception", function () {
         let testSub = new Quirk();
-        testSub.setSentenceCase("lowercase", {exceptions: "u"});
+        testSub.setSentenceCase("lowercase", { exceptions: "u" });
         expect(testSub.toQuirk("I love you so much!")).to.equal("i love you so much!");
         expect(testSub.toPlain("i love you so much too!")).to.equal("I love you so much too!");
     });
@@ -112,21 +153,21 @@ describe("setSentenceCase", function () {
 
     it("should create valid uppercase enforcement with lowercase exception", function () {
         let testSub = new Quirk();
-        testSub.setSentenceCase("uppercase", {exceptions: "u"});
+        testSub.setSentenceCase("uppercase", { exceptions: "u" });
         expect(testSub.toQuirk("I LOVE you SO MUCH!")).to.equal("I LOVE YOu SO MUCH!");
         expect(testSub.toPlain("I LOVE YOu SO MUCH TOO!")).to.equal("I love you so much too!");
     });
 
     it("should create valid uppercase enforcement with multiple adjacent lowercase exceptions", function () {
         let testSub = new Quirk();
-        testSub.setSentenceCase("uppercase", {exceptions: "sea"});
+        testSub.setSentenceCase("uppercase", { exceptions: "sea" });
         expect(testSub.toQuirk("she sells sea shells by the sea shore.")).to.equal("sHe seLLs sea sHeLLs BY THe sea sHORe.");
         expect(testSub.toPlain("sHe sELLs sea sHeLLs BY THe sea sHORe.")).to.equal("She sells sea shells by the sea shore.");
     });
-    
+
     it("should have no effect on a uppercase enforcement with uppercase exception", function () {
         let testSub = new Quirk();
-        testSub.setSentenceCase("uppercase", {exceptions: "U"});
+        testSub.setSentenceCase("uppercase", { exceptions: "U" });
         expect(testSub.toQuirk("I love YOU so much!")).to.equal("I LOVE YOU SO MUCH!");
         expect(testSub.toPlain("I LOVE YOU SO MUCH TOO!")).to.equal("I love you so much too!");
     });
