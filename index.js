@@ -27,8 +27,22 @@ kanter.addSubstitution(",", "|\\\/|", {ignoreCase: true});
 kanter.addSubstitution("k", "|<", {ignoreCase: true});
 kanter.setSentenceCase("lowercase");
 kanter.setCapitalizeFragments(true);
-const troll=kanter;
 
+
+let gamzee = new Quirk(); 
+gamzee.setSentenceCase("alternatingcaps");
+
+let petrus = new Quirk();
+petrus.addSubstitution("l", "L", {ignoreCase: true});
+petrus.addSubstitution("e", "E", {ignoreCase: true});
+petrus.addSubstitution("a", "A", {ignoreCase: true});
+petrus.addSubstitution("f", "F", {ignoreCase: true});
+petrus.addQuirkStripPattern(".");
+petrus.addQuirkStripPattern("'");
+petrus.setCapitalizeFragments(true);
+petrus.setSentenceCase("lowercase", {exceptions: "LEAF"});
+
+const troll=petrus;
 
 [ "She sells sea shells by the sea shore", "this is some stuff I'm saying!", "I AM YELLING HERE?", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
     console.group("===========");

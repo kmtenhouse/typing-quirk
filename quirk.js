@@ -133,7 +133,7 @@ class Quirk {
         //lastly, if we have passed a string of letters that should not be affected by case enforcement, create a match pattern for them
         if (options) {
             let matchPattern = options.exceptions;
-            this.quirkCase.exceptions = new RegExp("[" + utils.escapeRegExpSpecials(matchPattern) + "]", 'g');
+            this.quirkCase.exceptions = new RegExp("[" + utils.escapeRegExpSpecials(matchPattern) + "]");
         }
     }
 

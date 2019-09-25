@@ -82,7 +82,7 @@ function capitalizeFirstPerson(str) {
     //takes in a string and ensures that any first person pronouns are capitalized properly
     //personal pronouns are I, I'm
     const firstPerson = /i\b/g;
-    const firstPersonPossessive = /i\'m\b/g
+    const firstPersonPossessive = /i\'m\b|\bim\b|\bIM\b/g
     str = str.replace(firstPerson, "I");
     str = str.replace(firstPersonPossessive, "I'm");
     return str;
@@ -136,9 +136,18 @@ function convertToLowerCase(str, options = null) {
         return str.toLowerCase();
     }
 
-    return str.split('').map(char => {
-        return (options.test(char) ? char : char.toLowerCase());
-    }).join('');
+    let result = ""
+    //loop through the string and figure out if we should change the case (or not)
+    for(let i=0; i<str.length; i++) {
+       let char = str[i];
+       if(options.test(char)) { 
+           result+=char;
+       } else {
+           result+=char.toLowerCase();
+       }
+    }
+
+    return result;
 }
 
 //Capitalize a string -- with an exception mask
@@ -147,9 +156,16 @@ function convertToUpperCase(str, options = null) {
         return str.toUpperCase();
     }
 
-    return str.split('').map(char => {
+    for(let j=0; j<str.length; j++) {
+        if(!options.test(str[j])) {
+            str[j] = str[j].toUpperCase();
+        }
+    }
+
+    return str;
+/*     return str.split('').map(char => {
         return (options.test(char) ? char : char.toUpperCase());
-    }).join('');
+    }).join(''); */
 }
 
 function convertToAlternatingCase(str, exceptions = null) {
