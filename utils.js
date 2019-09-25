@@ -156,16 +156,18 @@ function convertToUpperCase(str, options = null) {
         return str.toUpperCase();
     }
 
-    for(let j=0; j<str.length; j++) {
-        if(!options.test(str[j])) {
-            str[j] = str[j].toUpperCase();
-        }
+    let result = ""
+    //loop through the string and figure out if we should change the case (or not)
+    for(let i=0; i<str.length; i++) {
+       let char = str[i];
+       if(options.test(char)) { 
+           result+=char;
+       } else {
+           result+=char.toUpperCase();
+       }
     }
 
-    return str;
-/*     return str.split('').map(char => {
-        return (options.test(char) ? char : char.toUpperCase());
-    }).join(''); */
+    return result;
 }
 
 function convertToAlternatingCase(str, exceptions = null) {

@@ -49,11 +49,12 @@ let taz = new Quirk();
 taz.addSubstitution("t", "+", {ignoreCase: true});
 taz.setPrefix("~");
 taz.setSuffix("~");
+//note: need the ability to add emoji -- they function as punctuation
 taz.addPlainException("+o+");
 
 const troll=taz;
 
-[ "She sells sea shells by the sea shore", "this is some stuff I'm saying?", "I AM YELLING HERE! +o+", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
+[ "She sells sea shells by the sea shore", "clown time :o)  yay", "this is some stuff I'm saying?", "I AM YELLING HERE! +o+", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
     console.group("===========");
     const quirkified = troll.toQuirk(word);
     console.log(`Original: ${word}`);

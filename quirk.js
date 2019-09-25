@@ -139,10 +139,12 @@ class Quirk {
 
     setCapitalizeFragments(val) {
         //sets whether or not the algorithm should attempt to capitalize sentence fragments when decoding
-        //Default is true
-        if(typeof val==="boolean") {
-            this.plainCase.capitalizeFragments = val;
+        //(Default is false)
+        if (!typeof val === "boolean") {
+            throw new Error("setCapitalizeFragments must be true or false!");
         }
+        this.plainCase.capitalizeFragments = val;
+
     }
 
     addSubstitution(plain, quirk, options = null) {
@@ -153,10 +155,10 @@ class Quirk {
         this.substitutions.push(newSub);
         //Next: attempt to sort the substitutions into a predictable order
         //TO-DO: refactor and think more about this
-        this.substitutions.sort((a,b) => {
-            if(b.quirk.replaceWith.length > a.quirk.replaceWith.length) {
+        this.substitutions.sort((a, b) => {
+            if (b.quirk.replaceWith.length > a.quirk.replaceWith.length) {
                 return true;
-            } 
+            }
             return false;
         });
     }
