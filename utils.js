@@ -175,13 +175,6 @@ function convertToAlternatingCase(str, exceptions = null) {
     return result;
 }
 
-
-//Validators
-function isSpecialCharacter(letter) {
-    return (/[\’\.~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?0123456789]/g.test(letter));
-
-}
-
 //takes in a character and determines if it is an uppercase alphabet letter [A-Z]
 //returns false for lowercase alphabet letters, numbers, special characters 
 function isUpperCaseLetter(letter) {
@@ -206,5 +199,6 @@ module.exports = {
     capitalizeFirstPerson,
     cleaveSentences,
     cleaveWords,
-    recombineWhitespace
+    recombineWhitespace,
+    isUpperCaseLetter
 };

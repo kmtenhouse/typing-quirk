@@ -1,42 +1,41 @@
-/* 
 const Quirk = require("./quirk");
-let sollux = new Quirk();
-sollux.addSubstitution("i", "ii", {ignoreCase: true});
-sollux.addSubstitution("s", "2", {ignoreCase: true});
-sollux.addSubstitution("together", "twogether");
-sollux.addSubstitution("to", {patternToMatch: /\bto{1,2}\b/gi, replaceWith: 'two'});
-console.log(sollux.toQuirk("and the answer is, I don't always remember it bc it's nonsense, so I use the reference at www.regexr.com a lot"));
- */
 
-const Quirk = require("./quirk");
-//const utils = require("./utils");
-let test = new Quirk();
-test.addPlainException("+o+");
-test.addQuirkException("tot");
-test.addSubstitution("t", "+", {ignoreCase: true});
+/* let aradia = new Quirk();
+aradia.addSubstitution("o", "0", {ignoreCase: true});
 
-const str = "This is an ATTACK WARNING! +o+";
-const quirkedStr = test.toQuirk(str);
-const plainStr = test.toPlain(quirkedStr);
-console.log("Original", str);
-console.log("Quirk", quirkedStr);
-console.log("Plain", plainStr);
-/* let dave = new Quirk();
-dave.addSubstitution("what's", "whats", {ignoreCase: true});
-dave.addSubstitution("don't", "dont", {ignoreCase: true});
-dave.addSubstitution("shouldn't", "shouldnt", {ignoreCase: true});
-dave.addStripPattern("'");
-dave.setSentenceCase("lowercase");
-const result = dave.toQuirk("I don't think anything is going to come of this lol what's up");
-console.log(result);
-console.log(dave.toPlain(result));
- */
+["I WANT TO GO OFF", "I WANT TO GO"].forEach(word => {
+    console.group("===========");
+    const quirkified = aradia.toQuirk(word);
+    console.log(`Original: ${word}`);
+    console.log(`To Quirk: ${quirkified}`);
+    console.log(`Remove Quirk: ${aradia.toPlain(quirkified)}`);
+    console.groupEnd();
+}); */
 
-/*  let kanaya = new Quirk();
-kanaya.setWordCase('capitalize');
-console.log(kanaya.toQuirk("This is really very ridiculous."))
-console.log(kanaya.toPlain("This Is All Very Quaint."))
- *//* const Quirk = require("./quirk");
-let gamzee = new Quirk();
-gamzee.setSentenceCase('alternatingcaps');
-console.log(gamzee.toQuirk("what's up my motherfuckin best friend in tha whole entire world :o)")); */
+let taytoh = new Quirk();
+taytoh.setSentenceCase("lowercase");
+taytoh.setPrefix("<|");
+taytoh.setSuffix("|>");
+taytoh.addQuirkStripPattern(".");
+
+
+let kanter = new Quirk();
+kanter.addSubstitution("i", "|", {ignoreCase: true});
+kanter.addSubstitution("l", "|_", {ignoreCase: true});
+kanter.addSubstitution("n", "|\\|", {ignoreCase: true});
+kanter.addSubstitution(",", "|\\\/|", {ignoreCase: true});
+kanter.addSubstitution("k", "|<", {ignoreCase: true});
+kanter.setSentenceCase("lowercase");
+kanter.setCapitalizeFragments(true);
+const troll=kanter;
+
+
+[ "She sells sea shells by the sea shore", "this is some stuff I'm saying!", "I AM YELLING HERE?", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
+    console.group("===========");
+    const quirkified = troll.toQuirk(word);
+    console.log(`Original: ${word}`);
+    console.log(`To Quirk: ${quirkified}`);
+    console.log(`Remove Quirk: ${troll.toPlain(quirkified)}`);
+    console.groupEnd();
+});
+

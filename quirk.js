@@ -15,6 +15,9 @@ class Quirk {
             wordCase: "default",
             exceptions: null //regular expression to trap any letters that should be exempt from case enforcement
         };
+        this.plainCase = {
+            capitalizeFragments: false //defaults to false
+        }
         this.exceptions = {
             plain: [],
             quirk: []
@@ -134,16 +137,40 @@ class Quirk {
         }
     }
 
-    addStripPattern(plain, options = null) {
-        //To-Do: accept a regexp too
-        let newStrip = new RegExp(utils.escapeRegExpSpecials(plain), "g");
-        this.strip.push(newStrip);
+    setCapitalizeFragments(val) {
+        //sets whether or not the algorithm should attempt to capitalize sentence fragments when decoding
+        //Default is true
+        if(typeof val==="boolean") {
+            this.plainCase.capitalizeFragments = val;
+        }
     }
 
     addSubstitution(plain, quirk, options = null) {
         //options: case-sensitive substitutions; apply to full sentences or individual words (default)
         let newSub = new Substitution(plain, quirk, options);
+
+        //Add the substitution to our current array
         this.substitutions.push(newSub);
+        //Next: attempt to sort the substitutions into a predictable order
+        //TO-DO: refactor and think more about this
+        this.substitutions.sort((a,b) => {
+            if(b.quirk.replaceWith.length > a.quirk.replaceWith.length) {
+                return true;
+            } 
+            return false;
+        });
+    }
+
+    addQuirkStripPattern(plain, options = null) {
+        //To-Do: accept a regexp too
+        let newStrip = new RegExp(utils.escapeRegExpSpecials(plain), "g");
+        this.strip.push(newStrip);
+    }
+
+    addPlainStripPattern(plain, options = null) {
+        //To-Do: accept a regexp too
+        let newStrip = new RegExp(utils.escapeRegExpSpecials(plain), "g");
+        this.strip.push(newStrip);
     }
 
     addQuirkException(word, options = null) {
@@ -192,8 +219,8 @@ class Quirk {
                     return false;
                 };
                 //perform subs on one word at a time
-                for(let k = 0; k < words.length; k++) {
-                    if(!isQuirkException(words[k])) {
+                for (let k = 0; k < words.length; k++) {
+                    if (!isQuirkException(words[k])) {
                         this.substitutions.forEach(sub => words[k] = sub.toQuirk(words[k]));
                         this.strip.forEach(strip => words[k] = words[k].replace(strip, ""));
                     }
@@ -284,6 +311,7 @@ class Quirk {
                 for (let j = 0; j < words.length; j++) {
                     if (!isPlainException(words[j])) {
                         this.substitutions.forEach(sub => words[j] = sub.toPlain(words[j]));
+                        //lastly, attempt to fix the case (if we can)
                     }
                 }
 
@@ -296,10 +324,8 @@ class Quirk {
             //Now we should handle case (as best we can):
             //If we did an enforced case, reset to lowercase first
             //To-do: handle any exceptions
-            if (['uppercase', 'lowercase','alternatingcaps'].includes(this.quirkCase.sentenceCase) || this.quirkCase.wordCase === 'capitalize') {
+            if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirkCase.sentenceCase) || this.quirkCase.wordCase === 'capitalize') {
                 sentence = sentence.toLowerCase();
-            } else { //otherwise, we attempt to fix any case issues cause by special character substitution
-                
             }
 
             //Note: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
@@ -307,7 +333,7 @@ class Quirk {
 
             //Finally, check if this chunk is a sentence that we need to capitalize
             //(Default assumption is that a proper sentence will have punctuation at the end; otherwise it's a fragment)
-            if (utils.hasPunctuation(sentence)) {
+            if (this.plainCase.capitalizeFragments || utils.hasPunctuation(sentence)) {
                 sentence = utils.capitalizeOneSentence(sentence);
             }
 
