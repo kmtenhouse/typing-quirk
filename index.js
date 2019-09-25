@@ -42,9 +42,18 @@ petrus.addQuirkStripPattern("'");
 petrus.setCapitalizeFragments(true);
 petrus.setSentenceCase("lowercase", {exceptions: "LEAF"});
 
-const troll=petrus;
+let neo = new Quirk();
+neo.addSubstitution("o", "()", {ignoreCase: true});
 
-[ "She sells sea shells by the sea shore", "this is some stuff I'm saying!", "I AM YELLING HERE?", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
+let taz = new Quirk();
+taz.addSubstitution("t", "+", {ignoreCase: true});
+taz.setPrefix("~");
+taz.setSuffix("~");
+taz.addPlainException("+o+");
+
+const troll=taz;
+
+[ "She sells sea shells by the sea shore", "this is some stuff I'm saying?", "I AM YELLING HERE! +o+", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
     console.group("===========");
     const quirkified = troll.toQuirk(word);
     console.log(`Original: ${word}`);
