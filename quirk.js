@@ -228,7 +228,7 @@ class Quirk {
 
                 //function to test if something is an exception
                 const isQuirkException = (word) => {
-                    for (let i = 0; i < this.quirk.exceptions.quirk.length; i++) {
+                    for (let i = 0; i < this.quirk.exceptions.length; i++) {
                         if (this.quirk.exceptions[i].test(word) === true) {
                             return true;
                         }
