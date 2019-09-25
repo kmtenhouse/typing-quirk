@@ -1,5 +1,9 @@
 const Quirk = require("./quirk");
 
+let jentha = new Quirk();
+jentha.addPlainStripPattern("y y y");
+console.log(jentha.toPlain("y y y you gonna do anything about that?"))
+const troll=jentha;
 /* let aradia = new Quirk();
 aradia.addSubstitution("o", "0", {ignoreCase: true});
 
@@ -12,7 +16,7 @@ aradia.addSubstitution("o", "0", {ignoreCase: true});
     console.groupEnd();
 }); */
 
-let taytoh = new Quirk();
+/* let taytoh = new Quirk();
 taytoh.setSentenceCase("lowercase");
 taytoh.setPrefix("<|");
 taytoh.setSuffix("|>");
@@ -58,9 +62,9 @@ barbel.addSubstitution("bb", "Bᗺ");
 barbel.addSubstitution("b", "ᗺ");
 
 let test = new Quirk();
-test.setCapitalizeFragments(true);
+test.setCapitalizeFragments(true); */
 
-const troll=test;
+
 
 [ "she sells sea shells by the sea shore", "rubber baby buggy bumpers", "I'm so sleepy?", "I AM YELLING HERE! +o+", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
     console.group("===========");

@@ -4,33 +4,30 @@ const { isObject, isString, isRegExp } = require("./validators");
 
 class Quirk {
     constructor() {
-        //initialize the number of substitutions to nothing
+        //DATA THAT APPLIES TO BOTH QUIRKS AND PLAIN TEXT
         this.substitutions = [];
-        this.strip = [];
         this.separator = null; //default word separator is a space
 
-        //DATA THAT APPLIES TO QUIRK
+        //DATA THAT APPLIES ONLY TO QUIRK
         this.quirk = {
             caseEnforcement: {
                 sentence: null, //default: none
                 word: null, //default: none
                 exceptions: null //default: no exceptions to case
             },
+            exceptions: [],
+            strip: [],
             suffix: null, //default: no suffix
             prefix: null, //default: no prefix
         }
 
-        this.plainCase = {
-            capitalizeFragments: false //defaults to false
-        }
-        this.exceptions = {
-            plain: [],
-            quirk: []
-        };
-
         //DATA THAT APPLIES TO PLAIN TEXT
         this.plain = {
-
+            caseEnforcement: {
+                capitalizeFragments: false //defaults to false
+            },
+            exceptions: [],
+            strip: []
         };
 
         //check if we received a possible config object with valid items
@@ -155,7 +152,7 @@ class Quirk {
         if (typeof val !== "boolean") {
             throw new Error("setCapitalizeFragments must be true or false!");
         }
-        this.plainCase.capitalizeFragments = val;
+        this.plain.caseEnforcement.capitalizeFragments = val;
 
     }
 
@@ -175,16 +172,22 @@ class Quirk {
         });
     }
 
-    addQuirkStripPattern(plain, options = null) {
+    addQuirkStripPattern(text, options = null) {
         //To-Do: accept a regexp too
-        let newStrip = new RegExp(utils.escapeRegExpSpecials(plain), "g");
-        this.strip.push(newStrip);
+        if (!isString(text) || text === "") {
+            throw new Error("Must provide an input string for the strip pattern!")
+        }
+        let newStrip = new RegExp(utils.escapeRegExpSpecials(text), "g");
+        this.quirk.strip.push(newStrip);
     }
 
-    addPlainStripPattern(plain, options = null) {
+    addPlainStripPattern(text, options = null) {
         //To-Do: accept a regexp too
-        let newStrip = new RegExp(utils.escapeRegExpSpecials(plain), "g");
-        this.strip.push(newStrip);
+        if (!isString(text) || text === "") {
+            throw new Error("Must provide an input string for the strip pattern!")
+        }
+        let newStrip = new RegExp(utils.escapeRegExpSpecials(text), "g");
+        this.plain.strip.push(newStrip);
     }
 
     addQuirkException(word, options = null) {
@@ -196,7 +199,7 @@ class Quirk {
         const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
 
         //create a pattern for the word
-        this.exceptions.quirk.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+        this.quirk.exceptions.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
     }
 
     addPlainException(word, options = null) {
@@ -208,7 +211,7 @@ class Quirk {
         const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
 
         //create a pattern for the word
-        this.exceptions.plain.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+        this.plain.exceptions.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
     }
 
     //the fun part - encoding their speech!!
@@ -219,14 +222,14 @@ class Quirk {
         const adjustedSentences = sentences.map(sentence => {
 
             //if we have exceptions, temporarily cleave them (so we can recombine later)
-            if (this.exceptions.quirk.length > 0) {
+            if (this.quirk.exceptions.length > 0) {
                 //cleave the words apart
                 let { words, whiteSpace } = utils.cleaveWords(sentence);
 
                 //function to test if something is an exception
                 const isQuirkException = (word) => {
-                    for (let i = 0; i < this.exceptions.quirk.length; i++) {
-                        if (this.exceptions.quirk[i].test(word) === true) {
+                    for (let i = 0; i < this.quirk.exceptions.quirk.length; i++) {
+                        if (this.quirk.exceptions[i].test(word) === true) {
                             return true;
                         }
                     }
@@ -236,7 +239,7 @@ class Quirk {
                 for (let k = 0; k < words.length; k++) {
                     if (!isQuirkException(words[k])) {
                         this.substitutions.forEach(sub => words[k] = sub.toQuirk(words[k]));
-                        this.strip.forEach(strip => words[k] = words[k].replace(strip, ""));
+                        this.quirk.strip.forEach(strip => words[k] = words[k].replace(strip, ""));
                     }
                 }
 
@@ -246,7 +249,7 @@ class Quirk {
                 //perform substitutions (currently: across the entire sentence at once)
                 this.substitutions.forEach(sub => sentence = sub.toQuirk(sentence));
                 //perform any stripping
-                this.strip.forEach(strip => sentence = sentence.replace(strip, ""));
+                this.quirk.strip.forEach(strip => sentence = sentence.replace(strip, ""));
             }
 
             //join the sentence with prefix and suffix
@@ -307,25 +310,26 @@ class Quirk {
             }
 
             //check if we have any plain exceptions
-            if (this.exceptions.plain.length > 0) {
+            if (this.plain.exceptions.length > 0) {
+                //start by cleaving the words apart from the whitespace
+                let { words, whiteSpace } = utils.cleaveWords(sentence);
+
                 //function to test if something is an exception
                 const isPlainException = (word) => {
-                    for (let i = 0; i < this.exceptions.plain.length; i++) {
-                        if (this.exceptions.plain[i].test(word) === true) {
+                    for (let i = 0; i < this.plain.exceptions.length; i++) {
+                        if (this.plain.exceptions[i].test(word) === true) {
                             return true;
                         }
                     }
                     return false;
                 };
 
-                //cleave the words apart
-                let { words, whiteSpace } = utils.cleaveWords(sentence);
-
                 //perform the plain fix if and only if it's not an exception
                 for (let j = 0; j < words.length; j++) {
                     if (!isPlainException(words[j])) {
                         this.substitutions.forEach(sub => words[j] = sub.toPlain(words[j]));
-                        //lastly, attempt to fix the case (if we can)
+                        this.plain.strip.forEach(strip => words[j] = words[j].replace(strip, ""));
+                        //TO-DO lastly, attempt to fix the case (if we can)
                     }
                 }
 
@@ -334,6 +338,7 @@ class Quirk {
 
             } else {
                 this.substitutions.forEach(sub => sentence = sub.toPlain(sentence));
+                this.plain.strip.forEach(strip => sentence = sentence.replace(strip, ""));
             }
             //Now we should handle case (as best we can):
             //If we did an enforced case, reset to lowercase first
@@ -347,7 +352,7 @@ class Quirk {
 
             //Finally, check if this chunk is a sentence that we need to capitalize
             //(Default assumption is that a proper sentence will have punctuation at the end; otherwise it's a fragment)
-            if (this.plainCase.capitalizeFragments || utils.hasPunctuation(sentence)) {
+            if (this.plain.caseEnforcement.capitalizeFragments || utils.hasPunctuation(sentence)) {
                 sentence = utils.capitalizeOneSentence(sentence);
             }
 
