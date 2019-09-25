@@ -52,9 +52,17 @@ taz.setSuffix("~");
 //note: need the ability to add emoji -- they function as punctuation
 taz.addPlainException("+o+");
 
-const troll=taz;
+let barbel = new Quirk();
+barbel.addSubstitution("sleepy", "sleeBᗺy");
+barbel.addSubstitution("bb", "Bᗺ");
+barbel.addSubstitution("b", "ᗺ");
 
-[ "She sells sea shells by the sea shore", "clown time :o)  yay", "this is some stuff I'm saying?", "I AM YELLING HERE! +o+", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
+let test = new Quirk();
+test.setCapitalizeFragments(true);
+
+const troll=test;
+
+[ "she sells sea shells by the sea shore", "rubber baby buggy bumpers", "I'm so sleepy?", "I AM YELLING HERE! +o+", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
     console.group("===========");
     const quirkified = troll.toQuirk(word);
     console.log(`Original: ${word}`);

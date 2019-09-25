@@ -140,7 +140,8 @@ class Quirk {
     setCapitalizeFragments(val) {
         //sets whether or not the algorithm should attempt to capitalize sentence fragments when decoding
         //(Default is false)
-        if (!typeof val === "boolean") {
+        console.log(typeof val);
+        if (typeof val !== "boolean") {
             throw new Error("setCapitalizeFragments must be true or false!");
         }
         this.plainCase.capitalizeFragments = val;
