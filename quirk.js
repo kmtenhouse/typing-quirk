@@ -214,7 +214,7 @@ class Quirk {
             const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
 
             //create a pattern for the word
-            this.quirk.exceptions.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+            this.quirk.exceptions.push(new RegExp("^" + utils.escapeRegExpSpecials(word) + "$", flags));
         }
     }
 
@@ -232,7 +232,7 @@ class Quirk {
             const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
 
             //create a pattern for the word
-            this.plain.exceptions.push(new RegExp(utils.escapeRegExpSpecials(word), flags));
+            this.plain.exceptions.push(new RegExp( "^" + utils.escapeRegExpSpecials(word) + "$", flags));
         }
     }
 
@@ -240,10 +240,14 @@ class Quirk {
     //Register an emoji so the code knows that it counts as 'punctuation'
     //Emoji are excepted from both plain and quirk
     addEmoji(emoji) {
-        if (!isString(emoji) || emoji === "") {
-            throw new Error("Emoji must be strings!");
+        //Accepts a string or a regexp
+        if ((!isRegExp(emoji) && !isString(emoji)) || emoji === "") {
+            throw new Error("Must provide an input string or regexp for the emoji!")
         }
-
+       
+        //add the emoji to both plain and quirk exception lists
+        this.addQuirkException(emoji);
+        this.addPlainException(emoji);
     }
 
     //the fun part - encoding their speech!!

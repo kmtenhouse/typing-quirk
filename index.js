@@ -1,9 +1,10 @@
 const Quirk = require("./quirk");
 
-let jentha = new Quirk();
-jentha.addPlainStripPattern("y y y");
-console.log(jentha.toPlain("y y y you gonna do anything about that?"))
-const troll=jentha;
+
+let testSub = new Quirk();
+testSub.addEmoji("+o+");
+testSub.addSubstitution("t", "+", {ignoreCase: true});
+const troll=testSub;
 /* let aradia = new Quirk();
 aradia.addSubstitution("o", "0", {ignoreCase: true});
 
@@ -66,7 +67,7 @@ test.setCapitalizeFragments(true); */
 
 
 
-[ "she sells sea shells by the sea shore", "rubber baby buggy bumpers", "I'm so sleepy?", "I AM YELLING HERE! +o+", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
+[ "this is totally ridiculous +o+", "rubber baby buggy bumpers", "I'm so sleepy?", "I AM YELLING HERE! +o+", "The quick brown fox jumps over the lazy dog." ].forEach(word => {
     console.group("===========");
     const quirkified = troll.toQuirk(word);
     console.log(`Original: ${word}`);
