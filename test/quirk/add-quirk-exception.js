@@ -12,7 +12,6 @@ describe('add quirk exception', function () {
     it("should ignore words that are listed as exceptions in a case-sensitive fashion when passed the correct option", function () {
         let testSub = new Quirk();
         testSub.addQuirkException("hello", {ignoreCase: true});
-        testSub.addQuirkException("hello");
         testSub.addSubstitution("e", "3", {ignoreCase: true});
         expect(testSub.toQuirk("hello can you hear me")).to.equal("hello can you h3ar m3");
         expect(testSub.toQuirk("HELLO CAN YOU HEAR ME")).to.equal("HELLO CAN YOU H3AR M3");
