@@ -21,6 +21,7 @@ class Quirk {
             strip: [],
             suffix: null, //default: no suffix
             prefix: null, //default: no prefix
+            sentenceBoundary: null //DEFAULT: algorithm will assume all sentences are space-separated, and punctuated by one or more . ! ? ) characters
         }
 
         //DATA THAT APPLIES TO PLAIN TEXT
@@ -73,6 +74,18 @@ class Quirk {
             text: prefix,
             patternToStrip: prefixRegExp
         };
+
+        //lastly: update our sentence boundaries!  Prefixes and suffixes make detecting the edges way easier :)
+        //The update will slightly depend on having a suffix:
+        let newBoundaryPattern = "";
+        if (!this.quirk.suffix) { //NO SUFFIX
+            //PATTERN: Match at least one space, then look ahead for the prefix
+            newBoundaryPattern = `\\s+(?=(${utils.escapeRegExpSpecials(this.quirk.prefix.text)}))`;
+        } else {  //SUFFIX EXISTS
+            //PATTERN: Look behind for suffix, then match at least one space, then look ahead for the prefix
+            newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.suffix.text)}))\\s+(?=(${utils.escapeRegExpSpecials(this.quirk.prefix.text)}))`;
+        }
+        this.quirk.sentenceBoundary = new RegExp(newBoundaryPattern, "g");
     }
 
     setSuffix(suffix, pattern = '') {
@@ -96,6 +109,19 @@ class Quirk {
             text: suffix,
             patternToStrip: suffixRegExp
         };
+
+        let newBoundaryPattern = "";
+
+        //lastly: update our sentence boundaries!  Prefixes and suffixes make detecting the edges way easier :)
+        //The update will slightly depend on having a suffix:
+        if (!this.quirk.prefix) { //NO PREFIX
+            //PATTERN: Look behind for suffix, then match at least one space
+            newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.suffix.text)}))\\s+`;
+        } else {  //PREFIX EXISTS
+            //PATTERN: Look behind for suffix, then match at least one space, then look ahead for the prefix
+            newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.suffix.text)}))\\s+(?=(${utils.escapeRegExpSpecials(this.quirk.prefix.text)}))`;
+        }
+        this.quirk.sentenceBoundary = new RegExp(newBoundaryPattern, "g");
     }
 
     setSeparator(separator) {
@@ -242,17 +268,19 @@ class Quirk {
 
         //Register the emoji as a form of punctuation!
         this.punctuation.push(emoji);
+
+        //Lastly, figure out how this affects sentence boundaries
+        //if we do NOT already have a suffix and prefix, then emoji can be considered sentence boundaries
+       /*  if(!this.quirk.suffix && !this.quirk.prefix) {
+
+        } */
     }
 
     //the fun part - encoding their speech!!
     toQuirk(str) {
         //we will do this sentence by sentence within a paragraph
         //first, split up the sentences
-        //there are two special cases here:
-        //1) custom suffix exists (which takes precedence!)
-        //2) custom punctuation exists
-        const sentenceBoundaryModifier = (this.suffix ? [this.suffix.text] : this.punctuation);
-        const { sentences, whiteSpace } = utils.cleaveSentences(str, sentenceBoundaryModifier);
+        const { sentences, whiteSpace } = utils.cleaveSentences(str); //NOTE: we assume default English sentence punctuation here
         const adjustedSentences = sentences.map(sentence => {
             //Now we dive into the sentence itself!
             //Start by cleaving the words apart
@@ -304,7 +332,8 @@ class Quirk {
             }
 
             if (this.quirk.caseEnforcement.sentence === "propercase") {
-                if (utils.hasPunctuation(sentence, this.punctuation)) {
+                if (utils.hasPunctuation(sentence)) {
+                    console.log(`${sentence} - Should capitalize!`);
                     sentence = utils.capitalizeOneSentence(sentence, this.quirk.caseEnforcement.exceptions);
                 }
                 sentence = utils.capitalizeFirstPerson(sentence);
@@ -334,7 +363,7 @@ class Quirk {
     //(TO-DO) Adjust to support paragraphs properly
     toPlain(str) {
         //first, split up the sentences from the paragraph
-        const { sentences, whiteSpace } = utils.cleaveSentences(str, this.punctuation);
+        const { sentences, whiteSpace } = utils.cleaveSentences(str, this.quirk.sentenceBoundary);
         const adjustedSentences = sentences.map(sentence => {
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
@@ -352,6 +381,7 @@ class Quirk {
             }
 
             //now, cleave the words themselves
+            //NOTE: we also want to cleave the exceptions
             let { words, whiteSpace } = utils.cleaveWords(sentence);
 
             //(helper function to test if something is an exception)
@@ -372,11 +402,11 @@ class Quirk {
                     //If there was an overall case set, we then just sent the word to lowercase
                     if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
                         words[j] = words[j].toLowerCase();
-                    } else { 
+                    } else {
                         //Otherwise, we attempt to follow the existing case as closely as possible -- by looking for SHOUTED words
                         words[j] = utils.adjustForShouts(words[j]);
                     }
-                } 
+                }
             }
 
 
@@ -388,8 +418,11 @@ class Quirk {
             sentence = utils.capitalizeFirstPerson(sentence);
 
             //Finally, check if this chunk is a sentence that we need to capitalize
-            //(Default assumption is that a proper sentence will have punctuation at the end; otherwise it's a fragment)
-            if (this.plain.caseEnforcement.capitalizeFragments || utils.hasPunctuation(sentence, this.punctuation)) {
+            if (utils.hasPunctuation(sentence)) {
+                sentence = utils.capitalizeOneSentence(sentence);
+            }
+
+            if(this.plain.caseEnforcement.capitalizeFragments) {
                 sentence = utils.capitalizeOneSentence(sentence);
             }
 
