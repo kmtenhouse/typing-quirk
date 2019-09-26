@@ -333,7 +333,6 @@ class Quirk {
 
             if (this.quirk.caseEnforcement.sentence === "propercase") {
                 if (utils.hasPunctuation(sentence)) {
-                    console.log(`${sentence} - Should capitalize!`);
                     sentence = utils.capitalizeOneSentence(sentence, this.quirk.caseEnforcement.exceptions);
                 }
                 sentence = utils.capitalizeFirstPerson(sentence);
