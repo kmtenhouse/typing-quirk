@@ -77,7 +77,6 @@ function hasPunctuation(str, customPunctuation=[]) {
     
     //assume that a 'normal' sentence ends with at least one . ! ? or ) 
     //possibly one or more additional spaces after
-    console.log(str);
     const defaultSentenceEnding = /[\.\!\?\)]+[\s]*$/; 
     if(defaultSentenceEnding.test(str) === true) {
         return true;
