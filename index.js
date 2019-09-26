@@ -1,25 +1,13 @@
 const Quirk = require("./quirk");
-let testSub = new Quirk();
+let example = new Quirk();
+example.setPrefix(">>");
+example.setSuffix("<<");
+example.addSubstitution("i", "ii", {ignoreCase: true});
+example.addSubstitution("s", "2");
+example.setSentenceCase("lowercase");
 
-testSub.addSubstitution("o", "0", {ignoreCase: true});
+console.log(example.toQuirk("Check this stuff out! It even works for multiple sentences."));
+//Outputs: >>check thii2 2tuff out!<< >>iit even work2 for multiiple 2entence2.<<
 
-/* testSub.addSubstitution("t", "+", {ignoreCase: true});
-testSub.addEmoji("+o+");
-testSub.setPrefix("~");
-testSub.setSuffix("~"); */
-//expect(testSub.toQuirk("hello can you hear me")).to.equal("hello can you h3ar m3");
-//expect(testSub.toQuirk("HELLO CAN YOU HEAR ME")).to.equal("HELLO CAN YOU H3AR M3");
-//expect(testSub.toQuirk("Hello Can You Hear Me")).to.equal("Hello Can You H3ar M3");const troll = testSub;
-
-const troll = testSub;
-
-["This is SUCH BULLSHIT!", "I am REALLY angry.", "I hate YOU. I WANT TO GO TOO!" ].forEach(word => {
-    console.group("===========");
-    const quirkified = troll.toQuirk(word);
-    console.log(`Original: ${word}`);
-    console.log(`To Quirk: ${quirkified}`);
-    console.log(`Remove Quirk: ${troll.toPlain(quirkified)}`);
-    console.groupEnd();
-});
-
- 
+console.log(example.toPlain(">>check thii2 2tuff out!<< >>iit even work2 for multiiple 2entence2.<<"));
+//Outputs: Check this stuff out! It even works for multiple sentences.

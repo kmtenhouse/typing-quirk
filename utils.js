@@ -115,16 +115,11 @@ function cleave(str, pattern) {
     return { strings, whiteSpace };
 }
 
-function cleaveSentences(paragraph, exceptions = []) {
-    //TO-DO: accept any characters that might need to be added to boundary detection due to custom punctuation / suffixes
-    //MODIFIERS WILL GO IN THE FIRST BIT:
-    //EX: (?<=[\.!\?:\)]|\:U|\+o\+)\s+(?!\:|\s)
-    let masks = "";
-    exceptions.forEach(exception => masks += "|" + escapeRegExpSpecials(exception));
-    const sentenceBoundaryPattern = "(?<=[\\.!\\?:\\)]" + masks + ")\\s+(?!\\:\\s)";
-    const sentenceBoundaries = new RegExp(sentenceBoundaryPattern, "g");
+function cleaveSentences(paragraph, customBoundaries=null) {
+    //DEFAULT: assumes all sentences have at least one space after them, and they punctuated by one or more . ! ? ) " ' ` characters
+    const matchSpacing = (customBoundaries ? customBoundaries :  /(?<=[\"\'\`\.\!\?\)])\s+/g);
 
-    const results = cleave(paragraph, sentenceBoundaries);
+    const results = cleave(paragraph, matchSpacing);
     return {
         sentences: results.strings,
         whiteSpace: results.whiteSpace
