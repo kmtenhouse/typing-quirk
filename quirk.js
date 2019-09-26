@@ -342,8 +342,7 @@ class Quirk {
     toPlain(str) {
         //first, split up the sentences from the paragraph
         const { sentences, whiteSpace } = utils.cleaveSentences(str, this.punctuation);
-        const adjustedSentences = sentences.map(sentence => {
-            console.log(sentence);
+        const adjustedSentences = sentences.map( sentence => {
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
             if (this.quirk.prefix) {

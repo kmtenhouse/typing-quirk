@@ -7,7 +7,7 @@ describe("add emoji", function () {
         testSub.addEmoji("+o+");
         testSub.addSubstitution("t", "+", {ignoreCase: true});
         expect(testSub.toQuirk("This is totally ridiculous +o+")).to.equal("+his is +o+ally ridiculous +o+");
-        expect(testSub.toPlain("+his is +o+ally ridiculous +oo +o+")).to.equal("this is totally ridiculous too +o+");
+        expect(testSub.toPlain("+his is +o+ally ridiculous +oo +o+")).to.equal("This is totally ridiculous too +o+");
     });
 
     it("should cause emoji to work even across multiple sentences", function () {
@@ -15,7 +15,7 @@ describe("add emoji", function () {
         testSub.addEmoji("+o+");
         testSub.addSubstitution("t", "+", {ignoreCase: true});
         expect(testSub.toQuirk("This is totally ridiculous +o+ who is going to use this feature? +o+ I AM SO MAD RN +o+")).to.equal("+his is +o+ally ridiculous +o+ who is going +o use +his fea+ure? +o+ I AM SO MAD RN +o+");
-        expect(testSub.toPlain("+his is +o+ally ridiculous +oo +o+")).to.equal("this is totally ridiculous too +o+");
+        expect(testSub.toPlain("+his is +o+ally ridiculous +oo +o+ who is going +o use +his fea+ure? +o+ I AM SO MAD RN +o+")).to.equal("This is totally ridiculous too +o+ Who is going to use this feature? +o+ I AM SO MAD RN +o+");
     });
 
 

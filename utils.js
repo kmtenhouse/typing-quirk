@@ -61,7 +61,7 @@ function capitalizeOneSentence(str, exceptions = null) {
     //takes in a single sentence and capitalizes the first letter
     //sentences can begin with ' " ` and ( -- these are ignored
     //exceptions are passed as a regular expression to check - if the start of the string is an exception, don't capitalize it!
-    const initialPunctuation = str.match(/^["'`\("]*/)[0];
+    const initialPunctuation = str.match(/^["'`\("¿¡]*/)[0];
     str = str.replace(initialPunctuation, '');
 
     let firstChar = str.charAt(0);
@@ -74,12 +74,25 @@ function capitalizeOneSentence(str, exceptions = null) {
 function hasPunctuation(str, customPunctuation=[]) {
     //takes in a string and detects if it has punctuation
     //NOTE: this may need additional tuning
-    //[\.\!\?\)]+[\s]*(\+o\+)*[\s]*$
-    let punctuationPattern = "[\.\!\?\)]+[\s]*"; 
-    customPunctuation.forEach(punctuation => punctuationPattern+= "(" + escapeRegExpSpecials(punctuation) + ")*[\s]*")
-    punctuationPattern+="$";
-    const punctuation = new RegExp(punctuationPattern);
-    return punctuation.test(str);
+    
+    //assume that a 'normal' sentence ends with at least one . ! ? or ) 
+    //possibly one or more additional spaces after
+    console.log(str);
+    const defaultSentenceEnding = /[\.\!\?\)]+[\s]*$/; 
+    if(defaultSentenceEnding.test(str) === true) {
+        return true;
+    }
+
+    //otherwise, see if we have a sentence that ends in one (or more) emoji
+    //basic emoji detection pattern: \s(  emoiji_goes_here   )\s*$
+    for(let i=0; i<customPunctuation.length; i++) {
+        let emojiPunctuationPattern = "\\s(" + escapeRegExpSpecials(customPunctuation[i]) + ")\\s*$";
+        let emojiRegExp = new RegExp(emojiPunctuationPattern);
+        if(emojiRegExp.test(str)===true) {
+            return true; //as soon as we find a match, return true
+        }
+    }
+    return false;
 }
 
 function capitalizeFirstPerson(str) {
