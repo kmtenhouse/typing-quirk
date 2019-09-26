@@ -205,40 +205,26 @@ class Quirk {
 
     //SUBSTITUTION EXCEPTIONS
     //ACCEPTS ENTIRE WORDS THAT SHOULD BE IGNORED WHEN PERFORMING SUBSTITUTIONS AND STRIPS
-    addQuirkException(word, options = null) {
+    //By default, word exceptions apply when going into a quirk
+    //Developers can optionally pass an options object to strip for plain, or both
+    addWordException(word, options = null) {
         //Accepts entire words that should be excluded from quirk substitutions
         //Accepts a string or a regexp
         if ((!isRegExp(word) && !isString(word)) || word === "") {
             throw new Error("Must provide an input string or regexp for the word!")
         }
 
-        if (isRegExp(word)) {
-            //TO-DO: check if they shot themselves in the foot?
-            this.quirk.exceptions.push(word);
-        } else {
-            //check if we should ignore case when matching
-            const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
+        const flags = ((options && options.ignoreCase === true) ? "i" : "");
+        const patternToAdd = (isRegExp(word) ? word : new RegExp("^" + utils.escapeRegExpSpecials(word) + "$", flags));
 
-            //create a pattern for the word
-            this.quirk.exceptions.push(new RegExp("^" + utils.escapeRegExpSpecials(word) + "$", flags));
+        //If we have the 'plain=true' flag set, this exception works for both!
+        if (options && options.plain === true) {
+            this.plain.exceptions.push(patternToAdd);
         }
-    }
 
-    addPlainException(word, options = null) {
-        //Accepts entire words that should be excluded from plain substitutions and strips
-        //Accepts a string or a regexp
-        if ((!isRegExp(word) && !isString(word)) || word === "") {
-            throw new Error("Must provide an input string or regexp for the word!")
-        }
-        if (isRegExp(word)) {
-            //TO-DO: check if they shot themselves in the foot?
-            this.plain.exceptions.push(word);
-        } else {
-            //check if we should ignore case when matching
-            const flags = ((options && options.ignoreCase === true) ? "gi" : "g");
-
-            //create a pattern for the word
-            this.plain.exceptions.push(new RegExp("^" + utils.escapeRegExpSpecials(word) + "$", flags));
+        //otherwise, as long as we don't have a 'quirk=false', this applies to quirk
+        if ( !options || (options && options.quirk!==false)) {
+            this.quirk.exceptions.push(patternToAdd);
         }
     }
 
@@ -252,8 +238,7 @@ class Quirk {
         }
 
         //add the emoji to both plain and quirk exception lists
-        this.addQuirkException(emoji);
-        this.addPlainException(emoji);
+        this.addWordException(emoji, { quirk: true, plain: true });
 
         //Register the emoji as a form of punctuation!
         this.punctuation.push(emoji);

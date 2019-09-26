@@ -1,11 +1,14 @@
 const Quirk = require("./quirk");
-
 let testSub = new Quirk();
-testSub.addEmoji("+o+");
-testSub.addSubstitution("t", "+", {ignoreCase: true});
+testSub.addWordException("hello", {ignoreCase: true});
+testSub.addSubstitution("e", "3", {ignoreCase: true});
+//expect(testSub.toQuirk("hello can you hear me")).to.equal("hello can you h3ar m3");
+//expect(testSub.toQuirk("HELLO CAN YOU HEAR ME")).to.equal("HELLO CAN YOU H3AR M3");
+//expect(testSub.toQuirk("Hello Can You Hear Me")).to.equal("Hello Can You H3ar M3");const troll = testSub;
+
 const troll = testSub;
 
-[ "This is totally ridiculous +o+ who is going to use this feature? +o+ I AM SO MAD RN +o+" ].forEach(word => {
+[ "hello can you hear me", "HELLO CAN YOU HEAR ME", "Hello Can You Hear Me" ].forEach(word => {
     console.group("===========");
     const quirkified = troll.toQuirk(word);
     console.log(`Original: ${word}`);
