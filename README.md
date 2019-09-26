@@ -10,16 +10,16 @@ This package attempts to help readers and writers more easily manage their text 
 ```
 const Quirk = require("quirk");
 let example = new Quirk();
-example.setPrefix("::");
-example.setSuffix("::");
+example.setPrefix(">>");
+example.setSuffix("<<");
 example.addSubstitution("i", "ii", {ignoreCase: true});
 example.addSubstitution("s", "2");
 example.setSentenceCase("lowercase");
 
 console.log(example.toQuirk("Check this stuff out! It even works for multiple sentences."));
-//Outputs: ::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::
+//Outputs: >>check thii2 2tuff out!<< >>iit even work2 for multiiple 2entence2.<<
 
-console.log(example.toPlain("::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::"));
+console.log(example.toPlain(">>check thii2 2tuff out!<< >>iit even work2 for multiiple 2entence2.<<"));
 //Outputs: Check this stuff out! It even works for multiple sentences.
 ```
 
