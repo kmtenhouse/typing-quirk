@@ -227,15 +227,9 @@ function convertToAlternatingCase(str, exceptions = null) {
     return result;
 }
 
-//detectWordCase
-//takes in a word and attempts to determine if it should be 0) all lowercase (default)  1) all UPPERCASE 2) Propercase (first letter caps, rest lower)
-//RETURNS l, u, p for each case; s if a sentence is made of all special characters
-function detectWordCase(word) {
-    //special case: "I" is proper case!
-    if(word==="I") {
-        return "p";
-    }
-
+//adjustForShouts
+//takes in a word and attempts to determine if it should have its case changed due to SHOUTING
+function adjustForShouts(word) {
     let lowerCaseCount = 0;
     let upperCaseCount = 0;
     let specialCharsCount = 0;
@@ -244,7 +238,7 @@ function detectWordCase(word) {
         if (/[^a-zA-Z]/.test(word[m])) { //if it's not an a-zA-Z character, ignore it!
             specialCharsCount++;
         }
-        else if (isUpperCaseLetter(word[m])) { 
+        else if (isUpperCaseLetter(word[m])) {
             upperCaseCount++;
         } else {
             lowerCaseCount++;
@@ -252,23 +246,22 @@ function detectWordCase(word) {
     }
     //now, figure out on the whole what we have (excluding specials)
     //so To! (3 char) is really To (2 char)
-    let totalLetterCount = word.length-specialCharsCount;
-    if(totalLetterCount===0) { //if the word was entirely special characters, return s
-        return "s";
+    let totalLetterCount = word.length - specialCharsCount;
+    if (totalLetterCount === 0) { //if the word was entirely special characters, return it as-is
+        return word;
     }
 
-    //check the easy paths -- the word is already all lowercase or all uppercase
-    if(totalLetterCount===upperCaseCount) {
-        return "u"; 
-    } else if(totalLetterCount===lowerCaseCount) {
-        return "l"; 
-    }
+    //similarly, if the word is already entirely upper/lower case, return it as-is
+    if (totalLetterCount === upperCaseCount || totalLetterCount === lowerCaseCount) {
+        return word;
+    } 
 
-    //otherwise we have a mix! we need to be mindful of propercase
-    if(upperCaseCount===1 && isUpperCaseLetter(word.charAt(0)) ) {
-        return "p";
-    } else {
-        return "u";
+    //otherwise we have a mix -- we might need to SHOUT! 
+    //(first, make sure it's not just Propercased tho lol)
+    if (upperCaseCount === 1 && isUpperCaseLetter(word.charAt(0))) {
+        return word;
+    } else { //AT LONG LAST WE ARE SHOUTING!
+        return word.toUpperCase();
     }
 }
 
@@ -290,6 +283,7 @@ module.exports = {
     capitalizeOneSentence,
     capitalizeSentences,
     capitalizeWords,
+    adjustForShouts,
     convertToLowerCase,
     convertToUpperCase,
     convertToProperCase,
@@ -299,6 +293,5 @@ module.exports = {
     cleaveSentences,
     cleaveWords,
     recombineWhitespace,
-    detectWordCase,
     isUpperCaseLetter
 };

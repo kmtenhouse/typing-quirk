@@ -374,34 +374,19 @@ class Quirk {
                 return false;
             };
 
-            //SHOUTing is a fence post problem - we will track the overall case of the sentence here
-            const trackWordCase = [];
-
             for (let j = 0; j < words.length; j++) {
                 if (!isPlainException(words[j])) {
                     this.substitutions.forEach(sub => words[j] = sub.toPlain(words[j]));
-                    //TO-DO: decide how to handle strips for entire sentence
+                    //TO-DO: decide how to handle strips/subs for entire sentence
                     this.plain.strip.forEach(strip => words[j] = words[j].replace(strip, ""));
                     //If there was an overall case set, we then just sent the word to lowercase
                     if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
                         words[j] = words[j].toLowerCase();
-                    } else { //Attempt to deal with SHOUTING:
-                        //Normally, we expect only the first word a sentence to be capitalized (unless they are proper nouns)
-                        //However, some characters SHOUT words
-                        //We want to detect SHOUTS and make those words all uppercase (if possible)
-                        let currentCase = utils.detectWordCase(words[j]);
-                        //if the recommendation upper or lowercase, make that happen:
-                        if(currentCase==="u") {
-                            words[j] = words[j].toUpperCase();
-                        } else if(currentCase==="l") {
-                            words[j] = words[j].toLowerCase();
-                        }
-                        trackWordCase.push(currentCase);
+                    } else { 
+                        //Otherwise, we attempt to follow the existing case as closely as possible -- by looking for SHOUTED words
+                        words[j] = utils.adjustForShouts(words[j]);
                     }
-                } else {
-                    //we ignore the case on exceptions
-                    trackWordCase.push("e");
-                }
+                } 
             }
 
 
