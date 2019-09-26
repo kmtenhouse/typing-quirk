@@ -2,6 +2,7 @@ const regexgen = require('regexgen');
 
 class Substitution {
     constructor(plain, quirk, options=null) {
+
         //first, check if we received one or more valid substitution objects for the plain text speech (happy path)
         if (isValidSubstitutionObj(plain)) {
             this.plain = {

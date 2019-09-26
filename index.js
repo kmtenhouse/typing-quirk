@@ -1,24 +1,25 @@
-/* 
 const Quirk = require("./quirk");
-let sollux = new Quirk();
-sollux.addSubstitution("i", "ii", {ignoreCase: true});
-sollux.addSubstitution("s", "2", {ignoreCase: true});
-sollux.addSubstitution("together", "twogether");
-sollux.addSubstitution("to", {patternToMatch: /\bto{1,2}\b/gi, replaceWith: 'two'});
-console.log(sollux.toQuirk("and the answer is, I don't always remember it bc it's nonsense, so I use the reference at www.regexr.com a lot"));
- */
+let testSub = new Quirk();
 
-const Quirk = require("./quirk");
-let eridan = new Quirk();
-eridan.addSubstitution(
-    {
-        patternToMatch: /in\b/g,
-        replaceWith: "ing"
-    },
-    {
-        patternToMatch: /ing\b/g,
-        replaceWith: "in"
-    }
-);
-console.log(eridan.toQuirk("trying out automatic clipping"));
-console.log(eridan.toPlain("tryin out automatic clippin"));
+testSub.addSubstitution("o", "0", {ignoreCase: true});
+
+/* testSub.addSubstitution("t", "+", {ignoreCase: true});
+testSub.addEmoji("+o+");
+testSub.setPrefix("~");
+testSub.setSuffix("~"); */
+//expect(testSub.toQuirk("hello can you hear me")).to.equal("hello can you h3ar m3");
+//expect(testSub.toQuirk("HELLO CAN YOU HEAR ME")).to.equal("HELLO CAN YOU H3AR M3");
+//expect(testSub.toQuirk("Hello Can You Hear Me")).to.equal("Hello Can You H3ar M3");const troll = testSub;
+
+const troll = testSub;
+
+["This is SUCH BULLSHIT!", "I am REALLY angry.", "I hate YOU. I WANT TO GO TOO!" ].forEach(word => {
+    console.group("===========");
+    const quirkified = troll.toQuirk(word);
+    console.log(`Original: ${word}`);
+    console.log(`To Quirk: ${quirkified}`);
+    console.log(`Remove Quirk: ${troll.toPlain(quirkified)}`);
+    console.groupEnd();
+});
+
+ 

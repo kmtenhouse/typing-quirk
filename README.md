@@ -10,11 +10,11 @@ This package attempts to help readers and writers more easily manage their text 
 ```
 const Quirk = require("quirk");
 let example = new Quirk();
-example.addPrefix("::");
-example.addSuffix("::");
+example.setPrefix("::");
+example.setSuffix("::");
 example.addSubstitution("i", "ii", {ignoreCase: true});
 example.addSubstitution("s", "2");
-example.enforceQuirkCase("lowercase");
+example.setSentenceCase("lowercase");
 
 console.log(example.toQuirk("Check this stuff out! It even works for multiple sentences."));
 //Outputs: ::check thii2 2tuff out!:: ::iit even work2 for multiiple 2entence2.::
@@ -27,11 +27,11 @@ Quirks are defined by invoking a new instance of the Quirk class and invoking it
 
 ## Table of Contents
 1. [ Quirk Ruleset Methods ](#ruleset)
-    * [ addPrefix ](#add-prefix)
-    * [ addSuffix ](#add-suffix)
-    * [ addSeparator ](#add-separator)
-    * [ addSubstitution ](#add-substitution)
-    * [ enforceCase ](#enforce-case)
+    * [ setPrefix ](#set-prefix)
+    * [ setSuffix ](#set-suffix)
+    * [ setSeparator ](#set-separator)
+    * [ addSubstitution ](#set-substitution)
+    * [ setSentenceCase ](#set-sentence-case)
 
 2. [ Text Conversion Methods ](#conversion)
     * [ toQuirk ](#to-quirk)
@@ -46,9 +46,9 @@ This collection of methods creates rules that define a typing quirk.
 
 <hr />
 
-<a href="add-prefix"></a>
+<a href="set-prefix"></a>
 
-### addPrefix(prefix, _optional_ patternToMatch)
+### setPrefix(prefix, _optional_ patternToMatch)
 
 Adds a set prefix to the beginning of every sentence. 
 
@@ -57,9 +57,9 @@ Parameters:
 * ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
 
 <hr />
-<a href="add-suffix"></a>
+<a href="set-suffix"></a>
 
-### addSuffix(suffix, _optional_ patternToMatch)
+### setSuffix(suffix, _optional_ patternToMatch)
 
 Adds a set suffix at the end of every sentence. 
 
@@ -68,17 +68,17 @@ Parameters:
 * ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
 
 <hr />
-<a href="add-separator"></a>
+<a href="set-separator"></a>
 
-### addSeparator(separator)
+### setSeparator(separator)
 
-Adds a custom string to separate the words of a sentence instead of spaces (the default). Every space (including tabs) will be replaced by this string.
+Adds a custom string to separate the words of a sentence instead of spaces (the default). Every space (including spaces within tabs) will be replaced by this string.
 
 Parameters:
 * ```separator```: (String) A string that will replace all existing whitespace within a sentence
 
 <hr />
-<a href="add-substitution"></a>
+<a href="set-substitution"></a>
 
 ### addSubstitution(plain, quirk, _optional_ options)
 
@@ -141,9 +141,9 @@ console.log(eridan.toQuirk("trying out automatic clipping"));
 ```
 
 <hr />
-<a href="enforce-case"></a>
+<a href="set-sentence-case"></a>
 
-### enforceQuirkCase(caseType, _optional_ options)
+### setSentenceCase(caseType, _optional_ options)
 Enforces a specific case upon quirkified sentences. This will OVERRIDE the case of the original input. 
 
 Parameters:
