@@ -176,7 +176,10 @@ class Quirk {
 
     //STRIPPING PATTERNS
     //PURELY DESTRUCTIVE SUBSTITUTIONS THAT REMOVE MATCHES COMPLETELY FROM THE TEXT
-    addQuirkStripPattern(patternInput) {
+    //By default, stripping is only applied when going INTO a quirk 
+    //Developers can optionally pass an options object to strip for plain, or both
+
+    addStripPattern(patternInput, options = null) {
         //Accepts a string or a regexp
         if ((!isRegExp(patternInput) && !isString(patternInput)) || patternInput === "") {
             throw new Error("Must provide an input string or regexp for the strip pattern!")
@@ -184,20 +187,21 @@ class Quirk {
 
         //now we just push the regexp
         const newPattern = (isRegExp(patternInput) ? patternInput : new RegExp(utils.escapeRegExpSpecials(patternInput), "g"));
-        this.quirk.strip.push(newPattern);
-    }
 
-    addPlainStripPattern(patternInput) {
-        //Accepts a string or a regexp
-        if ((!isRegExp(patternInput) && !isString(patternInput)) || patternInput === "") {
-            throw new Error("Must provide an input string for the strip pattern!")
+        //check for options...
+        if (options) {
+            if (options.hasOwnProperty("quirk") && options.quirk === true) {
+                this.quirk.strip.push(newPattern);
+            }
+
+            if (options.hasOwnProperty("plain") && options.plain === true) {
+                this.plain.strip.push(newPattern);
+            }
+        } else {
+            this.quirk.strip.push(newPattern);
         }
 
-        //now we just push the regexp
-        const newPattern = (isRegExp(patternInput) ? patternInput : new RegExp(utils.escapeRegExpSpecials(patternInput), "g"));
-        this.plain.strip.push(newPattern);
     }
-
 
     //SUBSTITUTION EXCEPTIONS
     //ACCEPTS ENTIRE WORDS THAT SHOULD BE IGNORED WHEN PERFORMING SUBSTITUTIONS AND STRIPS
@@ -244,7 +248,7 @@ class Quirk {
     addEmoji(emoji) {
         //Accepts a string only, because we have to do some gnarly regexp stuff
         if (!isString(emoji) || emoji === "") {
-            throw new Error("Must provide a string for the emoji!") 
+            throw new Error("Must provide a string for the emoji!")
         }
 
         //add the emoji to both plain and quirk exception lists
@@ -342,7 +346,7 @@ class Quirk {
     toPlain(str) {
         //first, split up the sentences from the paragraph
         const { sentences, whiteSpace } = utils.cleaveSentences(str, this.punctuation);
-        const adjustedSentences = sentences.map( sentence => {
+        const adjustedSentences = sentences.map(sentence => {
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
             if (this.quirk.prefix) {
@@ -378,7 +382,7 @@ class Quirk {
                     this.plain.strip.forEach(strip => words[j] = words[j].replace(strip, ""));
                     //If there was an overall case set, we then just sent the word to lowercase
                     if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
-                        words[j]= words[j].toLowerCase();
+                        words[j] = words[j].toLowerCase();
                     } else {
                         //TO-DO: attempt to fix SHOUTING (as best we can)
                     }
