@@ -223,7 +223,7 @@ class Quirk {
         }
 
         //otherwise, as long as we don't have a 'quirk=false', this applies to quirk
-        if ( !options || (options && options.quirk!==false)) {
+        if (!options || (options && options.quirk !== false)) {
             this.quirk.exceptions.push(patternToAdd);
         }
     }
@@ -247,15 +247,15 @@ class Quirk {
     //(EXPERIMENTAL): sets a bevvy of regexp to replace common English contractions
     setRemoveContractions() {
         //matches ain't, shouldn't
-        testSub.addSubstitution({patternToMatch: /(?<=[imaso])nt$/i, replaceWith: "n't"}, {patternToMatch: /(?<=[imads])n't$/i, replaceWith: "nt"});
+        testSub.addSubstitution({ patternToMatch: /(?<=[imaso])nt$/i, replaceWith: "n't" }, { patternToMatch: /(?<=[imads])n't$/i, replaceWith: "nt" });
         //matches don't
-        testSub.addSubstitution({patternToMatch: /^dont$/i, replaceWith: "don't"}, {patternToMatch: /^don't$/i, replaceWith: "dont"});
+        testSub.addSubstitution({ patternToMatch: /^dont$/i, replaceWith: "don't" }, { patternToMatch: /^don't$/i, replaceWith: "dont" });
         //matches can't
-        testSub.addSubstitution({patternToMatch: /^cant$/i, replaceWith: "can't"}, {patternToMatch: /^can't$/i, replaceWith: "cant"});
+        testSub.addSubstitution({ patternToMatch: /^cant$/i, replaceWith: "can't" }, { patternToMatch: /^can't$/i, replaceWith: "cant" });
         //matches should've, would've, could've
-        testSub.addSubstitution({patternToMatch: /(?<=ul)dve$/i, replaceWith: "d've"}, {patternToMatch: /(?<=ul)d've$/i, replaceWith: "dve"});
+        testSub.addSubstitution({ patternToMatch: /(?<=ul)dve$/i, replaceWith: "d've" }, { patternToMatch: /(?<=ul)d've$/i, replaceWith: "dve" });
         //and clean up any remaining '
-        testSub.addStripPattern("'", {plain: false, quirk: true});
+        testSub.addStripPattern("'", { plain: false, quirk: true });
     }
 
     //the fun part - encoding their speech!!
@@ -374,6 +374,9 @@ class Quirk {
                 return false;
             };
 
+            //SHOUTing is a fence post problem - we will track the overall case of the sentence here
+            const trackWordCase = [];
+
             for (let j = 0; j < words.length; j++) {
                 if (!isPlainException(words[j])) {
                     this.substitutions.forEach(sub => words[j] = sub.toPlain(words[j]));
@@ -382,11 +385,25 @@ class Quirk {
                     //If there was an overall case set, we then just sent the word to lowercase
                     if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
                         words[j] = words[j].toLowerCase();
-                    } else {
-                        //TO-DO: attempt to fix SHOUTING (as best we can)
+                    } else { //Attempt to deal with SHOUTING:
+                        //Normally, we expect only the first word a sentence to be capitalized (unless they are proper nouns)
+                        //However, some characters SHOUT words
+                        //We want to detect SHOUTS and make those words all uppercase (if possible)
+                        let currentCase = utils.detectWordCase(words[j]);
+                        //if the recommendation upper or lowercase, make that happen:
+                        if(currentCase==="u") {
+                            words[j] = words[j].toUpperCase();
+                        } else if(currentCase==="l") {
+                            words[j] = words[j].toLowerCase();
+                        }
+                        trackWordCase.push(currentCase);
                     }
+                } else {
+                    //we ignore the case on exceptions
+                    trackWordCase.push("e");
                 }
             }
+
 
             //now, recombine the words with their whitespace
             sentence = utils.recombineWhitespace(words, whiteSpace);

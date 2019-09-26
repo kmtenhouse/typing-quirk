@@ -71,23 +71,23 @@ function capitalizeOneSentence(str, exceptions = null) {
     return initialPunctuation + firstChar + str.slice(1);
 }
 
-function hasPunctuation(str, customPunctuation=[]) {
+function hasPunctuation(str, customPunctuation = []) {
     //takes in a string and detects if it has punctuation
     //NOTE: this may need additional tuning
-    
+
     //assume that a 'normal' sentence ends with at least one . ! ? or ) 
     //possibly one or more additional spaces after
-    const defaultSentenceEnding = /[\.\!\?\)]+[\s]*$/; 
-    if(defaultSentenceEnding.test(str) === true) {
+    const defaultSentenceEnding = /[\.\!\?\)]+[\s]*$/;
+    if (defaultSentenceEnding.test(str) === true) {
         return true;
     }
 
     //otherwise, see if we have a sentence that ends in one (or more) emoji
     //basic emoji detection pattern: \s(  emoiji_goes_here   )\s*$
-    for(let i=0; i<customPunctuation.length; i++) {
+    for (let i = 0; i < customPunctuation.length; i++) {
         let emojiPunctuationPattern = "\\s(" + escapeRegExpSpecials(customPunctuation[i]) + ")\\s*$";
         let emojiRegExp = new RegExp(emojiPunctuationPattern);
-        if(emojiRegExp.test(str)===true) {
+        if (emojiRegExp.test(str) === true) {
             return true; //as soon as we find a match, return true
         }
     }
@@ -227,6 +227,52 @@ function convertToAlternatingCase(str, exceptions = null) {
     return result;
 }
 
+//detectWordCase
+//takes in a word and attempts to determine if it should be 0) all lowercase (default)  1) all UPPERCASE 2) Propercase (first letter caps, rest lower)
+//RETURNS l, u, p for each case; s if a sentence is made of all special characters
+function detectWordCase(word) {
+    //special case: "I" is proper case!
+    if(word==="I") {
+        return "p";
+    }
+
+    let lowerCaseCount = 0;
+    let upperCaseCount = 0;
+    let specialCharsCount = 0;
+    //loop through the word and do the math
+    for (let m = 0; m < word.length; m++) {
+        if (/[^a-zA-Z]/.test(word[m])) { //if it's not an a-zA-Z character, ignore it!
+            specialCharsCount++;
+        }
+        else if (isUpperCaseLetter(word[m])) { 
+            upperCaseCount++;
+        } else {
+            lowerCaseCount++;
+        }
+    }
+    //now, figure out on the whole what we have (excluding specials)
+    //so To! (3 char) is really To (2 char)
+    let totalLetterCount = word.length-specialCharsCount;
+    if(totalLetterCount===0) { //if the word was entirely special characters, return s
+        return "s";
+    }
+
+    //check the easy paths -- the word is already all lowercase or all uppercase
+    if(totalLetterCount===upperCaseCount) {
+        return "u"; 
+    } else if(totalLetterCount===lowerCaseCount) {
+        return "l"; 
+    }
+
+    //otherwise we have a mix! we need to be mindful of propercase
+    if(upperCaseCount===1 && isUpperCaseLetter(word.charAt(0)) ) {
+        return "p";
+    } else {
+        return "u";
+    }
+}
+
+//isUpperCaseLetter
 //takes in a character and determines if it is an uppercase alphabet letter [A-Z]
 //returns false for lowercase alphabet letters, numbers, special characters 
 function isUpperCaseLetter(letter) {
@@ -253,5 +299,6 @@ module.exports = {
     cleaveSentences,
     cleaveWords,
     recombineWhitespace,
+    detectWordCase,
     isUpperCaseLetter
 };
