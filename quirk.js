@@ -244,20 +244,6 @@ class Quirk {
         this.punctuation.push(emoji);
     }
 
-    //(EXPERIMENTAL): sets a bevvy of regexp to replace common English contractions
-    setRemoveContractions() {
-        //matches ain't, shouldn't
-        testSub.addSubstitution({ patternToMatch: /(?<=[imaso])nt$/i, replaceWith: "n't" }, { patternToMatch: /(?<=[imads])n't$/i, replaceWith: "nt" });
-        //matches don't
-        testSub.addSubstitution({ patternToMatch: /^dont$/i, replaceWith: "don't" }, { patternToMatch: /^don't$/i, replaceWith: "dont" });
-        //matches can't
-        testSub.addSubstitution({ patternToMatch: /^cant$/i, replaceWith: "can't" }, { patternToMatch: /^can't$/i, replaceWith: "cant" });
-        //matches should've, would've, could've
-        testSub.addSubstitution({ patternToMatch: /(?<=ul)dve$/i, replaceWith: "d've" }, { patternToMatch: /(?<=ul)d've$/i, replaceWith: "dve" });
-        //and clean up any remaining '
-        testSub.addStripPattern("'", { plain: false, quirk: true });
-    }
-
     //the fun part - encoding their speech!!
     toQuirk(str) {
         //we will do this sentence by sentence within a paragraph
