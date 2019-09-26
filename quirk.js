@@ -262,7 +262,11 @@ class Quirk {
     toQuirk(str) {
         //we will do this sentence by sentence within a paragraph
         //first, split up the sentences
-        const { sentences, whiteSpace } = utils.cleaveSentences(str, this.punctuation);
+        //there are two special cases here:
+        //1) custom suffix exists (which takes precedence!)
+        //2) custom punctuation exists
+        const sentenceBoundaryModifier = (this.suffix ? [this.suffix.text] : this.punctuation);
+        const { sentences, whiteSpace } = utils.cleaveSentences(str, sentenceBoundaryModifier);
         const adjustedSentences = sentences.map(sentence => {
             //Now we dive into the sentence itself!
             //Start by cleaving the words apart
