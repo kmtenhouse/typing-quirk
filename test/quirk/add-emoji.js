@@ -2,7 +2,7 @@ const expect = require("chai").expect;
 const Quirk = require("../../quirk");
 
 describe("add emoji", function () {
-    it("should add emoji to both plain and quirk substitution lists", function () {
+/*     it("should add emoji to both plain and quirk substitution lists", function () {
         let testSub = new Quirk();
         testSub.addEmoji("+o+");
         testSub.addSubstitution("t", "+", {ignoreCase: true});
@@ -16,7 +16,7 @@ describe("add emoji", function () {
         testSub.addSubstitution("t", "+", {ignoreCase: true});
         expect(testSub.toQuirk("This is totally ridiculous +o+ who is going to use this feature? +o+ I AM SO MAD RN +o+")).to.equal("+his is +o+ally ridiculous +o+ who is going +o use +his fea+ure? +o+ I AM SO MAD RN +o+");
         expect(testSub.toPlain("+his is +o+ally ridiculous +oo +o+ who is going +o use +his fea+ure? +o+ I AM SO MAD RN +o+")).to.equal("This is totally ridiculous too +o+ Who is going to use this feature? +o+ I AM SO MAD RN +o+");
-    });
+    }); */
 
 
     it("should except emoji even when dealing with case changes", function () {
