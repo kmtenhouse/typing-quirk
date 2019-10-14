@@ -16,6 +16,24 @@ describe("linked list", function () {
         expect(testList.join()).to.equal("onetwo");
     });
 
+    it("should find items on the list by index", function () {
+        let testList = new LinkedList();
+        testList.add("zero");
+        testList.add("one");
+        testList.add("two");
+        const zero = testList.findNode(0);
+        const one = testList.findNode(1);
+        const two = testList.findNode(2);
+        const nonsense = testList.findNode(3);
+        const moreNonsense = testList.findNode(-3);
+        expect(testList.length).to.equal(3);
+        expect(zero.value).to.equal("zero");
+        expect(one.value).to.equal("one");
+        expect(two.value).to.equal("two");
+        expect(nonsense).to.equal(null);
+        expect(moreNonsense).to.equal(null);
+    });
+
     it("should add items at the head when specified", function () {
         let testList = new LinkedList();
         testList.add("one");

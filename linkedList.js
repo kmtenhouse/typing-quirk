@@ -14,7 +14,7 @@ class LinkedList {
         this.next = null;
     }
 
-    // functions to be implemented 
+    // Add a new node to the list
     add(element) {
         let newNode = new Node(element);
         let currentNode;
@@ -30,6 +30,7 @@ class LinkedList {
         this.size++;
     }
 
+    // Insert a new node at a certain position in the list
     insertAt(index, element) {
         //Returns FALSE on a failed insertion
         //Returns TRUE on a successfull insertion
@@ -59,11 +60,12 @@ class LinkedList {
         return true;
     }
 
-    removeFrom(index) { //deletes a node at a particular location
-        //Returns FALSE on a failed insertion
-        //Returns TRUE on a successfull insertion
+    //deletes a node at a particular location
+    removeFrom(index) { 
+        //Returns FALSE on a failed deletion
+        //Returns TRUE on a successfull deletion
         if (index > this.size - 1 || index < 0) {
-            return false; //don't insert if the index is nonsense
+            return false; //don't delete if the index is nonsense
         }
 
         if (index === 0) { //special case: removing from head
@@ -83,6 +85,20 @@ class LinkedList {
         }
         this.size--;
         return true;
+    }
+
+    //Get the node at a particular index
+    findNode(index) {
+        if (index > this.size - 1 || index < 0) {
+            return null; //-1 is not found
+        }
+        let currentIndex = 0;
+        let currentNode = this.head;
+        while(currentIndex < index) {
+            currentNode = currentNode.next;            
+            currentIndex++;
+        }
+        return currentNode;
     }
 
     // Helper Methods 
