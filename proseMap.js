@@ -22,6 +22,7 @@ class ProseMap {
 
         //first, grab the whitespace so we can preserve it
         const whiteSpace = this.original.match(pattern);
+        //next, split out the sentences
         const sentences = this.original.split(pattern);
 
         //now, add them to the linked list!
@@ -29,10 +30,10 @@ class ProseMap {
         const max = (sentences.length > whiteSpace.length ? sentences.length : whiteSpace.length);
         while(index < max) {
             if(index < sentences.length) {
-                this.list.add(sentences[index]);
+                this.list.add(sentences[index], "sentence");
             }
             if(index < whiteSpace.length) {
-                this.list.add(whiteSpace[index]);
+                this.list.add(whiteSpace[index], "sentence separator");
             }
             index++;
         }
@@ -42,9 +43,10 @@ class ProseMap {
 
     }
 
-    //GET SENTENCES
-
-    //GET WORDS
+    //ITERATE
+    forEach() {
+        
+    }
 
     //JOIN 
     join() {

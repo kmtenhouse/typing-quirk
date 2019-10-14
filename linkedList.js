@@ -1,8 +1,38 @@
 //Node class
 class Node {
-    constructor(value) {
+    constructor(value, nodeType) {
         this.value = value;
         this.next = null;
+        //set the node type based on a human readable map
+        switch (nodeType) {
+            case "sentence": this.nodeType = 0;
+                break;
+            case "sentence separator": this.nodeType = 1;
+                break;
+            case "word": this.nodeType = 2;
+                break;
+            case "word separator": this.nodeType = 3;
+                break;
+            default: this.nodeType = -1;
+                break;
+        }
+    }
+
+    get nodeName() {
+        let result;
+        switch (this.nodeType) {
+            case 0: result = "sentence";
+                break;
+            case 1: result = "sentence separator";
+                break;
+            case 2: result = "word";
+                break;
+            case 3: result = "word separator";
+                break;
+            default: result = "null";
+                break;
+        }
+        return result;
     }
 }
 
@@ -15,8 +45,8 @@ class LinkedList {
     }
 
     // Add a new node to the list
-    add(element) {
-        let newNode = new Node(element);
+    add(element, nodeType = null) {
+        let newNode = new Node(element, nodeType);
         let currentNode;
         if (this.head === null) {
             this.head = newNode;
@@ -31,14 +61,14 @@ class LinkedList {
     }
 
     // Insert a new node at a certain position in the list
-    insertAt(index, element) {
+    insertAt(index, element, nodeType = null) {
         //Returns FALSE on a failed insertion
         //Returns TRUE on a successfull insertion
         if (index > this.size - 1 || index < 0) {
             return false; //don't insert if the index is nonsense
         }
         //create a new node
-        let newNode = new Node(element);
+        let newNode = new Node(element, nodeType);
 
         if (index === 0) { //special case: inserting at head
             newNode.next = this.head;
@@ -61,7 +91,7 @@ class LinkedList {
     }
 
     //deletes a node at a particular location
-    removeFrom(index) { 
+    removeFrom(index) {
         //Returns FALSE on a failed deletion
         //Returns TRUE on a successfull deletion
         if (index > this.size - 1 || index < 0) {
@@ -94,8 +124,8 @@ class LinkedList {
         }
         let currentIndex = 0;
         let currentNode = this.head;
-        while(currentIndex < index) {
-            currentNode = currentNode.next;            
+        while (currentIndex < index) {
+            currentNode = currentNode.next;
             currentIndex++;
         }
         return currentNode;
@@ -115,7 +145,7 @@ class LinkedList {
     //Returns a stringified version of the entire list
     //(if there's nothing in the list, will return an empty string)
     join() {
-        if (this.isEmpty()) { 
+        if (this.isEmpty()) {
             return "";
         }
         //otherwise, join together the value for all the nodes

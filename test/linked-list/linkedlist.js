@@ -16,6 +16,32 @@ describe("linked list", function () {
         expect(testList.join()).to.equal("onetwo");
     });
 
+    it("should return the appropriate human readable node names", function () {
+        let testList = new LinkedList();
+        testList.add("One two three!", "sentence"); //0
+        testList.add(" ", "sentence separator"); //1
+        testList.add("And four five six. "); //2
+        testList.add("A", "word"); //3
+        testList.add(" ", "word separator"); //4
+        testList.add("test", "word"); //5
+        const sNode = testList.findNode(0);
+        const sepNode = testList.findNode(1);
+        const nonsense = testList.findNode(2);
+        const wordNode = testList.findNode(3);
+        const wordSepNode = testList.findNode(4);
+        expect(sNode.nodeName).to.equal("sentence");
+        expect(sNode.nodeType).to.equal(0);
+        expect(sepNode.nodeName).to.equal("sentence separator");
+        expect(sepNode.nodeType).to.equal(1);
+        expect(nonsense.nodeName).to.equal("null");
+        expect(nonsense.nodeType).to.equal(-1);
+        expect(wordNode.nodeName).to.equal("word");
+        expect(wordNode.nodeType).to.equal(2);
+        expect(wordSepNode.nodeName).to.equal("word separator");
+        expect(wordSepNode.nodeType).to.equal(3);
+        expect(testList.join()).to.equal("One two three! And four five six. A test");
+    });
+
     it("should find items on the list by index", function () {
         let testList = new LinkedList();
         testList.add("zero");
