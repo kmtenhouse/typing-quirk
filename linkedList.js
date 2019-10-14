@@ -18,6 +18,9 @@ class Node {
         }
     }
 
+    //GETTERS AND SETTERS
+
+    //nodeName -- returns a human readable string about what a node contains
     get nodeName() {
         let result;
         switch (this.nodeType) {
@@ -33,6 +36,21 @@ class Node {
                 break;
         }
         return result;
+    }
+
+    //HELPER FUNCTIONS
+    isSeparator() { 
+        //returns true if the node is a separator
+        return (this.nodeType===1 || this.nodeType===3);
+    }
+
+    isSentence() {
+        //returns true if the node is a sentence
+        return this.nodeType===0;
+    }
+
+    isWord() {
+        return this.nodeType===2;
     }
 }
 
