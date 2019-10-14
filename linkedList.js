@@ -3,6 +3,7 @@ class Node {
     constructor(value, nodeType) {
         this.value = value;
         this.next = null;
+        this.isFirstWord = false; 
         //set the node type based on a human readable map
         switch (nodeType) {
             case "sentence": this.nodeType = 0;
