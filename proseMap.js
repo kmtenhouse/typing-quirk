@@ -69,16 +69,18 @@ class ProseMap {
                 //lastly, we insert this into the existing list!
                 const firstWord = wordList.head;
                 firstWord.isFirstWord = true; //make sure we remember that this is the start of the sentence!
-                const lastWord = wordList.findNode(wordList.length-1);
+                const lastWord = wordList.findNode(wordList.length - 1);
                 const nextParagraphNode = currentNode.next;
                 //the current node is now the first word of the sentence...
-                if(previousNode === null) {
+                if (previousNode === null) {
                     this.list.head = firstWord;
                 } else {
                     previousNode.next = firstWord;
                 }
                 //...and the final node of that word list hooks back to the paragraph!
-                lastWord.next = nextParagraphNode; 
+                lastWord.next = nextParagraphNode;
+                // we adjust the size of the list...
+                this.list.size += wordList.length;
                 //and we move right along to the next paragraph segment :)
                 currentNode = nextParagraphNode;
             } else {
@@ -99,9 +101,31 @@ class ProseMap {
         }
     }
 
-    //JOIN 
+    //JOINS
+
+    //Joins the entire list as one
     join() {
         return this.list.join();
+    }
+
+    //Joins all words / word separators back into sentences
+    joinWords() {
+        const newList = new LinkedList();
+        let currentNode = this.list.head;
+        let sentence = "";
+        while (currentNode) {
+            if (currentNode.isWord() || currentNode.isWordSeparator()) {
+                sentence += currentNode.value;
+            } else {
+                if (sentence!=="") {
+                    newList.add(sentence, "sentence");
+                    sentence = "";
+                }
+                newList.add(currentNode.value, currentNode.nodeName);
+            }
+            currentNode = currentNode.next;
+        }
+        this.list = newList;
     }
 }
 

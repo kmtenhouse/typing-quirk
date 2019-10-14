@@ -1,4 +1,4 @@
-const Quirk = require("./quirk");
+/* const Quirk = require("./quirk");
 let example = new Quirk();
 example.setPrefix(">>");
 example.setSuffix("<<");
@@ -11,17 +11,24 @@ console.log(example.toQuirk("Check this stuff out! It even works for multiple se
 
 console.log(example.toPlain(">>check thii2 2tuff out!<< >>iit even work2 for multiiple 2entence2.<<"));
 //Outputs: Check this stuff out! It even works for multiple sentences. 
-
-/* const ProseMap = require("./proseMap");
-const myText = new ProseMap("This is a test. This is only a test.");
+ */
+const ProseMap = require("./proseMap");
+const myText = new ProseMap("This is a test. This is only a test. Proceed to numb my brain.");
 myText.cleaveSentences();
 myText.forEach(function(node, index) {
     node.value = node.value.replace(/[tT]/g, "+");
 });
 myText.cleaveWords();
-myText.forEach(function(node, index) {
+/* myText.forEach(function(node, index) {
     if(node.isFirstWord) {
         node.value = node.value.toUpperCase();
     }
+    console.log(`${index}: ${node.nodeName}: ${node.value}`);
 });
-console.log(myText.join()); */
+console.log(myText.join());
+ */
+myText.joinWords();
+myText.forEach(function(node, index) {
+    console.log(`T${index}: ${node.nodeName}: ${node.value}`);
+});
+console.log(myText.join());

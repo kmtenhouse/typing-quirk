@@ -311,8 +311,11 @@ class Quirk {
                     case "uppercase":
                         node.value = utils.convertToUpperCase(node.value, this.quirk.caseEnforcement.exceptions);
                         break;
-                    case "propercase": //Note: propercase starts by making the words lower case; final adjustment happens later
+                    case "propercase": 
                         node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
+                        if(node.isFirstWord) {
+                            //TO-DO: handle the propercase right here, right now :)
+                        }
                         break;
                     default: break;
                 }

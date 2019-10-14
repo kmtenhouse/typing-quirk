@@ -41,7 +41,7 @@ class Node {
 
     //HELPER FUNCTIONS
     isSeparator() { 
-        //returns true if the node is a separator
+        //returns true if the node is any kind of separator
         return (this.nodeType===1 || this.nodeType===3);
     }
 
@@ -50,8 +50,19 @@ class Node {
         return this.nodeType===0;
     }
 
+    isSentenceSeparator() {
+        //returns true if the node is a sentence
+        return this.nodeType===1;
+    }
+
     isWord() {
+        //returns true if the node is a word
         return this.nodeType===2;
+    }
+
+    isWordSeparator() {
+        //returns true if the node is a word separator
+        return this.nodeType===3;
     }
 }
 
