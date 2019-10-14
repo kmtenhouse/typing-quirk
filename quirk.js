@@ -1,5 +1,6 @@
 const Substitution = require("./substitution");
 const utils = require("./utils");
+const ProseMap = require("./proseMap");
 const { isObject, isString, isRegExp } = require("./validators");
 
 class Quirk {
@@ -271,59 +272,68 @@ class Quirk {
 
         //Lastly, figure out how this affects sentence boundaries
         //if we do NOT already have a suffix and prefix, then emoji can be considered sentence boundaries
-       /*  if(!this.quirk.suffix && !this.quirk.prefix) {
-
-        } */
+        /*  if(!this.quirk.suffix && !this.quirk.prefix) {
+ 
+         } */
     }
 
     //the fun part - encoding their speech!!
     toQuirk(str) {
         //we will do this sentence by sentence within a paragraph
         //first, split up the sentences
-        const { sentences, whiteSpace } = utils.cleaveSentences(str); //NOTE: we assume default English sentence punctuation here
-        const adjustedSentences = sentences.map(sentence => {
-            //Now we dive into the sentence itself!
-            //Start by cleaving the words apart
-            let { words, whiteSpace } = utils.cleaveWords(sentence);
+        const paragraph = new ProseMap(str);
+        paragraph.cleaveSentences(); //NOTE: we assume default English sentence punctuation here
 
-            //(helper function to test if something is an exception)
-            const isQuirkException = (word) => {
-                for (let i = 0; i < this.quirk.exceptions.length; i++) {
-                    if (this.quirk.exceptions[i].test(word) === true) {
-                        return true;
-                    }
-                }
-                return false;
-            };
+        //Next, we dive into it word-by-word:
+        paragraph.cleaveWords();
 
-            //next perform subs/strips/case adjustment on one word at a time
-            for (let k = 0; k < words.length; k++) {
-                if (!isQuirkException(words[k])) {
-                    //perform any substitutions and strips
-                    this.substitutions.forEach(sub => words[k] = sub.toQuirk(words[k]));
-                    this.quirk.strip.forEach(strip => words[k] = words[k].replace(strip, ""));
-                    //deal with sentence case
-                    switch (this.quirk.caseEnforcement.sentence) {
-                        case "lowercase":
-                            words[k] = utils.convertToLowerCase(words[k], this.quirk.caseEnforcement.exceptions);
-                            break;
-                        case "uppercase":
-                            words[k] = utils.convertToUpperCase(words[k], this.quirk.caseEnforcement.exceptions);
-                            break;
-                        case "propercase": //Note: propercase starts by making the words lower case; final adjustment happens later
-                            words[k] = utils.convertToLowerCase(words[k], this.quirk.caseEnforcement.exceptions);
-                            break;
-                        default: break;
-                    }
-                    //lastly, check if we need to enforce caps on this word in particular
-                    if (this.quirk.caseEnforcement.word === 'capitalize') {
-                        words[k] = utils.capitalizeOneSentence(words[k], this.quirk.caseEnforcement.exceptions);
-                    }
+        //(helper function to test if something is an exception)
+        const isQuirkException = (word) => {
+            for (let i = 0; i < this.quirk.exceptions.length; i++) {
+                if (this.quirk.exceptions[i].test(word) === true) {
+                    return true;
                 }
             }
+            return false;
+        };
 
-            //time to recombine so we can perform our final operations on the sentence as a whole
-            sentence = utils.recombineWhitespace(words, whiteSpace);
+        //iterate through all words in the paragraph level first
+        paragraph.forEach((node) => {
+            if (node.isWord() && !isQuirkException(node.value)) {
+                //perform any substitutions and strips
+                this.substitutions.forEach(sub => node.value = sub.toQuirk(node.value));
+                this.quirk.strip.forEach(strip => node.value = node.value.replace(strip, ""));
+                //deal with sentence case
+                switch (this.quirk.caseEnforcement.sentence) {
+                    case "lowercase":
+                        node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
+                        break;
+                    case "uppercase":
+                        node.value = utils.convertToUpperCase(node.value, this.quirk.caseEnforcement.exceptions);
+                        break;
+                    case "propercase": //Note: propercase starts by making the words lower case; final adjustment happens later
+                        node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
+                        break;
+                    default: break;
+                }
+                //lastly, check if we need to enforce caps on this word in particular
+                if (this.quirk.caseEnforcement.word === 'capitalize') {
+                    node.value = utils.capitalizeOneSentence(node.value, this.quirk.caseEnforcement.exceptions);
+                }
+            } else if (node.isSeparator()) {
+                //if there is a custom separator, add that
+                if (this.separator) {
+                    node.value = this.separator.toQuirk(node.value);
+                }
+            }
+        });
+
+        //now we join the words back into sentences so that we can do any sentence-wide tweaks
+
+        return paragraph.join();
+    /*     const adjustedSentences = sentences.map(sentence => {
+            //Now we dive into the sentence itself!
+
 
             //do one more final check for case, as certain cases affect the entire sentence
             //To-Do: figure out how this one affects emoji
@@ -346,17 +356,14 @@ class Quirk {
             //nex, join the prepared sentence with prefix and suffix
             sentence = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence + (this.quirk.suffix ? this.quirk.suffix.text : '');
 
-            //lastly, if there is a custom separator, add that
-            if (this.separator) {
-                sentence = this.separator.toQuirk(str);
-            }
+
             //AT LAST!  we return the sentence to our map
             return sentence;
         });
 
         //at the very end, we recombine the sentences with their original whitespace to reform a paragraph
         const adjustedParagraph = utils.recombineWhitespace(adjustedSentences, whiteSpace);
-        return adjustedParagraph;
+        return adjustedParagraph; */
     }
 
     //(TO-DO) Adjust to support paragraphs properly
@@ -421,7 +428,7 @@ class Quirk {
                 sentence = utils.capitalizeOneSentence(sentence);
             }
 
-            if(this.plain.caseEnforcement.capitalizeFragments) {
+            if (this.plain.caseEnforcement.capitalizeFragments) {
                 sentence = utils.capitalizeOneSentence(sentence);
             }
 
