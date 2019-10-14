@@ -3,8 +3,6 @@ class Node {
     constructor(value) {
         this.value = value;
         this.next = null;
-        //figure out where we determine the nodetype
-        //this.nodeType = nodeType;
     }
 }
 
@@ -98,17 +96,20 @@ class LinkedList {
         return (this.length > 0 ? false : true);
     }
 
-    printList() {
-        if (this.isEmpty()) {
-            return console.log("The current list is empty.");
+    //Returns a stringified version of the entire list
+    //(if there's nothing in the list, will return an empty string)
+    join() {
+        if (this.isEmpty()) { 
+            return "";
         }
-        console.log(`Printing your list of size ${this.size}`);
+        //otherwise, join together the value for all the nodes
         let currentNode = this.head;
-
+        let str = "";
         do {
-            console.log(currentNode.value);
+            str += currentNode.value;
             currentNode = currentNode.next;
         } while (currentNode);
+        return str;
     }
 
 }
