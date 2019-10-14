@@ -16,10 +16,25 @@ class ProseMap {
     //Attempts to separate sentences into the linked list
     //DEFAULT ASSUMPTION: sentences are terminated by one or more " ' ` . ! ? ) 
     //that are NOT immediately preceeded by a comma
-    cleaveParagraph() {
-        const boundaries = "\"'`.!?)";
-        for(let i = 0; i < this.original.length; i++) {
-            
+    cleaveSentences(customBoundaries=null) {
+        //(optionally accepts a custom regexp pattern to cleave on)
+        const pattern = (customBoundaries ? customBoundaries :  /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g);
+
+        //first, grab the whitespace so we can preserve it
+        const whiteSpace = this.original.match(pattern);
+        const sentences = this.original.split(pattern);
+
+        //now, add them to the linked list!
+        let index = 0;  
+        const max = (sentences.length > whiteSpace.length ? sentences.length : whiteSpace.length);
+        while(index < max) {
+            if(index < sentences.length) {
+                this.list.add(sentences[index]);
+            }
+            if(index < whiteSpace.length) {
+                this.list.add(whiteSpace[index]);
+            }
+            index++;
         }
     }
 

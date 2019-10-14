@@ -14,6 +14,6 @@ console.log(example.toPlain(">>check thii2 2tuff out!<< >>iit even work2 for mul
 
 const ProseMap = require("./proseMap");
 const myText = new ProseMap("This is a test. This is only a test.");
-myText.cleaveParagraph();
+myText.cleaveSentences();
 console.log(myText.join());
 console.log(myText.original);
