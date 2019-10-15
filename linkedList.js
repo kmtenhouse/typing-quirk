@@ -6,17 +6,19 @@ class Node {
         this.isFirstWord = false;
         //set the node type based on a human readable map
         switch (nodeType) {
-            case "paragraph": this.nodeType = 0;
+            case "paragraph": this._nodeType = 0;
                 break;
-            case "sentence": this.nodeType = 1;
+            case "sentence": this._nodeType = 1;
                 break;
-            case "sentence separator": this.nodeType = 2;
+            case "sentence separator": this._nodeType = 2;
                 break;
-            case "word": this.nodeType = 3;
+            case "word": this._nodeType = 3;
                 break;
-            case "word separator": this.nodeType = 4;
+            case "word separator": this._nodeType = 4;
                 break;
-            default: this.nodeType = -1;
+            case "emoji": this._nodeType = 5;
+                break;
+            default: this._nodeType = -1;
                 break;
         }
     }
@@ -26,7 +28,7 @@ class Node {
     //nodeName -- returns a human readable string about what a node contains
     get nodeName() {
         let result;
-        switch (this.nodeType) {
+        switch (this._nodeType) {
             case 0: result = "paragraph";
                 break;
             case 1: result = "sentence";
@@ -37,41 +39,58 @@ class Node {
                 break;
             case 4: result = "word separator";
                 break;
+            case 5: result = "emoji";
+                break;
             default: result = "null";
                 break;
         }
         return result;
     }
 
+    set nodeType(val) {
+        if(Number.isInteger(val) && val < 6 && val >= 0) { 
+            this._nodeType = val;
+        } 
+    }
+
+    get nodeType() {
+        return this._nodeType;
+    }
+
     //HELPER FUNCTIONS
     isSeparator() {
         //returns true if the node is any kind of separator
-        return (this.nodeType === 2 || this.nodeType === 4);
+        return (this._nodeType === 2 || this._nodeType === 4);
     }
 
     isParagraph() {
         //returns true if the node is a paragraph
-        return this.nodeType === 0;
-   }
+        return this._nodeType === 0;
+    }
 
     isSentence() {
         //returns true if the node is a sentence
-        return this.nodeType === 1;
+        return this._nodeType === 1;
     }
 
     isSentenceSeparator() {
         //returns true if the node is a sentence
-        return this.nodeType === 2;
+        return this._nodeType === 2;
     }
 
     isWord() {
         //returns true if the node is a word
-        return this.nodeType === 3;
+        return this._nodeType === 3;
     }
 
     isWordSeparator() {
         //returns true if the node is a word separator
-        return this.nodeType === 4;
+        return this._nodeType === 4;
+    }
+
+    isEmoji() {
+        //returns true if the node is an emoji
+        return this._nodeType === 5;
     }
 }
 

@@ -11,6 +11,7 @@ describe("prosemap", function () {
 
     it("should make a new ProseMap from a simple paragraph when cleaving words", function () {
         let testMap = new ProseMap("This is a very simple paragraph. It uses normal English punctuation only!  What's wrong with that?");
+        testMap.cleaveSentences();
         testMap.cleaveWords();
         expect(testMap.level).to.equal("word");
         expect(testMap.join()).to.equal("This is a very simple paragraph. It uses normal English punctuation only!  What's wrong with that?");
