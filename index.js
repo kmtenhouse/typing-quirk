@@ -1,5 +1,5 @@
 const Quirk = require("./quirk");
-let example = new Quirk();
+/* let example = new Quirk();
 example.setPrefix(">>");
 example.setSuffix("<<");
 example.addSubstitution("i", "ii", {ignoreCase: true});
@@ -20,4 +20,14 @@ console.log(gamzee.toQuirk("Check this out my wicked bitch tits brother. It's do
 
 let kanaya = new Quirk();
 kanaya.setWordCase("capitalize");
-console.log(kanaya.toQuirk("This is the only way to get through to you, it seems. What a waste."))
+console.log(kanaya.toQuirk("This is the only way to get through to you, it seems. What a waste.")) */
+
+let testSub = new Quirk();
+testSub.setSeparator('*');
+const phrases = ["This is nonsense.   I can't believe it.", "Why this", "Seriously? I have no idea why."];
+
+phrases.forEach(phrase => {
+    const quirky = testSub.toQuirk(phrase);
+    const reverse = testSub.toPlain(quirky);
+    console.log(`Quirk: ${quirky}\nPlain: ${reverse}`)
+});
