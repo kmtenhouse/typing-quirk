@@ -18,24 +18,24 @@ describe("linked list", function () {
 
     it("should return the appropriate human readable node names", function () {
         let testList = new LinkedList();
-        testList.add("One two three!", "sentence"); //0
-        testList.add(" ", "sentence separator"); //1
-        testList.add("And four five six. "); //2
-        testList.add("A", "word"); //3
-        testList.add(" ", "word separator"); //4
-        testList.add("test", "word"); //5
+        testList.add("One two three!", "sentence"); //1
+        testList.add(" ", "sentence separator"); //2
+        testList.add("And four five six. "); //3
+        testList.add("A", "word"); //4
+        testList.add(" ", "word separator"); //5
+        testList.add("test", "word"); //4
         const sNode = testList.findNode(0);
         const sepNode = testList.findNode(1);
         const nonsense = testList.findNode(2);
         const wordNode = testList.findNode(3);
         const wordSepNode = testList.findNode(4);
         expect(sNode.nodeName).to.equal("sentence");
-        expect(sNode.nodeType).to.equal(0);
+        expect(sNode.nodeType).to.equal(1);
         expect(sNode.isSeparator()).to.be.false;
         expect(sNode.isSentence()).to.be.true;
         expect(sNode.isWord()).to.be.false;
         expect(sepNode.nodeName).to.equal("sentence separator");
-        expect(sepNode.nodeType).to.equal(1);
+        expect(sepNode.nodeType).to.equal(2);
         expect(sepNode.isSentence()).to.be.false;
         expect(sepNode.isWord()).to.be.false;
         expect(sepNode.isSeparator()).to.be.true;
@@ -48,12 +48,12 @@ describe("linked list", function () {
         expect(wordNode.isSentence()).to.be.false;
         expect(wordNode.isWord()).to.be.true;
         expect(wordNode.isSeparator()).to.be.false;
-        expect(wordNode.nodeType).to.equal(2);
+        expect(wordNode.nodeType).to.equal(3);
         expect(wordSepNode.nodeName).to.equal("word separator");
         expect(wordSepNode.isSentence()).to.be.false;
         expect(wordSepNode.isWord()).to.be.false;
         expect(wordSepNode.isSeparator()).to.be.true;
-        expect(wordSepNode.nodeType).to.equal(3);
+        expect(wordSepNode.nodeType).to.equal(4);
         expect(testList.join()).to.equal("One two three! And four five six. A test");
     });
 

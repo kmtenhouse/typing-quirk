@@ -7,9 +7,10 @@ const LinkedList = require("./linkedList");
 class ProseMap {
     //basic map takes in a paragraph and attempts to separate it 
     //
-    constructor(paragraph) {
+    constructor(paragraph = "") {
         this.list = new LinkedList();
-        this.original = paragraph || "";
+        this.list.add(paragraph, "paragraph"); //by default our linked list will contain one node, a paragraph
+        this.level = "paragraph"; //prose must be at the same level
     }
 
     //CLEAVE
@@ -18,31 +19,52 @@ class ProseMap {
     //that are NOT immediately preceeded by a comma
     cleaveSentences(customBoundaries = null) {
         //(optionally accepts a custom regexp pattern to cleave on)
-        const pattern = (customBoundaries ? customBoundaries : /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g);
+        const pattern = customBoundaries || /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g;
 
-        //first, grab the whitespace so we can preserve it
-        const whiteSpace = this.original.match(pattern);
-        //next, split out the sentences
-        const sentences = this.original.split(pattern);
+        //go through our existing linked list first
+        const newList = new LinkedList();
 
-        //now, add them to the linked list!
-        let index = 0;
-        const max = (sentences.length > whiteSpace.length ? sentences.length : whiteSpace.length);
-        while (index < max) {
-            if (index < sentences.length) {
-                this.list.add(sentences[index], "sentence");
+        this.forEach(node => {
+            if (node.isParagraph()) {
+                const str = node.value;
+                //first, grab the whitespace so we can preserve it
+                const whiteSpace = str.match(pattern);
+                //next, split out the sentences
+                const sentences = str.split(pattern);
+                //now, add them to the new linked list!
+                let index = 0;
+                //figure out our max
+                const numSentences = (sentences ? sentences.length : 0);
+                const numSpaces = (whiteSpace ? whiteSpace.length : 0);
+                const max = (numSentences > numSpaces ? numSentences : numSpaces);
+                while (index < max) {
+                    if (index < numSentences) {
+                        newList.add(sentences[index], "sentence");
+                    }
+                    if (index < numSpaces) {
+                        newList.add(whiteSpace[index], "sentence separator");
+                    }
+                    index++;
+                }
+            } else {
+                newList.add(node.value, node.nodeName);
             }
-            if (index < whiteSpace.length) {
-                this.list.add(whiteSpace[index], "sentence separator");
-            }
-            index++;
-        }
+        });
+
+        //lastly, we overwrite the old list with our new one
+        this.list = newList;
+        this.level = "sentence";
     }
 
     //Cuts up an existing ProseMap into even smaller chunks
     //Optionally accepts a custom separator regexp to match on
-    cleaveWords(customSeparator = null) {
-        const wordBoundaries = customSeparator || /(?<!^)\s/g;
+    cleaveWords(customBoundaries = null) {
+        //if we are at the paragraph level, start by cleaving the sentences!
+        if (this.level === "paragraph") {
+            this.cleaveSentences();
+        }
+
+        const wordBoundaries = customBoundaries || /(?<!^)\s/g;
         let currentNode = this.list.head;
         let previousNode = null;
         while (currentNode) {
@@ -56,12 +78,15 @@ class ProseMap {
                 const words = sentence.split(wordBoundaries);
                 //now, add them to the linked list!
                 let index = 0;
-                const max = (words.length > whiteSpace.length ? words.length : whiteSpace.length);
+                //figure out our max
+                const numWords = (words ? words.length : 0);
+                const numSpaces = (whiteSpace ? whiteSpace.length : 0);
+                const max = (numWords > numSpaces ? numWords : numSpaces);
                 while (index < max) {
-                    if (index < words.length) {
+                    if (index < numWords) {
                         wordList.add(words[index], "word");
                     }
-                    if (index < whiteSpace.length) {
+                    if (index < numSpaces) {
                         wordList.add(whiteSpace[index], "word separator");
                     }
                     index++;
@@ -88,6 +113,7 @@ class ProseMap {
                 currentNode = currentNode.next;
             }
         }
+        this.level = "word";
     }
 
     //ITERATE
@@ -103,7 +129,7 @@ class ProseMap {
 
     //JOINS
 
-    //Joins the entire list as one
+    //Joins the entire list into a single string
     join() {
         return this.list.join();
     }
@@ -117,7 +143,7 @@ class ProseMap {
             if (currentNode.isWord() || currentNode.isWordSeparator()) {
                 sentence += currentNode.value;
             } else {
-                if (sentence!=="") {
+                if (sentence !== "") {
                     newList.add(sentence, "sentence");
                     sentence = "";
                 }
@@ -125,7 +151,20 @@ class ProseMap {
             }
             currentNode = currentNode.next;
         }
+        //check for one last sentence...
+        if (sentence) {
+            newList.add(sentence, "sentence");
+        }
         this.list = newList;
+        this.level = "sentence";
+    }
+
+    //Joins all sentences back into a paragraph (so you can split all over again)
+    joinSentences() {
+        const paragraph = this.list.join();
+        this.list = new LinkedList();
+        this.list.add(paragraph, "paragraph");
+        this.level = "paragraph"
     }
 }
 

@@ -311,9 +311,9 @@ class Quirk {
                     case "uppercase":
                         node.value = utils.convertToUpperCase(node.value, this.quirk.caseEnforcement.exceptions);
                         break;
-                    case "propercase": 
+                    case "propercase":
                         node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
-                        if(node.isFirstWord) {
+                        if (node.isFirstWord) {
                             //TO-DO: handle the propercase right here, right now :)
                         }
                         break;
@@ -332,41 +332,34 @@ class Quirk {
         });
 
         //now we join the words back into sentences so that we can do any sentence-wide tweaks
-
-        return paragraph.join();
-    /*     const adjustedSentences = sentences.map(sentence => {
-            //Now we dive into the sentence itself!
-
-
-            //do one more final check for case, as certain cases affect the entire sentence
-            //To-Do: figure out how this one affects emoji
-            if (this.quirk.caseEnforcement.sentence === "alternatingcaps") {
-                sentence = utils.convertToAlternatingCase(sentence, this.quirk.caseEnforcement.exceptions);
-            }
-
-            if (this.quirk.caseEnforcement.sentence === "propercase") {
-                if (utils.hasPunctuation(sentence)) {
-                    sentence = utils.capitalizeOneSentence(sentence, this.quirk.caseEnforcement.exceptions);
+        paragraph.joinWords();
+        paragraph.forEach((sentence) => {
+            if (sentence.isSentence()) {
+                console.log(sentence.value);
+                //do one more final check for case, as certain cases affect the entire sentence
+                //To-Do: figure out how this one affects emoji
+                if (this.quirk.caseEnforcement.sentence === "alternatingcaps") {
+                    sentence.value = utils.convertToAlternatingCase(sentence.value, this.quirk.caseEnforcement.exceptions);
                 }
-                sentence = utils.capitalizeFirstPerson(sentence);
+
+                if (this.quirk.caseEnforcement.sentence === "propercase") {
+                    if (utils.hasPunctuation(sentence.value)) {
+                        sentence.value = utils.capitalizeOneSentence(sentence.value, this.quirk.caseEnforcement.exceptions);
+                    }
+                    sentence.value = utils.capitalizeFirstPerson(sentence.value);
+                }
+
+                //If capitalize fragments is on, we also caps the sentence
+                if (this.quirk.caseEnforcement.capitalizeFragments) {
+                    sentence.value = utils.capitalizeOneSentence(sentence.value, this.quirk.caseEnforcement.exceptions);
+                }
+
+                //nex, join the prepared sentence with prefix and suffix
+                sentence.value = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence.value + (this.quirk.suffix ? this.quirk.suffix.text : '');
             }
-
-            //If capitalize fragments is on, we also caps the sentence
-            if (this.quirk.caseEnforcement.capitalizeFragments) {
-                sentence = utils.capitalizeOneSentence(sentence, this.quirk.caseEnforcement.exceptions);
-            }
-
-            //nex, join the prepared sentence with prefix and suffix
-            sentence = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence + (this.quirk.suffix ? this.quirk.suffix.text : '');
-
-
-            //AT LAST!  we return the sentence to our map
-            return sentence;
         });
 
-        //at the very end, we recombine the sentences with their original whitespace to reform a paragraph
-        const adjustedParagraph = utils.recombineWhitespace(adjustedSentences, whiteSpace);
-        return adjustedParagraph; */
+        return paragraph.join();
     }
 
     //(TO-DO) Adjust to support paragraphs properly

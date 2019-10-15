@@ -3,16 +3,18 @@ class Node {
     constructor(value, nodeType) {
         this.value = value;
         this.next = null;
-        this.isFirstWord = false; 
+        this.isFirstWord = false;
         //set the node type based on a human readable map
         switch (nodeType) {
-            case "sentence": this.nodeType = 0;
+            case "paragraph": this.nodeType = 0;
                 break;
-            case "sentence separator": this.nodeType = 1;
+            case "sentence": this.nodeType = 1;
                 break;
-            case "word": this.nodeType = 2;
+            case "sentence separator": this.nodeType = 2;
                 break;
-            case "word separator": this.nodeType = 3;
+            case "word": this.nodeType = 3;
+                break;
+            case "word separator": this.nodeType = 4;
                 break;
             default: this.nodeType = -1;
                 break;
@@ -25,13 +27,15 @@ class Node {
     get nodeName() {
         let result;
         switch (this.nodeType) {
-            case 0: result = "sentence";
+            case 0: result = "paragraph";
                 break;
-            case 1: result = "sentence separator";
+            case 1: result = "sentence";
                 break;
-            case 2: result = "word";
+            case 2: result = "sentence separator";
                 break;
-            case 3: result = "word separator";
+            case 3: result = "word";
+                break;
+            case 4: result = "word separator";
                 break;
             default: result = "null";
                 break;
@@ -40,29 +44,34 @@ class Node {
     }
 
     //HELPER FUNCTIONS
-    isSeparator() { 
+    isSeparator() {
         //returns true if the node is any kind of separator
-        return (this.nodeType===1 || this.nodeType===3);
+        return (this.nodeType === 2 || this.nodeType === 4);
     }
+
+    isParagraph() {
+        //returns true if the node is a paragraph
+        return this.nodeType === 0;
+   }
 
     isSentence() {
         //returns true if the node is a sentence
-        return this.nodeType===0;
+        return this.nodeType === 1;
     }
 
     isSentenceSeparator() {
         //returns true if the node is a sentence
-        return this.nodeType===1;
+        return this.nodeType === 2;
     }
 
     isWord() {
         //returns true if the node is a word
-        return this.nodeType===2;
+        return this.nodeType === 3;
     }
 
     isWordSeparator() {
         //returns true if the node is a word separator
-        return this.nodeType===3;
+        return this.nodeType === 4;
     }
 }
 
