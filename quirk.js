@@ -8,7 +8,7 @@ class Quirk {
         //DATA THAT APPLIES TO BOTH QUIRKS AND PLAIN TEXT
         this.substitutions = [];
         this.separator = null; //default word separator is a space
-        this.punctuation = [];
+        this.emoji = [];
 
         //DATA THAT APPLIES ONLY TO QUIRK
         this.quirk = {
@@ -140,7 +140,7 @@ class Quirk {
         });
 
         //as well as how to detect separators
-        this.wordBoundary = new RegExp(utils.escapeRegExpSpecials(separator), "g");
+        this.quirk.wordBoundary = new RegExp(utils.escapeRegExpSpecials(separator), "g");
     }
 
     setWordCase(wordCase, options = null) {
@@ -264,22 +264,23 @@ class Quirk {
     //Register an emoji so the code knows that it counts as 'punctuation'
     //Emoji are excepted from both plain and quirk
     addEmoji(emoji) {
-        //Accepts a string only, because we have to do some gnarly regexp stuff
-        if (!isString(emoji) || emoji === "") {
-            throw new Error("Must provide a string for the emoji!")
+        if ( (!isString(emoji) && !isRegExp(emoji) ) || emoji === "") {
+            throw new Error("Must provide a string or valid regexp for the emoji!")
         }
-
-        //add the emoji to both plain and quirk exception lists
-        this.addWordException(emoji, { quirk: true, plain: true });
-
         //Register the emoji as a form of punctuation!
-        this.punctuation.push(emoji);
+        //We are going to make it a regexp for our own use
+        const emojiRegExp = (isRegExp(emoji) ? emoji : new RegExp("^"+utils.escapeRegExpSpecials(emoji)+"$", "g"));
+        this.emoji.push(emojiRegExp);
     }
 
     //the fun part - encoding their speech!!
     toQuirk(str) {
-        //first, split up the sentences into words
+        //first, split up the sentences 
         const prose = new ProseMap(str);
+        prose.cleaveSentences(); 
+        //(Note: we definitely want to split out any emoji as well)
+        prose.cleaveEmoji(this.emoji);
+        //once we've sorted that, cleave the individual words
         prose.cleaveWords();
 
         //(helper function to test if something is an exception)
@@ -363,6 +364,7 @@ class Quirk {
         //first, split up the prose into sentences and deal with prefixes/suffixes/separators
         const prose = new ProseMap(str);
         prose.cleaveSentences(this.quirk.sentenceBoundary);
+        prose.cleaveEmoji(this.emoji, this.quirk.wordBoundary);
         prose.forEach((sentence) => {
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
@@ -376,7 +378,7 @@ class Quirk {
         }, { sentence: true });
 
         //now, cleave the words themselves to deal with strips/subs/exceptions
-        prose.cleaveWords(this.wordBoundary);
+        prose.cleaveWords(this.quirk.wordBoundary);
 
         //(helper function to test if something is an exception)
         const isPlainException = (word) => {

@@ -6,22 +6,31 @@ const LinkedList = require("./linkedList");
 
 class ProseMap {
     //basic map takes in a paragraph and sets that as the only node in the list
-    constructor(paragraph = "") {
+    constructor(text = "", level = "paragraph") { //by default our linked list will contain one node, a paragraph
         this.list = new LinkedList();
-        this.list.add(paragraph, "paragraph"); //by default our linked list will contain one node, a paragraph
-        this.level = "paragraph"; //prose must be at the same level
+        this.list.add(text, level);
+        this.level = level; //prose must be at the same level as the initial node
+        //(TO-DO): Figure out what to do if people try to make the first node a separator??
     }
 
     //CLEAVE
     //Attempts to separate sentences into the linked list
     //DEFAULT ASSUMPTION: sentences are terminated by one or more " ' ` . ! ? ) 
     //that are NOT immediately preceeded by a comma
+    //Function returns TRUE if operation was able to proceed
+    //FALSE if function could not proceed
     cleaveSentences(customBoundaries = null) {
+        if (this.level === "word" || this.level === "sentence") {
+            return false; //if we are already at a lower level, we can't do this lol
+        }
         //(optionally accepts a custom regexp pattern to cleave on)
         const pattern = customBoundaries || /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g;
 
         //go through our existing linked list first
         const newList = new LinkedList();
+
+        //this is our list of verified emoji
+        const verifiedEmoji = [];
 
         this.forEach(node => {
             if (node.isParagraph()) {
@@ -53,75 +62,108 @@ class ProseMap {
         //lastly, we overwrite the old list with our new one
         this.list = newList;
         this.level = "sentence";
+        return true;
+    }
+
+    //Cuts up existing sentences further by finding emoji and treating them as punctuation
+    //Emoji nodes are special and should not be treated as separators; they are exempt from modification
+    //Function returns TRUE if operation was able to proceed
+    //FALSE if function could not proceed
+    cleaveEmoji(emoji = [], customWordBoundaries = null) {
+        //helper function to detect emoji
+        const isEmoji = word => {
+            for(let i=0; i<emoji.length; i++) {
+                if(emoji[i].test(word)===true) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        if (emoji.length > 0 && this.level === "sentence") {
+            //start by cleaving the whole sentence into words so we can save some energy
+            this.cleaveWords(customWordBoundaries);
+            //now we iterate through the existing list and see if any 'words' should be reclassified as emoji
+            this.forEach(word => {
+                if(isEmoji(word.value)) {
+                    word.nodeType = 5; //set the 'word' to be an emoji instead
+                }
+            }, {word: true});
+
+            //lastly, we rejoin the words into sentences
+            this.joinWords();
+            return true;
+        }
+        return false;
     }
 
     //Cuts up an existing ProseMap into even smaller chunks
     //Optionally accepts a custom separator regexp to match on
     cleaveWords(customBoundaries = null) {
-        //if we are at the paragraph level, start by cleaving the sentences!
-        if (this.level === "paragraph") {
-            this.cleaveSentences();
-        }
-
-        const wordBoundaries = customBoundaries || /(?<!^)\s/g;
-        let currentNode = this.list.head;
-        let previousNode = null;
-        while (currentNode) {
-            //if we have hit a sentence, we're going to start a brand new linked list for its words!
-            if (currentNode.isSentence()) {
-                const sentence = currentNode.value; //don't change the original!
-                const wordList = new LinkedList();
-                //first, grab the whitespace so we can preserve it
-                const whiteSpace = sentence.match(wordBoundaries);
-                //next, split the paragraph into discrete sentences
-                const words = sentence.split(wordBoundaries);
-                //now, add them to the linked list!
-                let index = 0;
-                //figure out our max
-                const numWords = (words ? words.length : 0);
-                const numSpaces = (whiteSpace ? whiteSpace.length : 0);
-                const max = (numWords > numSpaces ? numWords : numSpaces);
-                while (index < max) {
-                    if (index < numWords) {
-                        wordList.add(words[index], "word");
+        if (this.level === "sentence") {
+            const wordBoundaries = customBoundaries || /(?<!^)\s/g;
+            let currentNode = this.list.head;
+            let previousNode = null;
+            while (currentNode) {
+                //if we have hit a sentence, we're going to start a brand new linked list for its words!
+                if (currentNode.isSentence()) {
+                    const sentence = currentNode.value; //don't change the original!
+                    const wordList = new LinkedList();
+                    //first, grab the whitespace so we can preserve it
+                    const whiteSpace = sentence.match(wordBoundaries);
+                    //next, split the paragraph into discrete sentences
+                    const words = sentence.split(wordBoundaries);
+                    //now, add them to the linked list!
+                    let index = 0;
+                    //figure out our max
+                    const numWords = (words ? words.length : 0);
+                    const numSpaces = (whiteSpace ? whiteSpace.length : 0);
+                    const max = (numWords > numSpaces ? numWords : numSpaces);
+                    while (index < max) {
+                        if (index < numWords) {
+                            wordList.add(words[index], "word");
+                        }
+                        if (index < numSpaces) {
+                            wordList.add(whiteSpace[index], "word separator");
+                        }
+                        index++;
                     }
-                    if (index < numSpaces) {
-                        wordList.add(whiteSpace[index], "word separator");
+                    //lastly, we insert this into the existing list!
+                    const firstWord = wordList.head;
+                    firstWord.isFirstWord = true; //make sure we remember that this is the start of the sentence!
+                    const lastWord = wordList.findNode(wordList.length - 1);
+                    const nextParagraphNode = currentNode.next;
+                    //the current node is now the first word of the sentence...
+                    if (previousNode === null) {
+                        this.list.head = firstWord;
+                    } else {
+                        previousNode.next = firstWord;
                     }
-                    index++;
-                }
-                //lastly, we insert this into the existing list!
-                const firstWord = wordList.head;
-                firstWord.isFirstWord = true; //make sure we remember that this is the start of the sentence!
-                const lastWord = wordList.findNode(wordList.length - 1);
-                const nextParagraphNode = currentNode.next;
-                //the current node is now the first word of the sentence...
-                if (previousNode === null) {
-                    this.list.head = firstWord;
+                    //...and the final node of that word list hooks back to the paragraph!
+                    lastWord.next = nextParagraphNode;
+                    // we adjust the size of the list...
+                    this.list.size += wordList.length;
+                    //and we move right along to the next paragraph segment :)
+                    currentNode = nextParagraphNode;
                 } else {
-                    previousNode.next = firstWord;
+                    previousNode = currentNode;
+                    currentNode = currentNode.next;
                 }
-                //...and the final node of that word list hooks back to the paragraph!
-                lastWord.next = nextParagraphNode;
-                // we adjust the size of the list...
-                this.list.size += wordList.length;
-                //and we move right along to the next paragraph segment :)
-                currentNode = nextParagraphNode;
-            } else {
-                previousNode = currentNode;
-                currentNode = currentNode.next;
             }
+            this.level = "word";
+            return true;
+        } else {
+            return false;
         }
-        this.level = "word";
     }
 
     //ITERATE
-    forEach(callbackFn, filters=null) {
+    forEach(callbackFn, filters = null) {
         let currentNode = this.list.head;
         let index = 0;
         while (currentNode) {
-            if(!filters || filters[currentNode.nodeName]===true) {
-                callbackFn(currentNode, index);    
+            if (!filters || filters[currentNode.nodeName] === true) {
+                callbackFn(currentNode, index);
             }
             index++;
             currentNode = currentNode.next;
