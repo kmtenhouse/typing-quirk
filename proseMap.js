@@ -70,10 +70,11 @@ class ProseMap {
     //Function returns TRUE if operation was able to proceed
     //FALSE if function could not proceed
     cleaveEmoji(emoji = [], customWordBoundaries = null) {
+        
         //helper function to detect emoji
         const isEmoji = word => {
-            for(let i=0; i<emoji.length; i++) {
-                if(emoji[i].test(word)===true) {
+            for (let i = 0; i < emoji.length; i++) {
+                if (emoji[i].test(word) === true) {
                     return true;
                 }
             }
@@ -84,11 +85,30 @@ class ProseMap {
             //start by cleaving the whole sentence into words so we can save some energy
             this.cleaveWords(customWordBoundaries);
             //now we iterate through the existing list and see if any 'words' should be reclassified as emoji
-            this.forEach(word => {
-                if(isEmoji(word.value)) {
-                    word.nodeType = 5; //set the 'word' to be an emoji instead
+            //we also have to reclassify any separators (on either side) as sentence boundaries
+        
+            let currentNode = this.list.head;
+            let previousNode = null;
+            while (currentNode) {
+                //if the current node is a word separator, first check if the node immediately preceding is an emoji
+                //if so, this is now a sentence separator
+                if (currentNode.isWordSeparator()) {
+                    if (previousNode!==null && previousNode.isEmoji()) {
+                        currentNode.nodeType = 2;
+                    }
                 }
-            }, {word: true});
+                //otherwise, check if the current node is a word that is secretly an emoji
+                if (currentNode.isWord() && isEmoji(currentNode.value)) {
+                    currentNode.nodeType = 5; //set the 'word' to be an emoji instead
+                    //...and check our previous to see if it's a separator we should reclass
+           
+                    if (previousNode!==null && previousNode.isWordSeparator()) {
+                        previousNode.nodeType = 2;
+                    }
+                }
+                previousNode = currentNode;
+                currentNode = currentNode.next;
+            }
 
             //lastly, we rejoin the words into sentences
             this.joinWords();

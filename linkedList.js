@@ -48,9 +48,9 @@ class Node {
     }
 
     set nodeType(val) {
-        if(Number.isInteger(val) && val < 6 && val >= 0) {
+        if(Number.isInteger(val) && val < 6 && val >= 0) { 
             this._nodeType = val;
-        }
+        } 
     }
 
     get nodeType() {

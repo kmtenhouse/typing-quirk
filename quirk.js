@@ -269,7 +269,7 @@ class Quirk {
         }
         //Register the emoji as a form of punctuation!
         //We are going to make it a regexp for our own use
-        const emojiRegExp = (isRegExp(emoji) ? emoji : new RegExp("^"+utils.escapeRegExpSpecials(emoji)+"$", "g"));
+        const emojiRegExp = (isRegExp(emoji) ? emoji : new RegExp(utils.escapeRegExpSpecials(emoji)));
         this.emoji.push(emojiRegExp);
     }
 
