@@ -279,13 +279,9 @@ class Quirk {
 
     //the fun part - encoding their speech!!
     toQuirk(str) {
-        //we will do this sentence by sentence within a paragraph
-        //first, split up the sentences
-        const paragraph = new ProseMap(str);
-        paragraph.cleaveSentences(); //NOTE: we assume default English sentence punctuation here
-
-        //Next, we dive into it word-by-word:
-        paragraph.cleaveWords();
+        //first, split up the sentences into words
+        const prose = new ProseMap(str);
+        prose.cleaveWords();
 
         //(helper function to test if something is an exception)
         const isQuirkException = (word) => {
@@ -298,12 +294,13 @@ class Quirk {
         };
 
         //iterate through all words in the paragraph level first
-        paragraph.forEach((node) => {
+        prose.forEach((node) => {
             if (node.isWord() && !isQuirkException(node.value)) {
-                //perform any substitutions and strips
+                //PERFORM SUBSTITUTIONS AND STRIPS
                 this.substitutions.forEach(sub => node.value = sub.toQuirk(node.value));
                 this.quirk.strip.forEach(strip => node.value = node.value.replace(strip, ""));
-                //deal with sentence case
+                //HANDLE CASE ISSUES
+                //Case enforcement imposed by overall sentence:
                 switch (this.quirk.caseEnforcement.sentence) {
                     case "lowercase":
                         node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
@@ -314,15 +311,23 @@ class Quirk {
                     case "propercase":
                         node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
                         if (node.isFirstWord) {
-                            //TO-DO: handle the propercase right here, right now :)
+                            node.value = utils.capitalizeOneSentence(node.value, this.quirk.caseEnforcement.exceptions);
                         }
+                        //Check if we need to caps any personal pronouns!
+                        node.value = utils.capitalizeFirstPerson(node.value);
                         break;
                     default: break;
                 }
-                //lastly, check if we need to enforce caps on this word in particular
+                //If capitalize fragments is on, we also caps the first word of fragments
+                if (node.isFirstWord && this.quirk.caseEnforcement.capitalizeFragments) {
+                    node.value = utils.capitalizeOneSentence(node.value, this.quirk.caseEnforcement.exceptions);
+                }
+
+                //Lastly, check if we need to enforce caps on this word in particular
                 if (this.quirk.caseEnforcement.word === 'capitalize') {
                     node.value = utils.capitalizeOneSentence(node.value, this.quirk.caseEnforcement.exceptions);
                 }
+
             } else if (node.isSeparator()) {
                 //if there is a custom separator, add that
                 if (this.separator) {
@@ -331,35 +336,29 @@ class Quirk {
             }
         });
 
-        //now we join the words back into sentences so that we can do any sentence-wide tweaks
-        paragraph.joinWords();
-        paragraph.forEach((sentence) => {
-            if (sentence.isSentence()) {
-                console.log(sentence.value);
-                //do one more final check for case, as certain cases affect the entire sentence
-                //To-Do: figure out how this one affects emoji
-                if (this.quirk.caseEnforcement.sentence === "alternatingcaps") {
-                    sentence.value = utils.convertToAlternatingCase(sentence.value, this.quirk.caseEnforcement.exceptions);
+        //(if necesary) join the words back into sentences so that we can do any final sentence-wide tweaks
+        //This will happen if we have a prefix or suffix
+        if (this.quirk.prefix || this.quirk.suffix) {
+            prose.joinWords();
+            prose.forEach((sentence) => {
+                if (sentence.isSentence()) {
+                    sentence.value = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence.value + (this.quirk.suffix ? this.quirk.suffix.text : '');
                 }
+            });
+        }
 
-                if (this.quirk.caseEnforcement.sentence === "propercase") {
-                    if (utils.hasPunctuation(sentence.value)) {
-                        sentence.value = utils.capitalizeOneSentence(sentence.value, this.quirk.caseEnforcement.exceptions);
-                    }
-                    sentence.value = utils.capitalizeFirstPerson(sentence.value);
+        //(if necessary) join the sentences back into a paragraph to do any final paragraph-wide tweaks
+        if (this.quirk.caseEnforcement.sentence === "alternatingcaps") {
+            prose.joinSentences();
+            prose.forEach(node => {
+                if (node.isParagraph()) {
+                    //To-Do: figure out how this one affects emoji
+                    node.value = utils.convertToAlternatingCase(node.value, this.quirk.caseEnforcement.exceptions);
                 }
-
-                //If capitalize fragments is on, we also caps the sentence
-                if (this.quirk.caseEnforcement.capitalizeFragments) {
-                    sentence.value = utils.capitalizeOneSentence(sentence.value, this.quirk.caseEnforcement.exceptions);
-                }
-
-                //nex, join the prepared sentence with prefix and suffix
-                sentence.value = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence.value + (this.quirk.suffix ? this.quirk.suffix.text : '');
-            }
-        });
-
-        return paragraph.join();
+            });
+        }
+        //at the very end, return our doctored text!
+        return prose.join();
     }
 
     //(TO-DO) Adjust to support paragraphs properly

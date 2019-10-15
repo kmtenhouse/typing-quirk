@@ -1,4 +1,4 @@
-/* const Quirk = require("./quirk");
+const Quirk = require("./quirk");
 let example = new Quirk();
 example.setPrefix(">>");
 example.setSuffix("<<");
@@ -10,27 +10,14 @@ console.log(example.toQuirk("Check this stuff out! It even works for multiple se
 //Outputs: >>check thii2 2tuff out!<< >>iit even work2 for multiiple 2entence2.<<
 
 console.log(example.toPlain(">>check thii2 2tuff out!<< >>iit even work2 for multiiple 2entence2.<<"));
-//Outputs: Check this stuff out! It even works for multiple sentences.  */
+//Outputs: Check this stuff out! It even works for multiple sentences.  
 
-const ProseMap = require("./proseMap");
-const myText = new ProseMap("Check this stuff out! It even works for multiple sentences.", "paragraph");
+let gamzee = new Quirk();
+gamzee.addWordException(":o)");
+gamzee.addWordException("(o:");
+gamzee.setSentenceCase("alternatingCaps");
+console.log(gamzee.toQuirk("Check this out my wicked bitch tits brother. It's dope af :o) honk (o:"));
 
-/* myText.cleaveSentences();
-myText.forEach(function(node, index) {
-    console.log(`${node.nodeName}: ${node.value}`)
-    node.value = node.value.replace(/[tT]/g, "+");
-});
- */
-myText.cleaveWords();
-
-myText.forEach(function(node, index) { 
-   if(node.isFirstWord) {
-       node.value = node.value.toUpperCase();
-   }
-});
-
-myText.joinWords();
-myText.forEach(function(node, index) {
-    console.log(`T${index}: ${node.nodeName}: ${node.value}`);
-});
-console.log(myText.join()); 
+let kanaya = new Quirk();
+kanaya.setWordCase("capitalize");
+console.log(kanaya.toQuirk("This is the only way to get through to you, it seems. What a waste."))
