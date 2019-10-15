@@ -5,8 +5,7 @@
 const LinkedList = require("./linkedList");
 
 class ProseMap {
-    //basic map takes in a paragraph and attempts to separate it 
-    //
+    //basic map takes in a paragraph and sets that as the only node in the list
     constructor(paragraph = "") {
         this.list = new LinkedList();
         this.list.add(paragraph, "paragraph"); //by default our linked list will contain one node, a paragraph
@@ -117,18 +116,19 @@ class ProseMap {
     }
 
     //ITERATE
-    forEach(callbackFn) {
+    forEach(callbackFn, filters=null) {
         let currentNode = this.list.head;
         let index = 0;
         while (currentNode) {
-            callbackFn(currentNode, index);
+            if(!filters || filters[currentNode.nodeName]===true) {
+                callbackFn(currentNode, index);    
+            }
             index++;
             currentNode = currentNode.next;
         }
     }
 
     //JOINS
-
     //Joins the entire list into a single string
     join() {
         return this.list.join();

@@ -23,8 +23,9 @@ kanaya.setWordCase("capitalize");
 console.log(kanaya.toQuirk("This is the only way to get through to you, it seems. What a waste.")) */
 
 let testSub = new Quirk();
-testSub.setSeparator('*');
-const phrases = ["This is nonsense.   I can't believe it.", "Why this", "Seriously? I have no idea why."];
+testSub.addSubstitution("t", "+", {ignoreCase: true});
+testSub.addEmoji("+o+");
+const phrases = ["This is nonsense +o+ I can TOTALLY FUCKING BELIEVE IT.", "Why this +o+", "Seriously? I have no idea why.", "a"];
 
 phrases.forEach(phrase => {
     const quirky = testSub.toQuirk(phrase);

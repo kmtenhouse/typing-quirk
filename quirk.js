@@ -274,12 +274,6 @@ class Quirk {
 
         //Register the emoji as a form of punctuation!
         this.punctuation.push(emoji);
-
-        //Lastly, figure out how this affects sentence boundaries
-        //if we do NOT already have a suffix and prefix, then emoji can be considered sentence boundaries
-        /*  if(!this.quirk.suffix && !this.quirk.prefix) {
- 
-         } */
     }
 
     //the fun part - encoding their speech!!
@@ -356,11 +350,9 @@ class Quirk {
         //This will happen if we have a prefix or suffix
         if (this.quirk.prefix || this.quirk.suffix) {
             prose.joinWords();
-            prose.forEach((sentence) => {
-                if (sentence.isSentence()) {
-                    sentence.value = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence.value + (this.quirk.suffix ? this.quirk.suffix.text : '');
-                }
-            });
+            prose.forEach(sentence => {
+                sentence.value = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence.value + (this.quirk.suffix ? this.quirk.suffix.text : '');
+            }, { sentence: true });
         }
 
         //at the very end, return our doctored text!
@@ -372,18 +364,16 @@ class Quirk {
         const prose = new ProseMap(str);
         prose.cleaveSentences(this.quirk.sentenceBoundary);
         prose.forEach((sentence) => {
-            if (sentence.isSentence()) {
-                //perform the same steps on every sentence
-                //start by removing any prefixes and suffixes
-                if (this.quirk.prefix) {
-                    sentence.value = sentence.value.replace(this.quirk.prefix.patternToStrip, '');
-                }
+            //perform the same steps on every sentence
+            //start by removing any prefixes and suffixes
+            if (this.quirk.prefix) {
+                sentence.value = sentence.value.replace(this.quirk.prefix.patternToStrip, '');
+            }
 
-                if (this.quirk.suffix) {
-                    sentence.value = sentence.value.replace(this.quirk.suffix.patternToStrip, '');
-                }
-            } 
-        });
+            if (this.quirk.suffix) {
+                sentence.value = sentence.value.replace(this.quirk.suffix.patternToStrip, '');
+            }
+        }, { sentence: true });
 
         //now, cleave the words themselves to deal with strips/subs/exceptions
         prose.cleaveWords(this.wordBoundary);
@@ -412,7 +402,7 @@ class Quirk {
                     //Otherwise, we attempt to follow the existing case as closely as possible -- by looking for SHOUTED words
                     word.value = utils.adjustForShouts(word.value);
                 }
-            } else if(this.separator && word.isSeparator()) {
+            } else if (this.separator && word.isSeparator()) {
                 word.value = this.separator.toPlain(word.value);
             }
         });
@@ -422,21 +412,18 @@ class Quirk {
 
         //A few final sentence-wide tweaks:
         prose.forEach(sentence => {
-            if (sentence.isSentence()) {
-                //Ex: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
-                sentence.value = utils.capitalizeFirstPerson(sentence.value);
+            //Ex: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
+            sentence.value = utils.capitalizeFirstPerson(sentence.value);
 
-                //Finally, check if this chunk is a sentence that we need to capitalize
-                if (utils.hasPunctuation(sentence.value)) {
-                    sentence.value = utils.capitalizeOneSentence(sentence.value);
-                }
-
-                if (this.plain.caseEnforcement.capitalizeFragments) {
-                    sentence.value = utils.capitalizeOneSentence(sentence.value);
-                }
-
+            //Finally, check if this chunk is a sentence that we need to capitalize
+            if (utils.hasPunctuation(sentence.value)) {
+                sentence.value = utils.capitalizeOneSentence(sentence.value);
             }
-        });
+
+            if (this.plain.caseEnforcement.capitalizeFragments) {
+                sentence.value = utils.capitalizeOneSentence(sentence.value);
+            }
+        }, { sentence: true });
 
         return prose.join();
     }
