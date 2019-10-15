@@ -199,9 +199,10 @@ function convertToProperCase(sentence, exceptions = null) {
     return sentence;
 }
 
-function convertToAlternatingCase(str, exceptions = null) {
+function convertToAlternatingCase(str, startWithCaps=false, exceptions = null) {
     //exceptions are passed as a regular expression to check - if the letter is an exception, don't modify it!
-    let isCaps = false;
+    //additionally, you have the option to either start with caps (LiKe ThIs) or start with lowercase (lIkE tHiS)
+    let isCaps = startWithCaps;
     let allChars = str.split('');
     let result = allChars
         .map(char => {

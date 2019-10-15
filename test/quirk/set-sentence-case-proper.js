@@ -3,11 +3,11 @@ const Quirk = require("../../quirk");
 
 describe("setSentenceCase -- propercase", function () {
   
-    it("should not propercase sentence fragments", function () {
+    it("should propercase sentence fragments", function () {
         let testSub = new Quirk();
         testSub.setSentenceCase("propercase");
-        expect(testSub.toQuirk("this is so silly")).to.equal("this is so silly");
-        expect(testSub.toPlain("this is so silly")).to.equal("this is so silly");
+        expect(testSub.toQuirk("this is really quite silly")).to.equal("This is really quite silly");
+        expect(testSub.toPlain("This is so silly")).to.equal("This is so silly");
     });
 
     it("should create valid simple propercase enforcement when sentence has a .", function () {
