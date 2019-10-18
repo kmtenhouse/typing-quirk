@@ -144,7 +144,7 @@ class Quirk {
         }
 
         //if a value other than a string is provided as the (optional) second parameter, throw an error
-        if (options !== null) {
+        if (options) {
             if (!options.hasOwnProperty('exceptions') || !isString(options.exceptions) || options.exceptions === '')
                 throw new Error("Exceptions to enforceCase must be provided as an object { exceptions: <String of characters to exclude> }!");
         }
