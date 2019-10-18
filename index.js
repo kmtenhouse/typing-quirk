@@ -34,25 +34,6 @@ class Quirk {
             exceptions: [],
             strip: []
         };
-
-        //check if we received a possible config object with valid items
-        if (arguments.length > 0) {
-            //valid config objects are: 
-            //1) one object only
-            //2) not null
-            //3) not an array
-            if (arguments.length > 1) {
-                throw new Error("Too many arguments to constructor!");
-            }
-            const config = arguments[0];
-
-            if (!isObject(config)) {
-                throw new Error("Invalid argument passed to constructor!");
-            }
-
-            //use the config object to set up the quirk :)
-        }
-
     }
 
     setPrefix(prefix, pattern = '') {
