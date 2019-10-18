@@ -1,5 +1,5 @@
 {
-  "name": "typing-quirk",
+  "name": "@twinarmageddons/typing-quirk",
   "version": "1.0.0",
   "description": "A package to encode and decode text into custom quirks - no regex required!",
   "main": "index.js",

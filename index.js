@@ -1,7 +1,11 @@
+/* Copyright 2019 @twinarmageddons authors & contributors
+/* This software may be modified and distributed under the terms
+/* of the ISC License (ISC). See the LICENSE file for details. */
+
 const Substitution = require("./substitution");
-const utils = require("./utils");
 const ProseMap = require("./proseMap");
-const { isObject, isString, isRegExp } = require("./validators");
+const { isString, isRegExp } = require("./validators");
+const utils = require("./utils");
 
 class Quirk {
     constructor() {
