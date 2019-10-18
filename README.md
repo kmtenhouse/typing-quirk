@@ -6,6 +6,11 @@ Fantasy writers, science fiction fans, and comic book geeks have often found the
 
 This package attempts to help readers and writers more easily manage their text changing needs by creating rulesets for each quirk. It allows for easy encoding plain text into a quirk, and attempts to decode 'quirkified' text into more standard English. 
 
+## How to Install
+First major release (1.0.0) of typing-quirk is available via npm from the @twinarmageddons organization!  Simply install the package into your project with npm:
+
+```npm install @twinarmageddons/typing-quirk```
+
 ## How to Use
 ```
 const Quirk = require("quirk");
@@ -185,8 +190,3 @@ Parameters:
 Returns: 
 * A string containing a plain version of the input
 
-
-<hr />
-
-## How to Install
-* Typing quirks is currently in pre-release, but the current project can be tested and used by forking this repository and cloning it to your local machine.
