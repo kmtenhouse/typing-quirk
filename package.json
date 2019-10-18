@@ -1,7 +1,7 @@
 {
   "name": "@twinarmageddons/typing-quirk",
   "version": "1.0.0",
-  "description": "A package to encode and decode text into custom quirks - no regex required!",
+  "description": "A package to encode and decode text according to user-defined rulesets.",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -14,13 +14,13 @@
     "url": "git+https://github.com/kmtenhouse/typing-quirk.git"
   },
   "keywords": [
-    "text",
-    "substitution",
     "typing",
     "quirk",
-    "homestuck"
+    "homestuck",
+    "text",
+    "substitution"
   ],
-  "author": "Katherine Tenhouse",
+  "author": "Katherine <kmtenhouse@gmail.com> (Tassa)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/kmtenhouse/typing-quirk/issues"
