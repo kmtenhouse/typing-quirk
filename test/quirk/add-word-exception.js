@@ -1,5 +1,5 @@
 const expect = require('chai').expect;
-const Quirk = require('../../quirk');
+const Quirk = require("../../index");
 
 describe('add plain exception', function () {
     it("should ignore words that are listed as exceptions when performing substitutions", function () {
