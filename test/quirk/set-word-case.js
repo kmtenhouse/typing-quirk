@@ -1,5 +1,5 @@
 const expect = require("chai").expect;
-const Quirk = require("../../quirk");
+const Quirk = require("../../index");
 
 describe("word case", function () {
     it("should enforce first letter capitalization", function () {

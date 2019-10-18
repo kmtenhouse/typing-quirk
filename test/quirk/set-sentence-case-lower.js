@@ -1,5 +1,5 @@
 const expect = require("chai").expect;
-const Quirk = require("../../quirk");
+const Quirk = require("../../index");
 
 describe("setSentenceCase - lowercase", function () {
     it("should enforce lowercase", function () {

@@ -1,5 +1,5 @@
 const expect = require("chai").expect;
-const Quirk = require("../../quirk");
+const Quirk = require("../../index");
 
 describe("set capitalize fragments", function () {
     it("should capitalize sentence fragments", function () {

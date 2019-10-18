@@ -1,5 +1,5 @@
 const expect = require('chai').expect;
-const Quirk = require('../../quirk');
+const Quirk = require("../../index");
 
 describe('add substitutions', function () {
     it('should create a valid quirk from substitutions added via addSubstitution', function () {

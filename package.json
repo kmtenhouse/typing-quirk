@@ -1,27 +1,33 @@
 {
   "name": "typing-quirk",
   "version": "1.0.0",
-  "description": "Troll typing quirk encoding and decoding",
+  "description": "A package to encode and decode text into custom quirks - no regex required!",
   "main": "index.js",
-  "scripts": {
-    "test": "mocha --recursive test"
-  },
   "directories": {
     "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --recursive test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kmtenhouse/typing-quirk.git"
   },
-  "author": "",
+  "keywords": [
+    "text",
+    "substitution",
+    "typing",
+    "quirk",
+    "homestuck"
+  ],
+  "author": "Katherine Tenhouse",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/kmtenhouse/typing-quirk/issues"
   },
   "homepage": "https://github.com/kmtenhouse/typing-quirk#readme",
-  "dependencies": {
+  "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^6.2.0",
-    "regexgen": "^1.3.0"
+    "mocha": "^6.2.1"
   }
 }

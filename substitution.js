@@ -1,4 +1,4 @@
-const regexgen = require('regexgen');
+const escapeRegExpSpecials = require('./utils').escapeRegExpSpecials;
 
 class Substitution {
     constructor(plain, quirk, options=null) {
@@ -28,7 +28,7 @@ class Substitution {
             //for the plain text, we assume we are going to make a regex that matches the quirk text, and replace with the plain text
             const quirkText = (this.quirk ? this.quirk.replaceWith : quirk);
             this.plain = {
-                patternToMatch: regexgen([quirkText], 'g'),
+                patternToMatch: new RegExp(escapeRegExpSpecials(quirkText), 'g'), 
                 replaceWith: plain
             };
         }
@@ -37,7 +37,7 @@ class Substitution {
             //...and vice versa for quirks
             const plainText = (this.plain ? this.plain.replaceWith : plain);
             this.quirk = {
-                patternToMatch: regexgen([plainText], 'g'),
+                patternToMatch: new RegExp(escapeRegExpSpecials(plainText), 'g'), 
                 replaceWith: quirk
             };
         }
