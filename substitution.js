@@ -1,3 +1,7 @@
+/* Copyright 2019 @twinarmageddons authors & contributors
+/* This software may be modified and distributed under the terms
+/* of the ISC License (ISC). See the LICENSE file for details. */
+
 const escapeRegExpSpecials = require('./utils').escapeRegExpSpecials;
 
 class Substitution {

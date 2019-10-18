@@ -1,4 +1,7 @@
-//Node class
+/* Copyright 2019 @twinarmageddons authors & contributors
+/* This software may be modified and distributed under the terms
+/* of the ISC License (ISC). See the LICENSE file for details. */
+
 class Node {
     constructor(value, nodeType) {
         this.value = value;
@@ -24,7 +27,6 @@ class Node {
     }
 
     //GETTERS AND SETTERS
-
     //nodeName -- returns a human readable string about what a node contains
     get nodeName() {
         let result;
