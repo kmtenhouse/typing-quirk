@@ -13,10 +13,10 @@ console.group("=========CLEAVING EMOJI=========");
 test.cleaveEmoji([/\:\)/]);
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
 console.groupEnd();
-/* 
+
 console.group("=========CLEAVING WORDS=========");
 test.cleaveWords();
-test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
+test.forEach(node=> console.log(`${(node.isFirstWord ? "FIRST:" : "")}${node.nodeName}: ${node.value}`));
 console.groupEnd();
 
 console.group("=========REJOING WORDS INTO SENTENCES=========");
@@ -27,4 +27,4 @@ console.groupEnd();
 console.group("=========REJOINING SENTENCES INTO PARAGRAPHS=========");
 test.joinSentences();
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
-console.groupEnd(); */
+console.groupEnd(); 

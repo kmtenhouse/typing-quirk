@@ -146,15 +146,23 @@ class ProseMap {
                 const whiteSpace = sentence.match(wordBoundaries);
                 //next, split the paragraph into discrete sentences
                 const words = sentence.split(wordBoundaries);
-                //now, add them to the linked list!
+                //(TO-DO) if we have a first word, let's flag it by adding a custom flag
+
+                //now, all the words to the list
                 let index = 0;
                 //figure out our max
                 const numWords = (words ? words.length : 0);
                 const numSpaces = (whiteSpace ? whiteSpace.length : 0);
                 const max = (numWords > numSpaces ? numWords : numSpaces);
+                let isFirstWord = true;
                 while (index < max) {
                     if (index < numWords) {
-                        wordList.push(new Node(words[index], "word"));
+                        const newWordNode = new Node(words[index], "word");
+                        if (isFirstWord) {
+                            newWordNode.isFirstWord = true;
+                            isFirstWord = false; //we never use this again
+                        }
+                        wordList.push(newWordNode);
                     }
                     if (index < numSpaces) {
                         wordList.push(new Node(whiteSpace[index], "word separator"));
