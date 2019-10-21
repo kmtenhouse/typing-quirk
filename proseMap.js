@@ -7,15 +7,86 @@
 
 //Requires the ProseNode class
 const Node = require("./proseNode");
-//V1.1.0: Switching from LinkedList to arrays for better performance, ability to use array features such as built-in filter and map
+//V1.1.1: Switching from LinkedList to arrays for better performance, ability to use array features such as built-in filter and map
 
 class ProseMap {
-    //basic map takes in a paragraph and sets that as the only node in the list
-    constructor(text = "", level = "paragraph") { //by default our input will contain one node, a paragraph
+    //by default our input will contain one node and assume it contains a paragraph
+    //optionally, developers can provide custom settings for word boundaries, sentence boundaries, and a list of emoji 
+    constructor(text = "", options = null) {
+        //define an array of ProseNodes
         this.nodes = [];
-        const firstNode = new Node(text, level);
+        //by default, a new ProseMap will contain one node - a paragraph
+        this.text = text;
+        //define our word and sentence boundaries
+        this.wordBoundaries = ((options && options.wordBoundaries) ? options.wordBoundaries : /(?<!^)\s/g); //default: assume 'words' are separated by one or more whitespaces
+        this.sentenceBoundaries =  ((options && options.sentenceBoundaries) ? options.sentenceBoundaries : /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g); //default: assume 'sentences' are terminated by one or more " ' ` ! ? ) and then whitespace
+        this.emoji = ((options && options.emoji) ? options.emoji : []); //default: no emoji are registered
+    }
+
+    //GETTERS AND SETTERS
+    //Text: the complete text contained in a prosemap
+    get text() {
+        return this.join();
+    }
+
+    set text(str) {
+        //WARNING: THIS IS A DESTRUCTIVE ACTION!  It removes the old text and changes it
+        if (typeof str !== "string") {
+            throw new Error("Must provide a string as the text for a prosemap!");
+        }
+        //okay, we 
+        this.nodes = [];
+        //by default, a new ProseMap will contain one node - a paragraph
+        this.level = "paragraph";
+        const firstNode = new Node(str, "paragraph");
         this.nodes.push(firstNode);
-        this.level = level; //ProseMap must be at the same level as the initial node
+    }
+
+    //Sentence Boundaries: the regular expression that detects how sentences should be kept apart
+    get sentenceBoundaries() {
+        return this._sentenceBoundaries;
+    }
+
+    set sentenceBoundaries(pattern) {
+        if (pattern instanceof RegExp === false) {
+            throw new Error("Must provide a regular expression in order to define a sentence boundary!");
+        }
+        this._sentenceBoundaries = pattern;
+    }
+
+    //Word Boundaries: the regular expression that detects how words are spaced apart
+    get wordBoundaries() {
+        return this._wordBoundaries;
+    }
+
+    set wordBoundaries(pattern) {
+        if (pattern instanceof RegExp === false) {
+            throw new Error("Must provide a regular expression in order to define a sentence boundary!");
+        }
+        this._wordBoundaries = pattern;
+    }
+
+    //Emoji: an array of regular expressions that denotes 'emoji'
+    //Note: emoji are 
+    get emoji() {
+        return this._emoji;
+    }
+
+    set emoji(arr) {
+        //Validate that we have an array of regular expressions for our emoji
+        //(To Do: accept an array of regular strings as well)
+
+        if (Array.isArray(arr) === false) {
+            throw new Error("Must provide an array of regular expressions to define emoji!");
+        }
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i] instanceof RegExp === false) {
+                throw new Error("Must provide an array of regular expressions to define emoji!");
+            }
+        }
+
+        //Congrats!  We have a valid emoji array
+        this._emoji = arr;
     }
 
     //CLEAVE
@@ -29,7 +100,7 @@ class ProseMap {
             return false; //if we are already at a lower level, we can't do this lol
         }
         //(optionally accepts a custom regexp pattern to cleave on)
-        const pattern = customBoundaries || /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g;
+        const pattern = customBoundaries || this._sentenceBoundaries;
 
         //create a new array that we'll put stuff in
         const newList = [];
@@ -74,19 +145,22 @@ class ProseMap {
     //Emoji nodes are special and should not be treated as separators; they are exempt from modification
     //Function returns TRUE if operation was able to proceed
     //FALSE if function could not proceed
-    cleaveEmoji(emoji = [], customWordBoundaries = null) {
+    cleaveEmoji(emojiList = [], customWordBoundaries = null) {
 
         //helper function to detect emoji
         const isEmoji = word => {
-            for (let i = 0; i < emoji.length; i++) {
-                if (emoji[i].test(word) === true) {
+            for (let i = 0; i < this.emoji.length; i++) {
+                if (this.emoji[i].test(word) === true) {
                     return true;
                 }
             }
             return false;
         };
 
-        if (emoji.length > 0 && this.level === "sentence") {
+        //(TO-DO: remove this line later it's nonsense)
+        this.emoji = emojiList;
+
+        if (this.emoji.length > 0 && this.level === "sentence") {
             //start by cleaving the whole sentence into words
             this.cleaveWords(customWordBoundaries);
             //now we iterate through the existing list and see if any 'words' should be reclassified as emoji
@@ -130,7 +204,7 @@ class ProseMap {
             return false; //we can only cleave words when we start from the sentence level!
             //TO DO: make the prosemap take in the custom sentence / word boundaries / emoji from the beginning??  So that we CAN cleave to word?
         }
-        const wordBoundaries = customBoundaries || /(?<!^)\s/g;
+        const wordBoundaries = customBoundaries || this._wordBoundaries;
         const wordList = [];
 
         //Using vanilla for loops for performance
