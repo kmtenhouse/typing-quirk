@@ -246,8 +246,9 @@ class Quirk {
     }
 
     //HELPFUL ADDITIONS
-    //Register an emoji so the code knows that it counts as 'punctuation'
+    //Register an emoji 
     //Emoji are excepted from both plain and quirk
+    //They are also treated as a break between sentences
     addEmoji(emoji) {
         if ( (!isString(emoji) && !isRegExp(emoji) ) || emoji === "") {
             throw new Error("Must provide a string or valid regexp for the emoji!")
