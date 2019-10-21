@@ -198,18 +198,24 @@ class ProseMap {
         let sentence = "";
         for (let i = 0; i < this.nodes.length; i++) {
             const currentNode = this.nodes[i];
-            console.log(`Join: ${currentNode.nodeName}: ${currentNode.value}`)
             if (currentNode.isWord() || currentNode.isWordSeparator()) {
                 sentence += currentNode.value;
             } else {
-                if ( (currentNode.isEmoji() || currentNode.isSentenceSeparator() ) && sentence !== "") {
+                if ((currentNode.isEmoji() || currentNode.isSentenceSeparator()) && sentence !== "") {
+                    //first, push the sentence that we have built
                     newList.push(new Node(sentence, "sentence"));
+                    //next, push the separator itself!
+                    newList.push(currentNode);
                     sentence = "";
+                } else {
+                    //otherwise it's a sentence separator or emoji or something - leave as-is
+                    newList.push(currentNode);
                 }
-                //otherwise it's a sentence separator or emoji or something - leave as-is
-                newList.push(currentNode);
             }
         }
+
+        //do one final push for the final sentence that could be lingering:
+        newList.push(new Node(sentence, "sentence"));
         //switch the new list to be our internal node list...
         this.nodes = newList;
         //and set the level back to sentence
