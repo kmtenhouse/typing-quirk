@@ -48,7 +48,7 @@ function capitalizeSentences(paragraph) {
     //next, split the paragraph into discrete sentences
     const sentences = paragraph.split(sentenceBoundaries);
     //for each sentence we have, perform the capitalization
-    const modifiedSentences = sentences.map(sentence => capitalizeOneSentence(sentence));
+    const modifiedSentences = sentences.map(sentence => capitalizeFirstCharacter(sentence));
     //then recombine the sentences with their original whitespace
     let modifiedParagraph = '';
     let whiteSpaceIndex = 0; //note: we're not using shift here to see if this might be more efficient than constantly changing the whitespace array :)
@@ -61,7 +61,7 @@ function capitalizeSentences(paragraph) {
     return modifiedParagraph;
 }
 
-function capitalizeOneSentence(str, exceptions = null) {
+function capitalizeFirstCharacter(str, exceptions = null) {
     //takes in a single sentence and capitalizes the first letter
     //sentences can begin with ' " ` and ( -- these are ignored
     //exceptions are passed as a regular expression to check - if the start of the string is an exception, don't capitalize it!
@@ -197,7 +197,7 @@ function convertToProperCase(sentence, exceptions = null) {
         //First, forcibly perform lowercasing
         //TO-DO: handle exception WORDS (?)
         sentence = convertToLowerCase(sentence, exceptions);
-        sentence = capitalizeOneSentence(sentence, exceptions);
+        sentence = capitalizeFirstCharacter(sentence, exceptions);
         sentence = capitalizeFirstPerson(sentence);
     }
     return sentence;
@@ -280,7 +280,7 @@ function isUpperCaseLetter(letter) {
 
 module.exports = {
     escapeRegExpSpecials,
-    capitalizeOneSentence,
+    capitalizeFirstCharacter,
     capitalizeSentences,
     capitalizeWords,
     adjustForShouts,

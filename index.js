@@ -268,12 +268,12 @@ class Quirk {
         //(TO-DO): add any 'sentence level' work here
 
         //once we've sorted that, cleave the individual words
-        prose.cleaveWords();   
+        prose.cleaveWords();
 
         //iterate through all words and perform substitions, strips, and fix case
         prose.forEach((node) => {
             let startWithCaps = false;
-            if (node.isWord() && !this._isWordException(node, this.quirk.exceptions) ) {
+            if (node.isWord() && !this._isWordException(node, this.quirk.exceptions)) {
                 //PERFORM SUBSTITUTIONS AND STRIPS
                 this.substitutions.forEach(sub => node.value = sub.toQuirk(node.value));
                 this.quirk.strip.forEach(strip => node.value = node.value.replace(strip, ""));
@@ -289,7 +289,7 @@ class Quirk {
                     case "propercase":
                         node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
                         if (node.isFirstWord) {
-                            node.value = utils.capitalizeOneSentence(node.value, this.quirk.caseEnforcement.exceptions);
+                            node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
                         }
                         //Check if we need to caps any personal pronouns!
                         node.value = utils.capitalizeFirstPerson(node.value);
@@ -298,12 +298,12 @@ class Quirk {
                 }
                 //If capitalize fragments is on, we also caps the first word of fragments
                 if (node.isFirstWord && this.quirk.caseEnforcement.capitalizeFragments) {
-                    node.value = utils.capitalizeOneSentence(node.value, this.quirk.caseEnforcement.exceptions);
+                    node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
                 }
 
                 //Lastly, check if we need to enforce caps on this word in particular
                 if (this.quirk.caseEnforcement.word === 'capitalize') {
-                    node.value = utils.capitalizeOneSentence(node.value, this.quirk.caseEnforcement.exceptions);
+                    node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
                 }
 
                 if (this.quirk.caseEnforcement.sentence === "alternatingcaps") {
@@ -394,11 +394,11 @@ class Quirk {
 
                 //Finally, check if this chunk is a sentence that we need to capitalize
                 if (utils.hasPunctuation(sentence.value)) {
-                    sentence.value = utils.capitalizeOneSentence(sentence.value);
+                    sentence.value = utils.capitalizeFirstCharacter(sentence.value);
                 }
 
                 if (this.plain.caseEnforcement.capitalizeFragments) {
-                    sentence.value = utils.capitalizeOneSentence(sentence.value);
+                    sentence.value = utils.capitalizeFirstCharacter(sentence.value);
                 }
             }
         });
@@ -408,13 +408,42 @@ class Quirk {
     //INTERNAL HELPERS
     //Function takes in a word node and returns true if it is an exception
     //Returns true if an exception was found, false otherwise
-    _isWordException (wordNode, exceptionList) {
+    _isWordException(wordNode, exceptionList) {
         for (let i = 0; i < exceptionList.length; i++) {
             if (exceptionList[i].test(wordNode.value) === true) {
                 return true;
             }
         }
         return false;
+    }
+
+    //Function takes in a word node and adjusts it based on any case enforcement in place
+    //Examples: UPPERCASE, lowercase
+    _adjustQuirkWordCase(wordNode) {
+        //Case enforcement imposed by overall sentence:
+        switch (this.quirk.caseEnforcement.sentence) {
+            case "lowercase":
+                node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
+                break;
+            case "uppercase":
+                node.value = utils.convertToUpperCase(node.value, this.quirk.caseEnforcement.exceptions);
+                break;
+            case "propercase":
+                node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
+                if (node.isFirstWord) {
+                    node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
+                }
+                //Check if we need to caps any personal pronouns!
+                node.value = utils.capitalizeFirstPerson(node.value);
+                break;
+            default: break;
+        }
+    }
+
+    //Function takes in a paragraph node and adjusts it based on any case enforcement in place
+    //Example: aLtErNaTiNg CaPs. ThAt CrOsS pErIoDs.
+    _adjustQuirkParagraphCase(paragraphNode) {
+
     }
 }
 
