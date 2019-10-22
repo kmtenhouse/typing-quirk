@@ -250,7 +250,7 @@ class Quirk {
     //Emoji are excepted from both plain and quirk
     //They are also treated as a break between sentences
     addEmoji(emoji) {
-        if ( (!isString(emoji) && !isRegExp(emoji) ) || emoji === "") {
+        if ((!isString(emoji) && !isRegExp(emoji)) || emoji === "") {
             throw new Error("Must provide a string or valid regexp for the emoji!")
         }
         //Register the emoji as a form of punctuation!
@@ -262,27 +262,18 @@ class Quirk {
     //the fun part - encoding their speech!!
     toQuirk(str) {
         //first, split up the sentences 
-        const prose = new ProseMap(str);
-        prose.cleaveSentences(); 
-        //(Note: we definitely want to split out any emoji as well)
-        prose.cleaveEmoji(this.emoji);
-        //once we've sorted that, cleave the individual words
-        prose.cleaveWords();
+        //note: we assume that the sentence and word boundaries are English-language default
+        const prose = new ProseMap(str, { emoji: this.emoji });
+        prose.cleaveSentences();
+        //(TO-DO): add any 'sentence level' work here
 
-        //(helper function to test if something is an exception)
-        const isQuirkException = (word) => {
-            for (let i = 0; i < this.quirk.exceptions.length; i++) {
-                if (this.quirk.exceptions[i].test(word) === true) {
-                    return true;
-                }
-            }
-            return false;
-        };
+        //once we've sorted that, cleave the individual words
+        prose.cleaveWords();   
 
         //iterate through all words and perform substitions, strips, and fix case
         prose.forEach((node) => {
             let startWithCaps = false;
-            if (node.isWord() && !isQuirkException(node.value)) {
+            if (node.isWord() && !this._isWordException(node, this.quirk.exceptions) ) {
                 //PERFORM SUBSTITUTIONS AND STRIPS
                 this.substitutions.forEach(sub => node.value = sub.toQuirk(node.value));
                 this.quirk.strip.forEach(strip => node.value = node.value.replace(strip, ""));
@@ -335,11 +326,14 @@ class Quirk {
 
         //(if necesary) join the words back into sentences so that we can do any final sentence-wide tweaks
         //This will happen if we have a prefix or suffix
+        //(TO DO: fix this if it is NOT a sentence-based prefix/suffix!)
         if (this.quirk.prefix || this.quirk.suffix) {
             prose.joinWords();
             prose.forEach(sentence => {
-                sentence.value = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence.value + (this.quirk.suffix ? this.quirk.suffix.text : '');
-            }, { sentence: true });
+                if (sentence.isSentence()) {
+                    sentence.value = (this.quirk.prefix ? this.quirk.prefix.text : '') + sentence.value + (this.quirk.suffix ? this.quirk.suffix.text : '');
+                }
+            });
         }
 
         //at the very end, return our doctored text!
@@ -348,38 +342,32 @@ class Quirk {
 
     toPlain(str) {
         //first, split up the prose into sentences and deal with prefixes/suffixes/separators
-        const prose = new ProseMap(str);
-        prose.cleaveSentences(this.quirk.sentenceBoundary);
-        prose.cleaveEmoji(this.emoji, this.quirk.wordBoundary);
+        const prose = new ProseMap(str, { wordBoundaries: this.quirk.wordBoundary, sentenceBoundaries: this.quirk.sentenceBoundary, emoji: this.emoji });
+
+        //Cut the paragraph into sentences first
+        prose.cleaveSentences();
+
         prose.forEach((sentence) => {
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
-            if (this.quirk.prefix) {
-                sentence.value = sentence.value.replace(this.quirk.prefix.patternToStrip, '');
-            }
+            if (sentence.isSentence()) {
+                if (this.quirk.prefix) {
+                    sentence.value = sentence.value.replace(this.quirk.prefix.patternToStrip, '');
+                }
 
-            if (this.quirk.suffix) {
-                sentence.value = sentence.value.replace(this.quirk.suffix.patternToStrip, '');
-            }
-        }, { sentence: true });
-
-        //now, cleave the words themselves to deal with strips/subs/exceptions
-        prose.cleaveWords(this.quirk.wordBoundary);
-
-        //(helper function to test if something is an exception)
-        const isPlainException = (word) => {
-            for (let i = 0; i < this.plain.exceptions.length; i++) {
-                if (this.plain.exceptions[i].test(word) === true) {
-                    return true;
+                if (this.quirk.suffix) {
+                    sentence.value = sentence.value.replace(this.quirk.suffix.patternToStrip, '');
                 }
             }
-            return false;
-        };
+        });
+
+        //now, cleave the words themselves to deal with strips/subs/exceptions
+        prose.cleaveWords();
 
         //go through each node
         //if it's a word, and not an exception, we will fix strips/subs and the case
         prose.forEach(word => {
-            if (word.isWord() && !isPlainException(word.value)) {
+            if (word.isWord() && !this._isWordException(word, this.plain.exceptions)) {
                 this.substitutions.forEach(sub => word.value = sub.toPlain(word.value));
                 //TO-DO: decide how to handle strips/subs for entire sentence
                 this.plain.strip.forEach(strip => word.value = word.value.replace(strip, ""));
@@ -400,20 +388,33 @@ class Quirk {
 
         //A few final sentence-wide tweaks:
         prose.forEach(sentence => {
-            //Ex: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
-            sentence.value = utils.capitalizeFirstPerson(sentence.value);
+            if (sentence.isSentence()) {
+                //Ex: many quirks mess up the personal pronoun 'I' - need to ensure this is capitalized!
+                sentence.value = utils.capitalizeFirstPerson(sentence.value);
 
-            //Finally, check if this chunk is a sentence that we need to capitalize
-            if (utils.hasPunctuation(sentence.value)) {
-                sentence.value = utils.capitalizeOneSentence(sentence.value);
-            }
+                //Finally, check if this chunk is a sentence that we need to capitalize
+                if (utils.hasPunctuation(sentence.value)) {
+                    sentence.value = utils.capitalizeOneSentence(sentence.value);
+                }
 
-            if (this.plain.caseEnforcement.capitalizeFragments) {
-                sentence.value = utils.capitalizeOneSentence(sentence.value);
+                if (this.plain.caseEnforcement.capitalizeFragments) {
+                    sentence.value = utils.capitalizeOneSentence(sentence.value);
+                }
             }
-        }, { sentence: true });
+        });
 
         return prose.join();
+    }
+    //INTERNAL HELPERS
+    //Function takes in a word node and returns true if it is an exception
+    //Returns true if an exception was found, false otherwise
+    _isWordException (wordNode, exceptionList) {
+        for (let i = 0; i < exceptionList.length; i++) {
+            if (exceptionList[i].test(wordNode.value) === true) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 

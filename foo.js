@@ -10,10 +10,10 @@ test.cleaveSentences();
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
 console.groupEnd();
 
-console.group("=========CLEAVING EMOJI=========");
+/* console.group("=========CLEAVING EMOJI=========");
 test.cleaveEmoji([/\:\)/]);
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
-console.groupEnd();
+console.groupEnd(); */
 
 console.group("=========CLEAVING WORDS=========");
 test.cleaveWords();
