@@ -36,7 +36,9 @@ class Quirk {
                 capitalizeFragments: false //defaults to false
             },
             exceptions: [],
-            strip: []
+            strip: [],
+            sentenceBoundary: null, //DEFAULT: algorithm will assume all sentences are space-separated, and punctuated by one or more . ! ? ) characters
+            wordBoundary: null //default: assume that words are separated by spaces
         };
     }
 
@@ -126,12 +128,12 @@ class Quirk {
 
         //as well as how to detect separators
         this.quirk.wordBoundary = new RegExp(utils.escapeRegExpSpecials(separator), "g");
+        //this.plain.wordBoundary = new RegExp(utils.escapeRegExpSpecials(separator), "g");
     }
 
     setPunctuation(punctuationArr, options = null) {
-        // Registers custom punctuation, which affects sentence boundary detection
-        // Default punctuation is " ` ' . ! ? ) followed by whitespace and NOT preceeded by a comma
-        // OPTION: ignore the quotation mark detection (detectQuotes = false)
+        // Registers custom punctuation, which affects sentence boundary detection for both plain and quirk text
+        // Default plain punctuation is " ` ' . ! ? ) followed by whitespace and NOT preceeded by a comma
         //const defaultPunc = /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g;
         if (!Array.isArray(punctuationArr)) {
             throw new Error("Must supply an array of single characters to use as punctuation!");
@@ -148,8 +150,14 @@ class Quirk {
         });
 
         regExpStr += "])\\s+";
-        
-        this.quirk.sentenceBoundary = new RegExp(regExpStr, "g");
+        const finalRegExp = new RegExp(regExpStr, "g");
+        //Finally, adjust our sentence boundaries!  For the quirk, it's going to be along the lines of our custom punctuation...
+        this.quirk.sentenceBoundary = finalRegExp;
+        this.plain.sentenceBoundary = finalRegExp;
+        //...for plain, we're going to attempt to detect 'normal' sentences too
+        //const regularPunctuation= "\"'`.!?)";
+        //((?<=[,])\s+)||((?<=[^\,][\"\'\`\.\!\?\)])\s+)
+        //this.plain.sentenceBoundary = new RegExp(`(${regExpStr})||((?<=[^\,][${utils.escapeRegExpSpecials(regularPunctuation)}])\s+)`, "g");
     }
 
     setWordCase(wordCase, options = null) {
@@ -296,7 +304,7 @@ class Quirk {
     toQuirk(str) {
         //first, split up the sentences 
         //note: we assume that the sentence and word boundaries are English-language default
-        const prose = new ProseMap(str, { emoji: this.emoji, wordBoundaries: this.quirk.wordBoundary, sentenceBoundaries: this.quirk.sentenceBoundary });
+        const prose = new ProseMap(str, { emoji: this.emoji, wordBoundaries: this.plain.wordBoundary, sentenceBoundaries: this.plain.sentenceBoundary });
         prose.cleaveSentences();
         //(TO-DO): add any 'sentence level' work here
 
@@ -345,7 +353,7 @@ class Quirk {
 
     toPlain(str) {
         //first, split up the prose into sentences and deal with prefixes/suffixes/separators
-        const prose = new ProseMap(str, { emoji: this.emoji });
+        const prose = new ProseMap(str, { emoji: this.emoji, wordBoundaries: this.quirk.wordBoundary, sentenceBoundaries: this.quirk.sentenceBoundary });
 
         //Cut the paragraph into sentences first
         prose.cleaveSentences();
@@ -375,7 +383,7 @@ class Quirk {
                 //TO-DO: decide how to handle strips/subs for entire sentence
                 this.plain.strip.forEach(strip => word.value = word.value.replace(strip, ""));
                 //If there was an overall case set, we then just sent the word to lowercase
-                if (['uppercase', 'lowercase', 'alternatingcaps'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
+                if (['uppercase', 'lowercase', 'alternatingcaps', 'inversecase'].includes(this.quirk.caseEnforcement.sentence) || this.quirk.caseEnforcement.word === 'capitalize') {
                     word.value = word.value.toLowerCase();
                 } else {
                     //Otherwise, we attempt to follow the existing case as closely as possible -- by looking for SHOUTED words

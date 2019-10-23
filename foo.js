@@ -1,6 +1,6 @@
 /* const ProseMap = require("./proseMap");
 console.group("=========INITIAL STATE=========");
-const test = new ProseMap("This is the wake up call, This,, is the way to rock.", { sentenceBoundaries: /(?<=[,])\s+/g});
+const test = new ProseMap("This is the wake up call, This,, is the way to rock.", { wordBoundaries: /(?<!^)\s/g, sentenceBoundaries: /((?<=[,])\s+)||((?<=[^,]["'`\.!\?\)])s+)/g});
 
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
 console.groupEnd();
@@ -25,12 +25,11 @@ test.joinSentences();
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
 console.groupEnd(); 
 
-console.log("TEXT",test.text);  */
+console.log("TEXT",test.text);   */
 
-const Quirk = require("./index");
+ const Quirk = require("./index");
 const test = new Quirk();
 test.setSentenceCase("inversecase");
-test.setCapitalizeFragments(true);
 test.setPunctuation([","]);
 
 ["This is a test. This is only a test.", "um,, your bad, maybe? I think,,ok", "wait why is this working,, but not this, huh"].forEach(str => {
@@ -41,4 +40,4 @@ test.setPunctuation([","]);
     ${quirked}
     ${dequirked}
     `)
-}); 
+});  

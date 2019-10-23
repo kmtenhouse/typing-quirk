@@ -256,9 +256,9 @@ class ProseMap {
         //Start an empty array for the words
         const wordList = []; 
         //now, grab the whitespace so we can preserve it
-        const whiteSpace = sentence.match(this._wordBoundaries);
+        const whiteSpace = sentence.match(this.wordBoundaries);
         //next, split the paragraph into discrete sentences
-        const words = sentence.split(this._wordBoundaries);
+        const words = sentence.split(this.wordBoundaries);
         //now, all the words to the list
         let index = 0;
         //figure out our max
