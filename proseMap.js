@@ -19,7 +19,8 @@ class ProseMap {
         this.text = text;
         //define our word and sentence boundaries
         this.wordBoundaries = ((options && options.wordBoundaries) ? options.wordBoundaries : /(?<!^)\s/g); //default: assume 'words' are separated by one or more whitespaces
-        this.sentenceBoundaries =  ((options && options.sentenceBoundaries) ? options.sentenceBoundaries : /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g); //default: assume 'sentences' are terminated by one or more " ' ` ! ? ) and then whitespace
+        this.sentenceBoundaries = ((options && options.sentenceBoundaries) ? options.sentenceBoundaries : /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g); //default: assume 'sentences' are terminated by one or more " ' ` ! ? ) and then whitespace
+        //define any exceptions
         this.emoji = ((options && options.emoji) ? options.emoji : []); //default: no emoji are registered
     }
 
@@ -67,7 +68,6 @@ class ProseMap {
     }
 
     //Emoji: an array of regular expressions that denotes 'emoji'
-    //Note: emoji are 
     get emoji() {
         return this._emoji;
     }
@@ -79,6 +79,7 @@ class ProseMap {
         if (Array.isArray(arr) === false) {
             throw new Error("Must provide an array of regular expressions to define emoji!");
         }
+
         for (let i = 0; i < arr.length; i++) {
             if (arr[i] instanceof RegExp === false) {
                 throw new Error("Must provide an array of regular expressions to define emoji!");
@@ -90,17 +91,17 @@ class ProseMap {
     }
 
     //CLEAVE
-    //Attempts to separate sentences into the linked list
+    //Attempts to separate sentences 
     //DEFAULT ASSUMPTION: sentences are terminated by one or more " ' ` . ! ? ) 
     //that are NOT immediately preceeded by a comma
     //Function returns TRUE if operation was able to proceed
     //FALSE if function could not proceed
-    cleaveSentences(customBoundaries = null) {
+    cleaveSentences() {
         if (this.level === "word" || this.level === "sentence") {
             return false; //if we are already at a lower level, we can't do this lol
         }
         //(optionally accepts a custom regexp pattern to cleave on)
-        const pattern = customBoundaries || this._sentenceBoundaries;
+        const pattern = this.sentenceBoundaries;
 
         //create a new array that we'll put stuff in
         const newList = [];
@@ -114,7 +115,7 @@ class ProseMap {
                 const whiteSpace = str.match(pattern);
                 //next, split out the sentences
                 const sentences = str.split(pattern);
-                //now, add them to the new linked list!
+                //now, add them to the new list!
                 let index = 0;
                 //figure out our max
                 const numSentences = (sentences ? sentences.length : 0);
@@ -141,70 +142,14 @@ class ProseMap {
         return true;
     }
 
-    //Cuts up existing sentences further by finding emoji and treating them as punctuation
-    //Emoji nodes are special and should not be treated as separators; they are exempt from modification
-    //Function returns TRUE if operation was able to proceed
-    //FALSE if function could not proceed
-    cleaveEmoji(emojiList = [], customWordBoundaries = null) {
-
-        //helper function to detect emoji
-        const isEmoji = word => {
-            for (let i = 0; i < this.emoji.length; i++) {
-                if (this.emoji[i].test(word) === true) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        //(TO-DO: remove this line later it's nonsense)
-        this.emoji = emojiList;
-
-        if (this.emoji.length > 0 && this.level === "sentence") {
-            //start by cleaving the whole sentence into words
-            this.cleaveWords(customWordBoundaries);
-            //now we iterate through the existing list and see if any 'words' should be reclassified as emoji
-            //we also have to reclassify any separators (on either side) as sentence boundaries
-
-            let previousNode = null;
-            for (let i = 0; i < this.nodes.length; i++) {
-                let currentNode = this.nodes[i];
-                //if the current node is a word separator, first check if the node immediately preceding is an emoji
-                //if so, this is now a sentence separator
-                if (currentNode.isWordSeparator()) {
-                    if (previousNode !== null && previousNode.isEmoji()) {
-                        currentNode.nodeType = 2;
-                    }
-                }
-
-                //otherwise, check if the current node is a word that is secretly an emoji
-                if (currentNode.isWord() && isEmoji(currentNode.value)) {
-                    currentNode.nodeType = 5; //flag the current 'word' to be an emoji instead
-                    //...and check our previous word to see if it's a separator we should now reclass
-                    if (previousNode !== null && previousNode.isWordSeparator()) {
-                        previousNode.nodeType = 2;
-                    }
-                }
-
-                //lastly, update our previous node
-                previousNode = currentNode;
-            }
-
-            //lastly, we rejoin the words into sentences
-            this.joinWords();
-            return true;
-        }
-        return false;
-    }
-
     //Cuts up an existing ProseMap into even smaller chunks
     //Optionally accepts a custom separator regexp to match on
-    cleaveWords(customBoundaries = null) {
+    cleaveWords() {
         if (this.level !== "sentence") {
             return false; //we can only cleave words when we start from the sentence level!
-            //TO DO: make the prosemap take in the custom sentence / word boundaries / emoji from the beginning??  So that we CAN cleave to word?
         }
-        const wordBoundaries = customBoundaries || this._wordBoundaries;
+
+        //Start an empty array for our word list
         const wordList = [];
 
         //Using vanilla for loops for performance
@@ -214,49 +159,25 @@ class ProseMap {
             if (!currentNode.isSentence()) {
                 wordList.push(currentNode);
             } else {
-                //Otherwise, we have hit a sentence! We're going to start a brand new linked list for its words.
-                const sentence = currentNode.value;
-                //first, grab the whitespace so we can preserve it
-                const whiteSpace = sentence.match(wordBoundaries);
-                //next, split the paragraph into discrete sentences
-                const words = sentence.split(wordBoundaries);
-                //(TO-DO) if we have a first word, let's flag it by adding a custom flag
-
-                //now, all the words to the list
-                let index = 0;
-                //figure out our max
-                const numWords = (words ? words.length : 0);
-                const numSpaces = (whiteSpace ? whiteSpace.length : 0);
-                const max = (numWords > numSpaces ? numWords : numSpaces);
-                let isFirstWord = true;
-                while (index < max) {
-                    if (index < numWords) {
-                        const newWordNode = new Node(words[index], "word");
-                        if (isFirstWord) {
-                            newWordNode.isFirstWord = true;
-                            isFirstWord = false; //we never use this again
-                        }
-                        wordList.push(newWordNode);
-                    }
-                    if (index < numSpaces) {
-                        wordList.push(new Node(whiteSpace[index], "word separator"));
-                    }
-                    index++;
+                //Otherwise, we have hit a sentence! We're going to grab all its words, separators, and emoji:
+                const allWords = this._cleaveWordsFromSentence(currentNode);
+                //Now push all these nodes into our wordList:
+                for (let j = 0; j < allWords.length; j++) {
+                    wordList.push(allWords[j]);
                 }
             }
         }
 
-        //Set our internal list to be this new one:
+        //Overwrite our internal list with this new one:
         this.nodes = wordList;
 
-        //Set the level to "word" now
+        //Set the ProseMap level to "word" now
         this.level = "word";
         return true;
     }
 
     //ITERATE
     //run a callback function on all the nodes
-    //(NOTE: may now be deprecated)
     forEach(callbackFn) {
         this.nodes.forEach(callbackFn);
     }
@@ -264,11 +185,7 @@ class ProseMap {
     //JOINS
     //Joins the entire list into a single string
     join() {
-        let str = "";
-        for (let i = 0; i < this.nodes.length; i++) {
-            str += this.nodes[i].value;
-        }
-        return str;
+        return this.nodes.map((node) => node.value).join('');
     }
 
     //Joins all words / word separators back into sentences
@@ -315,6 +232,73 @@ class ProseMap {
         this.nodes.push(new Node(paragraph, "paragraph"));
         this.level = "paragraph"
         return true;
+    }
+
+    //INTERNAL HELPERS
+    //_cleaveEmoji(wordNode) -
+    //Function takes in a word node and flags if it is an emoji
+    //Returns true if an emoji was found, false otherwise
+    _isEmoji(wordNode) {
+        for (let i = 0; i < this._emoji.length; i++) {
+            if (this._emoji[i].test(wordNode.value) === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //_cleaveWordsFromSentence(sentenceNode) -
+    //Function takes in a sentence node and breaks it apart into words, word separators, and emoji
+    //Returns an array of the resulting nodes
+    _cleaveWordsFromSentence(sentenceNode) {
+        //Grab the text of the sentence
+        const sentence = sentenceNode.value;
+        //Start an empty array for the words
+        const wordList = []; 
+        //now, grab the whitespace so we can preserve it
+        const whiteSpace = sentence.match(this.wordBoundaries);
+        //next, split the paragraph into discrete sentences
+        const words = sentence.split(this.wordBoundaries);
+        //now, all the words to the list
+        let index = 0;
+        //figure out our max
+        const numWords = (words ? words.length : 0);
+        const numSpaces = (whiteSpace ? whiteSpace.length : 0);
+        const max = (numWords > numSpaces ? numWords : numSpaces);
+        //A couple helpers:
+        let isFirstWord = true;
+        let emojiExist = (this._emoji.length > 0 ? true : false);
+        //While we still have whitespace and sentences:
+        while (index < max) {
+            //Add words and emoji
+            if (index < numWords) {
+                const newWordNode = new Node(words[index], "word");
+                //First, double-check if this "word" is actually an emoji and flag it!
+                //(TO-DO) Check performance -- should we suppress this sometimes?
+                if (emojiExist && this._isEmoji(newWordNode)) {
+                    newWordNode.nodeType = 5; //modify the nodetype ONLY if an emoji was detected!
+                } else {
+                //Otherwise, if this is not an emoji AND 
+                //Next, check if this is the very first word we have found and flag that
+                    if (isFirstWord) {
+                        newWordNode.isFirstWord = true;
+                        isFirstWord = false; //there is only one first word!
+                    }
+                }
+                //Finally, push the completed node to the list
+                wordList.push(newWordNode);
+            }
+            //Add spaces
+            if (index < numSpaces) {
+                wordList.push(new Node(whiteSpace[index], "word separator"));
+            }
+            index++;
+        }
+        return wordList;
+    }
+
+    printList() {
+        this.nodes.forEach(node=>console.log(`${node.nodeName}: ${node.value}`));
     }
 }
 

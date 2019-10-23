@@ -1,38 +1,38 @@
 const expect = require('chai').expect;
-const capitalizeOneSentence = require('../../utils').capitalizeOneSentence;
+const capitalizeFirstCharacter = require('../../utils').capitalizeFirstCharacter;
 const capitalizeSentences = require("../../utils").capitalizeSentences;
 
 describe('single sentence capitalization', function () {
     it('should capitalize a sentence with no encapsulation', function () {
-        expect(capitalizeOneSentence("this is a test.")).to.equal("This is a test.");
+        expect(capitalizeFirstCharacter("this is a test.")).to.equal("This is a test.");
     });
 
     it('should capitalize a sentence with quotes', function () {
-        expect(capitalizeOneSentence("\"this is a test.\"")).to.equal("\"This is a test.\"");
+        expect(capitalizeFirstCharacter("\"this is a test.\"")).to.equal("\"This is a test.\"");
     });
 
     it('should capitalize a sentence with single quotes', function () {
-        expect(capitalizeOneSentence("'this is a test.'")).to.equal("'This is a test.'");
+        expect(capitalizeFirstCharacter("'this is a test.'")).to.equal("'This is a test.'");
     });
 
     it('should capitalize a sentence with both double and single quotes', function () {
-        expect(capitalizeOneSentence("\"'this is a test.'\"")).to.equal("\"'This is a test.'\"");
+        expect(capitalizeFirstCharacter("\"'this is a test.'\"")).to.equal("\"'This is a test.'\"");
     });
 
 
     it('should capitalize a sentence with back ticks', function () {
-        expect(capitalizeOneSentence("`this is a test.`")).to.equal("`This is a test.`");
+        expect(capitalizeFirstCharacter("`this is a test.`")).to.equal("`This is a test.`");
     });
 
     it('should capitalize a sentence with parenthesis', function () {
-        expect(capitalizeOneSentence("(this is a test.)")).to.equal("(This is a test.)");
+        expect(capitalizeFirstCharacter("(this is a test.)")).to.equal("(This is a test.)");
     });
 
     it('should not change an already capitalized sentence', function () {
-        expect(capitalizeOneSentence("This is a test.")).to.equal("This is a test.");
+        expect(capitalizeFirstCharacter("This is a test.")).to.equal("This is a test.");
     });
 });
-
+/* 
 describe('multi sentence capitalization', function () {
     it('should capitalize a paragraph with no encapsulation', function () {
         expect(capitalizeSentences("this is a test. hooray!")).to.equal("This is a test. Hooray!");
@@ -70,4 +70,4 @@ describe('multi sentence capitalization', function () {
         expect(capitalizeSentences("this is a test.      hooray!")).to.equal("This is a test.      Hooray!");
     });
 
-});
+}); */

@@ -53,34 +53,36 @@ This collection of methods creates rules that define a typing quirk.
 
 <a href="set-prefix"></a>
 
-### setPrefix(prefix, _optional_ patternToMatch)
+### setPrefix(prefix, _optional_ optionsObj)
 
 Adds a set prefix to the beginning of every sentence. 
 
 Parameters:
 * ```prefix```: (String) A string to prepend at the start of every sentence.
-* ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
+* ```optionsObj``` _(Optional)_: (Object) Sets where to apply the prefix. Valid options are paragragph, sentence, word. (Default: sentence)
 
 <hr />
 <a href="set-suffix"></a>
 
-### setSuffix(suffix, _optional_ patternToMatch)
+### setSuffix(suffix, _optional_ optionsObj)
 
 Adds a set suffix at the end of every sentence. 
 
 Parameters:
 * ```suffix```: (String) A string to append at the end of every sentence.
-* ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
+* ```optionsObj``` _(Optional)_: (Object) Sets where to apply the suffix. Valid options are paragragph, sentence, word. (Default: sentence)
+
 
 <hr />
 <a href="set-separator"></a>
 
-### setSeparator(separator)
+### setSeparator(separator, _optional_ optionsObj)
 
-Adds a custom string to separate the words of a sentence instead of spaces (the default). Every space (including spaces within tabs) will be replaced by this string.
+Adds a custom string to separate the words of a sentence instead of spaces (the default). Every space (including spaces within tabs) will be replaced 1:1 by this string. Different separators can be set for the spacing between words and the spacing between sentences.
 
 Parameters:
 * ```separator```: (String) A string that will replace all existing whitespace within a sentence
+* ```optionsObj``` _(Optional)_: (Object) Sets where to apply the suffix. Valid options are sentence, word. (Default: same separator for both words and sentences)
 
 <hr />
 <a href="set-substitution"></a>
