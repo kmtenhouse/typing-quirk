@@ -1,4 +1,4 @@
-const ProseMap = require("./proseMap");
+/* const ProseMap = require("./proseMap");
 
 const masterStr = "D==> This is a test.";
 console.group("=========INITIAL STATE=========");
@@ -27,14 +27,14 @@ test.joinSentences();
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
 console.groupEnd(); 
 
-console.log("TEXT",test.text);   
+console.log("TEXT",test.text);    */
  
  const Quirk = require("./index");
 const test2 = new Quirk();
-test2.setPrefix('BB', { sentence: true});
-console.log(test2.quirk);
+test2.setPrefix('AA', { word: true});
+test2.setSuffix('BB', { word: true});
 
-[ "This is a test" ].forEach(str => {
+[ "This is a test. ...I hope? I repeat. This is only a test!" ].forEach(str => {
     const quirked = test2.toQuirk(str);
     const dequirked = test2.toPlain(quirked);
     console.log(`
