@@ -76,12 +76,13 @@ Parameters:
 <hr />
 <a href="set-separator"></a>
 
-### setSeparator(separator)
+### setSeparator(separator, _optional_ optionsObj)
 
-Adds a custom string to separate the words of a sentence instead of spaces (the default). Every space (including spaces within tabs) will be replaced by this string.
+Adds a custom string to separate the words of a sentence instead of spaces (the default). Every space (including spaces within tabs) will be replaced 1:1 by this string. Different separators can be set for the spacing between words and the spacing between sentences.
 
 Parameters:
 * ```separator```: (String) A string that will replace all existing whitespace within a sentence
+* ```optionsObj``` _(Optional)_: (Object) Sets where to apply the suffix. Valid options are sentence, word. (Default: same separator for both words and sentences)
 
 <hr />
 <a href="set-substitution"></a>
