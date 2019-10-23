@@ -151,13 +151,13 @@ class Quirk {
         //Determine what levels we need to set
         //(Default is both word & sentence have the same separator!)
         if (!options || (options && options.sentence)) {
-            this.separator.word = separatorSub;
-            this._updateQuirkWordBoundaries();
+            this.separator.sentence = separatorSub;
+            this._updateQuirkSentenceBoundaries();
         }
 
         if (!options || (options && options.word)) {
-            this.separator.sentence = separatorSub;
-            this._updateQuirkSentenceBoundaries();
+            this.separator.word = separatorSub;
+            this._updateQuirkWordBoundaries();
         }
     }
 
@@ -330,8 +330,12 @@ class Quirk {
 
             } else if (node.isSeparator()) {
                 //if there is a custom separator, swap that in
-                if (this.separator.word) {
+                if (this.separator.word && node.nodeName === "word separator") {
                     node.value = this.separator.word.toQuirk(node.value);
+                }
+
+                if (this.separator.sentence && node.nodeName === "sentence separator") {
+                    node.value = this.separator.sentence.toQuirk(node.value);
                 }
             }
         });
@@ -377,20 +381,27 @@ class Quirk {
 
         //go through each node
         //if it's a word, and not an exception, we will fix strips/subs and the case
-        prose.forEach(word => {
-            if (word.isWord() && !this._isWordException(word, this.plain.word.exceptions)) {
-                this.substitutions.forEach(sub => word.value = sub.toPlain(word.value));
+        prose.forEach(node => {
+            if (node.isWord() && !this._isWordException(node, this.plain.word.exceptions)) {
+                this.substitutions.forEach(sub => node.value = sub.toPlain(node.value));
                 //TO-DO: decide how to handle strips/subs for entire sentence
-                this.plain.strip.forEach(strip => word.value = word.value.replace(strip, ""));
+                this.plain.strip.forEach(strip => node.value = node.value.replace(strip, ""));
                 //If there was an overall case set, we then just sent the word to lowercase
                 if (['uppercase', 'lowercase', 'alternatingcaps', 'inversecase'].includes(this.quirk.sentence.caseEnforcement) || this.quirk.word.caseEnforcement === 'capitalize') {
-                    word.value = word.value.toLowerCase();
+                    node.value = node.value.toLowerCase();
                 } else {
                     //Otherwise, we attempt to follow the existing case as closely as possible -- by looking for SHOUTED words
-                    word.value = utils.adjustForShouts(word.value);
+                    node.value = utils.adjustForShouts(node.value);
                 }
-            } else if (this.separator.word && word.isSeparator()) {
-                word.value = this.separator.word.toPlain(word.value);
+            } else if (node.isSeparator()) {
+                //if there is a custom separator, swap that in
+                if (this.separator.word && node.nodeName === "word separator") {
+                    node.value = this.separator.word.toPlain(node.value);
+                }
+
+                if (this.separator.sentence && node.nodeName === "sentence separator") {
+                    node.value = this.separator.sentence.toPlain(node.value);
+                }
             }
         });
 
@@ -533,12 +544,8 @@ class Quirk {
     //Function looks at the current state of the word prefix, suffix, and separator to generate a new word boundary
     _updateQuirkWordBoundaries() {
         if (this.separator.word) {
-            console.log("Updating quirk word boundaries!");
-            console.log(this.quirk.word.boundaries);
             const separatorStr = (this.separator.word ? utils.escapeRegExpSpecials(this.separator.word.quirk.replaceWith) : "\\s"); //default to whitespace 
             this.quirk.word.boundaries = new RegExp(separatorStr, "g");
-            console.log("Done");
-            console.log(this.quirk.word.boundaries);
         }
     }
 }

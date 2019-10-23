@@ -30,8 +30,10 @@ console.log("TEXT",test.text);   */
  const Quirk = require("./index");
 const test = new Quirk();
 test.setSeparator("*");
+test.setSeparator('*', { word: true, sentence: false });
+test.setSeparator('++', { word: false, sentence: true });
 
-["This is a test. This is only a test."].forEach(str => {
+["This is a test. This is only a test.", "This is a test?  Hooray!  Wow."].forEach(str => {
     const quirked = test.toQuirk(str);
     const dequirked = test.toPlain(quirked);
     console.log(`
@@ -39,5 +41,4 @@ test.setSeparator("*");
     To Quirk: ${quirked}
     Dequirk: ${dequirked}
     `)
-    console.log(test.quirk.word);
 });   
