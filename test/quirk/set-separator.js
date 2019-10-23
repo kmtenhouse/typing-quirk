@@ -9,6 +9,13 @@ describe('separator', function () {
         expect(testSub.toQuirk("this is nonsense")).to.equal('this*is*nonsense');
     });
 
+    it('should create a valid quirk that works for multiple sentences', function () {
+        let testSub = new Quirk();
+        testSub.setSeparator('*');
+        expect(testSub.toPlain("this*is*nonsense.*I*hope*you*have*a*good*explanation!*Seriously?*Why.")).to.equal('this is nonsense. I hope you have a good explanation! Seriously? Why.');
+        expect(testSub.toQuirk("this is nonsense. I hope you have a good explanation! Seriously? Why.")).to.equal('this*is*nonsense.*I*hope*you*have*a*good*explanation!*Seriously?*Why.');
+    });
+
     it('should throw an error when given an invalid separator', function () {
         const badFn = () => {
             let testSub = new Quirk();

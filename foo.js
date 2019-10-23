@@ -29,10 +29,9 @@ console.log("TEXT",test.text);   */
 
  const Quirk = require("./index");
 const test = new Quirk();
-test.setSuffix("<<");
-console.log(test.quirk.sentence.suffix.text);
+test.setSeparator("*");
 
-["This is a test. This is only a test.", "um,, your bad, maybe? I think,,ok", "wait why is this working,, but not this, huh"].forEach(str => {
+["This is a test. This is only a test."].forEach(str => {
     const quirked = test.toQuirk(str);
     const dequirked = test.toPlain(quirked);
     console.log(`
@@ -40,6 +39,5 @@ console.log(test.quirk.sentence.suffix.text);
     To Quirk: ${quirked}
     Dequirk: ${dequirked}
     `)
+    console.log(test.quirk.word);
 });   
-
-
