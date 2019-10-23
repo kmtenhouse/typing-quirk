@@ -128,6 +128,30 @@ class Quirk {
         this.quirk.wordBoundary = new RegExp(utils.escapeRegExpSpecials(separator), "g");
     }
 
+    setPunctuation(punctuationArr, options = null) {
+        // Registers custom punctuation, which affects sentence boundary detection
+        // Default punctuation is " ` ' . ! ? ) followed by whitespace and NOT preceeded by a comma
+        // OPTION: ignore the quotation mark detection (detectQuotes = false)
+        //const defaultPunc = /(?<=[^\,][\"\'\`\.\!\?\)])\s+/g;
+        if (!Array.isArray(punctuationArr)) {
+            throw new Error("Must supply an array of single characters to use as punctuation!");
+        }
+
+        let regExpStr = "(?<=[";
+
+        //Make sure the array contains only single characters:
+        punctuationArr.forEach(char => {
+            if (!isString(char) || char.length > 1) {
+                throw new Error("Must supply an array of single characters to use as punctuation!");
+            }
+            regExpStr += utils.escapeRegExpSpecials(char);
+        });
+
+        regExpStr += "])\\s+";
+        
+        this.quirk.sentenceBoundary = new RegExp(regExpStr, "g");
+    }
+
     setWordCase(wordCase, options = null) {
         //enforces a specific case on each word within a sentence
         //(To do): add an option to set a pattern for caps 
@@ -272,7 +296,7 @@ class Quirk {
     toQuirk(str) {
         //first, split up the sentences 
         //note: we assume that the sentence and word boundaries are English-language default
-        const prose = new ProseMap(str, { emoji: this.emoji });
+        const prose = new ProseMap(str, { emoji: this.emoji, wordBoundaries: this.quirk.wordBoundary, sentenceBoundaries: this.quirk.sentenceBoundary });
         prose.cleaveSentences();
         //(TO-DO): add any 'sentence level' work here
 
@@ -321,7 +345,7 @@ class Quirk {
 
     toPlain(str) {
         //first, split up the prose into sentences and deal with prefixes/suffixes/separators
-        const prose = new ProseMap(str, { wordBoundaries: this.quirk.wordBoundary, sentenceBoundaries: this.quirk.sentenceBoundary, emoji: this.emoji });
+        const prose = new ProseMap(str, { emoji: this.emoji });
 
         //Cut the paragraph into sentences first
         prose.cleaveSentences();
