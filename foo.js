@@ -1,4 +1,4 @@
-const ProseMap = require("./proseMap");
+/* const ProseMap = require("./proseMap");
 console.group("=========INITIAL STATE=========");
 const test = new ProseMap("This is the wake up call :) This,, is the way to rock.", { emoji: [/\:\)/], sentenceBoundaries: /(?<=[\,\"\'\`\.\!\?\)])\s+/g});
 
@@ -15,7 +15,7 @@ test.cleaveEmoji([/\:\)/]);
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
 console.groupEnd(); */
 
-console.group("=========CLEAVING WORDS=========");
+/*console.group("=========CLEAVING WORDS=========");
 test.cleaveWords();
 test.forEach(node=> console.log(`${(node.isFirstWord ? "FIRST:" : "")}${node.nodeName}: ${node.value}`));
 console.groupEnd();
@@ -30,4 +30,13 @@ test.joinSentences();
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
 console.groupEnd(); 
 
-console.log("TEXT",test.text);
+console.log("TEXT",test.text); */
+
+const Quirk = require("./index");
+const test = new Quirk();
+test.setSentenceCase("inversecase");
+
+["This is a test. This is only a test."].forEach(str => console.log(`
+${str}    
+${test.toQuirk(str)}
+`));

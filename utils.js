@@ -3,6 +3,8 @@
 /* of the ISC License (ISC). See the LICENSE file for details. */
 
 function escapeRegExpSpecials(str) {
+    //takes in a string
+    //returns a version of that string with escapes for the 12 regexp special characters so that it can be used to create a valid regexp
     const arr = str.split("");
     //matches the 12 special characters in regexps - \ ^ $ . | ? * + ( ) { [ ]
     const specialChars = /[\\\^\$\.\|\?\*\+\(\)\[\{\]]/;
@@ -12,58 +14,9 @@ function escapeRegExpSpecials(str) {
         .join("");
 }
 
-//WORD CASE ADJUSTMENT
-//
-//
-//Takes in a single sentence and adjusts the case of specific letters
-//Defaults to capitalizing the first word
-function capitalizeWords(sentence) {
-    let nextCharToCaps = true;
-    let newStr = "";
-    for (let i = 0; i < sentence.length; i++) {
-        if (/\s/.test(sentence[i]) === true) {
-            nextCharToCaps = true;
-            newStr += sentence[i];
-        } else if (nextCharToCaps) {
-            newStr += sentence[i].toUpperCase();
-            nextCharToCaps = false;
-        } else {
-            newStr += sentence[i];
-        }
-    }
-    return newStr;
-}
-
-//SENTENCE CASE ADJUSTMENT
-//
-//
-//Takes in a paragraph with one or more sentences and changes each sentence to proper case
-//Proper case is defined as first letter capitalized
-//Sentences end in one or more . ! ? 
-//Sentences can be wrapped in "", '', ``, and () -- these will be preserved
-function capitalizeSentences(paragraph) {
-    const sentenceBoundaries = /(?<=[\.!\?]+['"`\)]*)\s+/g;
-    //first, grab the whitespace so we can preserve it
-    const whiteSpace = paragraph.match(sentenceBoundaries);
-    //next, split the paragraph into discrete sentences
-    const sentences = paragraph.split(sentenceBoundaries);
-    //for each sentence we have, perform the capitalization
-    const modifiedSentences = sentences.map(sentence => capitalizeFirstCharacter(sentence));
-    //then recombine the sentences with their original whitespace
-    let modifiedParagraph = '';
-    let whiteSpaceIndex = 0; //note: we're not using shift here to see if this might be more efficient than constantly changing the whitespace array :)
-    modifiedSentences.forEach(sentence => {
-        let spacing = ((whiteSpace && whiteSpaceIndex < whiteSpace.length) ? whiteSpace[whiteSpaceIndex] : '');
-        whiteSpaceIndex++;
-        modifiedParagraph += sentence + spacing;
-    });
-
-    return modifiedParagraph;
-}
-
 function capitalizeFirstCharacter(str, exceptions = null) {
-    //takes in a single sentence and capitalizes the first letter
-    //sentences can begin with ' " ` and ( -- these are ignored
+    //takes in a string and capitalizes the first letter that is not punctuation or whitespace
+    //sentences can begin with " ' ` ( " ¿ ¡ -- these are ignored
     //exceptions are passed as a regular expression to check - if the start of the string is an exception, don't capitalize it!
     const initialPunctuation = str.match(/^["'`\("¿¡]*/)[0];
     str = str.replace(initialPunctuation, '');
@@ -71,6 +24,20 @@ function capitalizeFirstCharacter(str, exceptions = null) {
     let firstChar = str.charAt(0);
     //check if we have exceptions -- and if so, leave the first character alone if it matches!
     firstChar = ((exceptions && exceptions.test(firstChar)) ? firstChar : firstChar.toUpperCase());
+
+    return initialPunctuation + firstChar + str.slice(1);
+}
+
+function lowercaseFirstCharacter(str, exceptions = null) {
+    //takes in a string and lowercases the first letter that is not punctuation or whitespace
+    //sentences can begin with " ' ` ( " ¿ ¡ -- these are ignored
+    //exceptions are passed as a regular expression to check - if the start of the string is an exception, don't capitalize it!
+    const initialPunctuation = str.match(/^["'`\("¿¡]*/)[0];
+    str = str.replace(initialPunctuation, '');
+
+    let firstChar = str.charAt(0);
+    //check if we have exceptions -- and if so, leave the first character alone if it matches!
+    firstChar = ((exceptions && exceptions.test(firstChar)) ? firstChar : firstChar.toLowerCase());
 
     return initialPunctuation + firstChar + str.slice(1);
 }
@@ -106,49 +73,6 @@ function capitalizeFirstPerson(str) {
     str = str.replace(firstPerson, "I");
     str = str.replace(firstPersonPossessive, "I'm");
     return str;
-}
-
-//Separating and recombining sentences
-function cleave(str, pattern) {
-    //accepts a string and a pattern to cleave on 
-    //returns an object with an array of the resulting strings, as well as the original whitespace
-    //first, grab the whitespace so we can preserve it
-    const whiteSpace = str.match(pattern);
-    //next, split the paragraph into discrete sentences
-    const strings = str.split(pattern);
-    return { strings, whiteSpace };
-}
-
-function cleaveSentences(paragraph, customBoundaries=null) {
-    //DEFAULT: assumes all sentences have at least one space after them, and they punctuated by one or more . ! ? ) " ' ` characters
-    const matchSpacing = (customBoundaries ? customBoundaries :  /(?<=[\"\'\`\.\!\?\)])\s+/g);
-
-    const results = cleave(paragraph, matchSpacing);
-    return {
-        sentences: results.strings,
-        whiteSpace: results.whiteSpace
-    };
-}
-
-function cleaveWords(sentence) {
-    const wordBoundaries = /(?<!^)\s/g;
-    const results = cleave(sentence, wordBoundaries);
-    return {
-        words: results.strings,
-        whiteSpace: results.whiteSpace
-    };
-}
-
-//Function to rejoin a sentence, given two parts
-function recombineWhitespace(sentenceArr, whiteSpaceArr) {
-    let adjustedParagraph = '';
-    let whiteSpaceIndex = 0; //note: we're not using shift here to see if this might be more efficient than constantly changing the whitespace array :)
-    sentenceArr.forEach(sentence => {
-        let spacing = ((whiteSpaceArr && whiteSpaceIndex < whiteSpaceArr.length) ? whiteSpaceArr[whiteSpaceIndex] : '');
-        whiteSpaceIndex++;
-        adjustedParagraph += sentence + spacing;
-    });
-    return adjustedParagraph;
 }
 
 //Lower case a string -- with an exception mask
@@ -191,6 +115,7 @@ function convertToUpperCase(str, options = null) {
     return result;
 }
 
+//DEPRECATED
 //Change a string to propercase -- with an exception mask
 function convertToProperCase(sentence, exceptions = null) {
     if (hasPunctuation(sentence)) {
@@ -281,17 +206,12 @@ function isUpperCaseLetter(letter) {
 module.exports = {
     escapeRegExpSpecials,
     capitalizeFirstCharacter,
-    capitalizeSentences,
-    capitalizeWords,
+    lowercaseFirstCharacter,
     adjustForShouts,
     convertToLowerCase,
     convertToUpperCase,
     convertToProperCase,
     convertToAlternatingCase,
     hasPunctuation,
-    capitalizeFirstPerson,
-    cleaveSentences,
-    cleaveWords,
-    recombineWhitespace,
-    isUpperCaseLetter
+    capitalizeFirstPerson
 };

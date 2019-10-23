@@ -143,8 +143,17 @@ class Quirk {
     setSentenceCase(sentenceCase, options = null) {
         //enforces a specific case across all text when quirkified 
         //(default is that the algorithm attempts to match the existing case of the input as closely as possible)
-        if (!isString(sentenceCase) || ['lowercase', 'uppercase', 'propercase', 'alternatingcaps'].includes(sentenceCase.toLowerCase()) === false) {
-            throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase, and alternatingcaps.");
+        //valid options are as follows:
+        const validCase = {
+            "lowercase": true,
+            "uppercase": true,
+            "propercase": true,
+            "alternatingcaps": true,
+            "inversecase": true
+        };
+
+        if (!isString(sentenceCase) || !validCase[sentenceCase.toLowerCase()]) {
+            throw new Error("Must provide a valid sentence case! Options are lowercase, uppercase, propercase, inversecase, and alternatingcaps.");
         }
 
         //if a value other than a string is provided as the (optional) second parameter, throw an error
@@ -270,54 +279,24 @@ class Quirk {
         //once we've sorted that, cleave the individual words
         prose.cleaveWords();
 
+        //do a quick check if we'll need to care about case enforcement:
+        const caseEnforcementExists = ((this.quirk.caseEnforcement.sentence || this.quirk.caseEnforcement.word || this.quirk.caseEnforcement.capitalizeFragments) ? true : false)
+
         //iterate through all words and perform substitions, strips, and fix case
         prose.forEach((node) => {
-            let startWithCaps = false;
             if (node.isWord() && !this._isWordException(node, this.quirk.exceptions)) {
+
                 //PERFORM SUBSTITUTIONS AND STRIPS
                 this.substitutions.forEach(sub => node.value = sub.toQuirk(node.value));
                 this.quirk.strip.forEach(strip => node.value = node.value.replace(strip, ""));
-                //HANDLE CASE ISSUES
-                //Case enforcement imposed by overall sentence:
-                switch (this.quirk.caseEnforcement.sentence) {
-                    case "lowercase":
-                        node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
-                        break;
-                    case "uppercase":
-                        node.value = utils.convertToUpperCase(node.value, this.quirk.caseEnforcement.exceptions);
-                        break;
-                    case "propercase":
-                        node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
-                        if (node.isFirstWord) {
-                            node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
-                        }
-                        //Check if we need to caps any personal pronouns!
-                        node.value = utils.capitalizeFirstPerson(node.value);
-                        break;
-                    default: break;
-                }
-                //If capitalize fragments is on, we also caps the first word of fragments
-                if (node.isFirstWord && this.quirk.caseEnforcement.capitalizeFragments) {
-                    node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
-                }
 
-                //Lastly, check if we need to enforce caps on this word in particular
-                if (this.quirk.caseEnforcement.word === 'capitalize') {
-                    node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
-                }
-
-                if (this.quirk.caseEnforcement.sentence === "alternatingcaps") {
-                    node.value = utils.convertToAlternatingCase(node.value, startWithCaps, this.quirk.caseEnforcement.exceptions);
-                    //test the last valid character to see if we are going to start the next round with caps or not
-                    if (/[A-Z][^a-zA-Z]+$/.test(node.value)) {
-                        startWithCaps = false;
-                    } else if (/[a-z][^a-zA-Z]+$/.test(node.value)) {
-                        startWithCaps = true;
-                    }
+                //HANDLE CASE ISSUES (ONLY IF NECESSARY)
+                if (caseEnforcementExists) {
+                    this._adjustQuirkWordCase(node);
                 }
 
             } else if (node.isSeparator()) {
-                //if there is a custom separator, add that
+                //if there is a custom separator, swap that in
                 if (this.separator) {
                     node.value = this.separator.toQuirk(node.value);
                 }
@@ -419,8 +398,8 @@ class Quirk {
 
     //Function takes in a word node and adjusts it based on any case enforcement in place
     //Examples: UPPERCASE, lowercase
-    _adjustQuirkWordCase(wordNode) {
-        //Case enforcement imposed by overall sentence:
+    _adjustQuirkWordCase(node) {
+        //First, handle any case enforcement imposed by overall sentence:
         switch (this.quirk.caseEnforcement.sentence) {
             case "lowercase":
                 node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
@@ -429,14 +408,47 @@ class Quirk {
                 node.value = utils.convertToUpperCase(node.value, this.quirk.caseEnforcement.exceptions);
                 break;
             case "propercase":
+                //Enforced propercase means that we must always lowercase words, save for the first one
                 node.value = utils.convertToLowerCase(node.value, this.quirk.caseEnforcement.exceptions);
-                if (node.isFirstWord) {
-                    node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
-                }
-                //Check if we need to caps any personal pronouns!
+                //Lastly, check if we need to caps any personal pronouns!
                 node.value = utils.capitalizeFirstPerson(node.value);
+                //(TO-DO): Capitalize any registered proper nouns
+                break;
+            case "inversecase":
+                //Inversecase is basically the opposite of propercase... iT LOOKS LIKE THIS! wITH FIRST CHARACTER LOW, OTHERS HIGH
+                node.value = utils.convertToUpperCase(node.value, this.quirk.caseEnforcement.exceptions);
                 break;
             default: break;
+        }
+
+        //Lastly, do some extra stuff if this is the very first word in a sentence!
+        //Three cases: 
+        //1) propercase is enforced => capitalize word
+        //2) sentence case fragment capitalization is enabled  => capitalize word
+        //3) inversecase is enforced => LOWERCASE the first word!
+        if (node.isFirstWord) {
+            if (this.quirk.caseEnforcement.capitalizeFragments || this.quirk.caseEnforcement.sentence === "propercase") {
+                node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
+            } else if (this.quirk.caseEnforcement.sentence === "inversecase") {
+                node.value = utils.lowercaseFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
+            }
+        }
+
+        //One other special case -- word-level rules
+        //Example: Capitalizing Every Word In The Sentence
+        if (this.quirk.caseEnforcement.word === 'capitalize') {
+            node.value = utils.capitalizeFirstCharacter(node.value, this.quirk.caseEnforcement.exceptions);
+        }
+
+        //TO-DO: move this one to the PARAGRAPH level instead!
+        if (this.quirk.caseEnforcement.sentence === "alternatingcaps") {
+            node.value = utils.convertToAlternatingCase(node.value, startWithCaps, this.quirk.caseEnforcement.exceptions);
+            //test the last valid character to see if we are going to start the next round with caps or not
+            if (/[A-Z][^a-zA-Z]+$/.test(node.value)) {
+                startWithCaps = false;
+            } else if (/[a-z][^a-zA-Z]+$/.test(node.value)) {
+                startWithCaps = true;
+            }
         }
     }
 

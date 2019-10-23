@@ -32,7 +32,7 @@ describe('single sentence capitalization', function () {
         expect(capitalizeFirstCharacter("This is a test.")).to.equal("This is a test.");
     });
 });
-
+/* 
 describe('multi sentence capitalization', function () {
     it('should capitalize a paragraph with no encapsulation', function () {
         expect(capitalizeSentences("this is a test. hooray!")).to.equal("This is a test. Hooray!");
@@ -70,4 +70,4 @@ describe('multi sentence capitalization', function () {
         expect(capitalizeSentences("this is a test.      hooray!")).to.equal("This is a test.      Hooray!");
     });
 
-});
+}); */
