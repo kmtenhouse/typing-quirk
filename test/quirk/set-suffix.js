@@ -3,7 +3,7 @@ const Quirk = require("../../index");
 
 describe('suffixes', function () {
 
-    it('should create a valid quirk from suffixes added via setSuffix', function () {
+    it('should create a valid quirk from suffixes added via setSuffix (default: sentence)', function () {
         let testSub = new Quirk();
         testSub.setSuffix('///');
         expect(testSub.toPlain("this is nonsense///")).to.equal('this is nonsense');
@@ -22,6 +22,13 @@ describe('suffixes', function () {
         testSub.setSuffix('$');
         expect(testSub.toPlain("this is nonsense$")).to.equal('this is nonsense');
         expect(testSub.toQuirk("this is nonsense")).to.equal('this is nonsense$');
+    });
+
+    it('should create a valid quirk from a word suffix', function () {
+        let testSub = new Quirk();
+        testSub.setSuffix('$', { word: true});
+        expect(testSub.toPlain("this$ is$ nonsense$")).to.equal('this is nonsense');
+        expect(testSub.toQuirk("this is nonsense")).to.equal('this$ is$ nonsense$');
     });
 
     it('should throw an error when given an invalid suffix', function () {

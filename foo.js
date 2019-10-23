@@ -1,6 +1,8 @@
-/* const ProseMap = require("./proseMap");
+const ProseMap = require("./proseMap");
+
+const masterStr = "+bats +are +rad. +why +are +you +screaming";
 console.group("=========INITIAL STATE=========");
-const test = new ProseMap("This is the wake up call, This,, is the way to rock.", { wordBoundaries: /(?<!^)\s/g, sentenceBoundaries: /((?<=[,])\s+)||((?<=[^,]["'`\.!\?\)])s+)/g});
+const test = new ProseMap(masterStr, { wordBoundaries: /\s+(?=\+)/g});
 
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
 console.groupEnd();
@@ -25,20 +27,20 @@ test.joinSentences();
 test.forEach(node=> console.log(`${node.nodeName}: ${node.value}`));
 console.groupEnd(); 
 
-console.log("TEXT",test.text);   */
-
+console.log("TEXT",test.text);   
+ 
  const Quirk = require("./index");
-const test = new Quirk();
-test.setSeparator("*");
-test.setSeparator('*', { word: true, sentence: false });
-test.setSeparator('++', { word: false, sentence: true });
+const test2 = new Quirk();
+test2.setPrefix('^', { word: true});
+console.log(test2.quirk.word);
 
-["This is a test. This is only a test.", "This is a test?  Hooray!  Wow."].forEach(str => {
-    const quirked = test.toQuirk(str);
-    const dequirked = test.toPlain(quirked);
+[ masterStr ].forEach(str => {
+    const quirked = test2.toQuirk(str);
+    const dequirked = test2.toPlain(quirked);
     console.log(`
     Original: ${str}    
     To Quirk: ${quirked}
     Dequirk: ${dequirked}
     `)
 });   
+ 

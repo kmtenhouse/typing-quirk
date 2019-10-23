@@ -53,24 +53,25 @@ This collection of methods creates rules that define a typing quirk.
 
 <a href="set-prefix"></a>
 
-### setPrefix(prefix, _optional_ patternToMatch)
+### setPrefix(prefix, _optional_ optionsObj)
 
 Adds a set prefix to the beginning of every sentence. 
 
 Parameters:
 * ```prefix```: (String) A string to prepend at the start of every sentence.
-* ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
+* ```optionsObj``` _(Optional)_: (Object) Sets where to apply the prefix. Valid options are paragragph, sentence, word. (Default: sentence)
 
 <hr />
 <a href="set-suffix"></a>
 
-### setSuffix(suffix, _optional_ patternToMatch)
+### setSuffix(suffix, _optional_ optionsObj)
 
 Adds a set suffix at the end of every sentence. 
 
 Parameters:
 * ```suffix```: (String) A string to append at the end of every sentence.
-* ```patternToMatch``` _(Optional)_: (RegExp object) Pattern to match when identifying prefixes. (Useful when parsing existing text that may have typos.)
+* ```optionsObj``` _(Optional)_: (Object) Sets where to apply the suffix. Valid options are paragragph, sentence, word. (Default: sentence)
+
 
 <hr />
 <a href="set-separator"></a>

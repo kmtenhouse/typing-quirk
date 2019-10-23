@@ -62,22 +62,13 @@ class Quirk {
 
     //sets a prefix to append before some text
     //(default): appends at the beginning of a sentence
-    setPrefix(prefix, pattern = '', options = null) {
+    setPrefix(prefix, options = null) {
         if (!isString(prefix) || prefix === '') {
             throw new Error("Prefix must be a non-empty string!");
         }
 
-        //if a pattern paramater was provided, check that 1) a regular expression
-        if (pattern !== '' && !isRegExp(pattern)) {
-            throw new Error("Invalid regexp provided for prefix!");
-        }
-        //...and that it's a valid regexp for the start of a string
-        if (isRegExp(pattern) && !/^\^/.test(pattern.source)) {
-            throw new Error("Invalid regexp provided for a prefix (hint: check for missing ^)");
-        }
-
         //Finally, we can make a valid prefix!
-        const prefixRegExp = (pattern ? pattern : new RegExp("^" + utils.escapeRegExpSpecials(prefix)));
+        const prefixRegExp = new RegExp("^" + utils.escapeRegExpSpecials(prefix));
         const prefixObject = new Eraser(prefix, prefixRegExp);
 
         //Time to see where we are applying this prefix: 
@@ -97,23 +88,14 @@ class Quirk {
         }
     }
 
-    setSuffix(suffix, pattern = '', options = null) {
+    setSuffix(suffix, options = null) {
         if (!isString(suffix) || suffix === '') {
             throw new Error("Suffix must be a non-empty string!");
         }
 
-        //if a pattern paramater was provided, check that 1) a regular expression
-        if (pattern !== '' && !isRegExp(pattern)) {
-            throw new Error("Invalid regexp provided for suffix!");
-        }
-        //...and that it's a valid regexp for the end of a string
-        if (isRegExp(pattern) && !/\$$/.test(pattern.source)) {
-            throw new Error("Invalid regexp provided for a suffix (hint: check for missing $)");
-        }
-
         //Finally, we can make a valid suffix!
         //create the proper regexp for the suffix (if necessary)
-        const suffixRegExp = (pattern ? pattern : new RegExp(utils.escapeRegExpSpecials(suffix) + "$"));
+        const suffixRegExp = new RegExp(utils.escapeRegExpSpecials(suffix) + "$");
         const suffixObject = new Eraser(suffix, suffixRegExp);
 
         //Now, figure out what level we are attaching the suffix to
@@ -328,6 +310,9 @@ class Quirk {
                     this._adjustQuirkWordCase(node);
                 }
 
+                //Lastly, add any word prefixes or suffixes:
+                node.value = (this.quirk.word.prefix ? this.quirk.word.prefix.text : '') + node.value + (this.quirk.word.suffix ? this.quirk.word.suffix.text : '')
+
             } else if (node.isSeparator()) {
                 //if there is a custom separator, swap that in
                 if (this.separator.word && node.nodeName === "word separator") {
@@ -361,7 +346,7 @@ class Quirk {
 
         //Cut the paragraph into sentences first
         prose.cleaveSentences();
-
+        
         prose.forEach((sentence) => {
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
@@ -383,6 +368,15 @@ class Quirk {
         //if it's a word, and not an exception, we will fix strips/subs and the case
         prose.forEach(node => {
             if (node.isWord() && !this._isWordException(node, this.plain.word.exceptions)) {
+                //strip any prefixes and suffixes
+                if (this.quirk.word.prefix) {
+                    node.value = this.quirk.word.prefix.strip(node.value);
+                }
+
+                if (this.quirk.word.suffix) {
+                    node.value = this.quirk.word.suffix.strip(node.value);
+                }
+
                 this.substitutions.forEach(sub => node.value = sub.toPlain(node.value));
                 //TO-DO: decide how to handle strips/subs for entire sentence
                 this.plain.strip.forEach(strip => node.value = node.value.replace(strip, ""));
@@ -539,14 +533,44 @@ class Quirk {
             newBoundaryPattern = `(?<=[^\,][\"\'\`\\.\!\\?\\)])${separatorStr}+`;
         }
         this.quirk.sentence.boundaries = new RegExp(newBoundaryPattern, "g");
+        return true;
     }
 
     //Function looks at the current state of the word prefix, suffix, and separator to generate a new word boundary
     _updateQuirkWordBoundaries() {
-        if (this.separator.word) {
-            const separatorStr = (this.separator.word ? utils.escapeRegExpSpecials(this.separator.word.quirk.replaceWith) : "\\s"); //default to whitespace 
-            this.quirk.word.boundaries = new RegExp(separatorStr, "g");
+        /*       if (this.separator.word) {
+                  const separatorStr = (this.separator.word ? utils.escapeRegExpSpecials(this.separator.word.quirk.replaceWith) : "\\s"); //default to whitespace 
+                  this.quirk.word.boundaries = new RegExp(separatorStr, "g");
+              } */
+        if (!this.separator.word && !this.quirk.word.suffix && !this.quirk.word.prefix) {
+            return false;
         }
+
+        // /(?<!^)\s/g
+        const separatorStr = (this.separator.word ? utils.escapeRegExpSpecials(this.separator.word.quirk.replaceWith) : "\\s"); //default to whitespace 
+        let newBoundaryPattern = "";
+        if (this.quirk.word.prefix && this.quirk.word.suffix) {
+            //If we have both a prefix but no suffix:
+            //PATTERN: Look behind for suffix, then match at least one separator, then look ahead for the prefix
+            newBoundaryPattern = `(?<=${utils.escapeRegExpSpecials(this.quirk.word.suffix.text)})${separatorStr}+(?=${utils.escapeRegExpSpecials(this.quirk.word.prefix.text)})`;
+
+        } else if (this.quirk.word.prefix && !this.quirk.word.suffix) {
+            //If we have a prefix but no suffix:
+            //PATTERN: Match at least one space, then look ahead for the prefix
+            newBoundaryPattern = `${separatorStr}+(?=${utils.escapeRegExpSpecials(this.quirk.word.prefix.text)})`;
+
+        } else if (!this.quirk.word.prefix && this.quirk.word.suffix) {
+            //If we have a suffix but no prefix:
+            //PATTERN: Look behind for suffix, then match at least one separator
+            newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.word.suffix.text)}))${separatorStr}+`;
+
+        } else {
+            //If we simply have a new separator
+            //PATTERN: same as default space-separated words, just with our separator character
+            newBoundaryPattern = `(?<!^)${separatorStr}`;
+        }
+        this.quirk.word.boundaries = new RegExp(newBoundaryPattern, "g");
+        return true;
     }
 }
 
