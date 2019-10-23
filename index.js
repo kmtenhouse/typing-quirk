@@ -78,12 +78,16 @@ class Quirk {
 
         if (options && options.word) {
             this.quirk.word.prefix = prefixObject;
+            console.log("Updating word boundaries - prefix!");
             this._updateQuirkWordBoundaries();
+            this._updateQuirkSentenceBoundaries();
         }
 
         // (If no options are provided, the default prefix location is 'sentence')
         if (!options || options.sentence) {
             this.quirk.sentence.prefix = prefixObject;
+            console.log("Updating sentence boundaries - prefix!");
+            this._updateQuirkWordBoundaries();
             this._updateQuirkSentenceBoundaries();
         }
     }
@@ -105,12 +109,16 @@ class Quirk {
 
         if (options && options.word) {
             this.quirk.word.suffix = suffixObject;
+            console.log("Updating word boundaries - suffix!");
             this._updateQuirkWordBoundaries();
+            this._updateQuirkSentenceBoundaries();
         }
 
         // (If no options are provided, the default prefix location is 'sentence')
         if (!options || options.sentence) {
             this.quirk.sentence.suffix = suffixObject;
+            console.log("Updating sentence boundaries - suffix!");
+            this._updateQuirkWordBoundaries();
             this._updateQuirkSentenceBoundaries();
         }
     }
@@ -337,16 +345,16 @@ class Quirk {
         }
 
         //at the very end, return our doctored text!
-        return ( (this.quirk.paragraph.prefix ? this.quirk.paragraph.prefix.text : '') + prose.join() + (this.quirk.paragraph.suffix ? this.quirk.paragraph.suffix.text : '') );
+        return ((this.quirk.paragraph.prefix ? this.quirk.paragraph.prefix.text : '') + prose.join() + (this.quirk.paragraph.suffix ? this.quirk.paragraph.suffix.text : ''));
     }
 
     toPlain(str) {
         //First order of business: strip off any paragraph prefixes or suffixes!
-        if(this.quirk.paragraph.prefix) {
+        if (this.quirk.paragraph.prefix) {
             str = this.quirk.paragraph.prefix.strip(str);
         }
 
-        if(this.quirk.paragraph.suffix) {
+        if (this.quirk.paragraph.suffix) {
             str = this.quirk.paragraph.suffix.strip(str);
         }
 
@@ -355,7 +363,7 @@ class Quirk {
 
         //Cut the paragraph into sentences first
         prose.cleaveSentences();
-        
+
         prose.forEach((sentence) => {
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
@@ -515,6 +523,7 @@ class Quirk {
     //6 - suffix exists w/separator
     //7 - prefix, suffix, separator exist
     _updateQuirkSentenceBoundaries() {
+        console.log("Before sentence", this.quirk.sentence.boundaries);
         if (!this.separator.sentence && !this.quirk.sentence.suffix && !this.quirk.sentence.prefix) {
             return false;
         }
@@ -525,7 +534,6 @@ class Quirk {
             //If we have both a prefix but no suffix:
             //PATTERN: Look behind for suffix, then match at least one separator, then look ahead for the prefix
             newBoundaryPattern = `(?<=${utils.escapeRegExpSpecials(this.quirk.sentence.suffix.text)})${separatorStr}+(?=${utils.escapeRegExpSpecials(this.quirk.sentence.prefix.text)})`;
-
         } else if (this.quirk.sentence.prefix && !this.quirk.sentence.suffix) {
             //If we have a prefix but no suffix:
             //PATTERN: Match at least one space, then look ahead for the prefix
@@ -542,6 +550,7 @@ class Quirk {
             newBoundaryPattern = `(?<=[^\,][\"\'\`\\.\!\\?\\)])${separatorStr}+`;
         }
         this.quirk.sentence.boundaries = new RegExp(newBoundaryPattern, "g");
+        console.log("After sentence", this.quirk.sentence.boundaries);
         return true;
     }
 
@@ -551,6 +560,7 @@ class Quirk {
                   const separatorStr = (this.separator.word ? utils.escapeRegExpSpecials(this.separator.word.quirk.replaceWith) : "\\s"); //default to whitespace 
                   this.quirk.word.boundaries = new RegExp(separatorStr, "g");
               } */
+        console.log("Before Word Boundary Update:", this.quirk.word.boundaries);
         if (!this.separator.word && !this.quirk.word.suffix && !this.quirk.word.prefix) {
             return false;
         }
@@ -561,8 +571,8 @@ class Quirk {
         if (this.quirk.word.prefix && this.quirk.word.suffix) {
             //If we have both a prefix but no suffix:
             //PATTERN: Look behind for suffix, then match at least one separator, then look ahead for the prefix
-            newBoundaryPattern = `(?<=${utils.escapeRegExpSpecials(this.quirk.word.suffix.text)})${separatorStr}+(?=${utils.escapeRegExpSpecials(this.quirk.word.prefix.text)})`;
 
+            newBoundaryPattern = `(?<=${utils.escapeRegExpSpecials(this.quirk.word.suffix.text)})${separatorStr}+(?=${utils.escapeRegExpSpecials(this.quirk.word.prefix.text)})`;
         } else if (this.quirk.word.prefix && !this.quirk.word.suffix) {
             //If we have a prefix but no suffix:
             //PATTERN: Match at least one space, then look ahead for the prefix
@@ -579,6 +589,7 @@ class Quirk {
             newBoundaryPattern = `(?<!^)${separatorStr}`;
         }
         this.quirk.word.boundaries = new RegExp(newBoundaryPattern, "g");
+        console.log("After Word", this.quirk.word.boundaries);
         return true;
     }
 }

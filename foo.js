@@ -36,8 +36,12 @@ testSub.setSuffix('^', { word: true }); */
 /* testSub.setPrefix('=||', { sentence: true });
 testSub.setSuffix('||=', { sentence: true });
 testSub.setSeparator("=", { sentence: true}); */
-testSub.setPrefix('//=', { paragraph: true });
-testSub.setSuffix('=\\\\', { paragraph: true });
+/* testSub.setPrefix('//=', { paragraph: true });
+testSub.setSuffix('=\\\\', { paragraph: true }); */
+
+testSub.setPrefix('^', { word: true });
+testSub.setSuffix('$', { word: true });
+testSub.setSeparator("*", { sentence: true});
 
 [ "This is a test. I hope? I repeat. This is only a test!" ].forEach(str => {
     const quirked = testSub.toQuirk(str);
