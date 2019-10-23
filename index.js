@@ -337,10 +337,19 @@ class Quirk {
         }
 
         //at the very end, return our doctored text!
-        return prose.join();
+        return ( (this.quirk.paragraph.prefix ? this.quirk.paragraph.prefix.text : '') + prose.join() + (this.quirk.paragraph.suffix ? this.quirk.paragraph.suffix.text : '') );
     }
 
     toPlain(str) {
+        //First order of business: strip off any paragraph prefixes or suffixes!
+        if(this.quirk.paragraph.prefix) {
+            str = this.quirk.paragraph.prefix.strip(str);
+        }
+
+        if(this.quirk.paragraph.suffix) {
+            str = this.quirk.paragraph.suffix.strip(str);
+        }
+
         //first, split up the prose into sentences and deal with prefixes/suffixes/separators
         const prose = new ProseMap(str, { emoji: this.emoji, wordBoundaries: this.quirk.word.boundaries, sentenceBoundaries: this.quirk.sentence.boundaries });
 
@@ -515,17 +524,17 @@ class Quirk {
         if (this.quirk.sentence.prefix && this.quirk.sentence.suffix) {
             //If we have both a prefix but no suffix:
             //PATTERN: Look behind for suffix, then match at least one separator, then look ahead for the prefix
-            newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.sentence.suffix.text)}))${separatorStr}+(?=(${utils.escapeRegExpSpecials(this.quirk.sentence.prefix.text)}))`;
+            newBoundaryPattern = `(?<=${utils.escapeRegExpSpecials(this.quirk.sentence.suffix.text)})${separatorStr}+(?=${utils.escapeRegExpSpecials(this.quirk.sentence.prefix.text)})`;
 
         } else if (this.quirk.sentence.prefix && !this.quirk.sentence.suffix) {
             //If we have a prefix but no suffix:
             //PATTERN: Match at least one space, then look ahead for the prefix
-            newBoundaryPattern = `${separatorStr}+(?=(${utils.escapeRegExpSpecials(this.quirk.sentence.prefix.text)}))`;
+            newBoundaryPattern = `${separatorStr}+(?=${utils.escapeRegExpSpecials(this.quirk.sentence.prefix.text)})`;
 
         } else if (!this.quirk.sentence.prefix && this.quirk.sentence.suffix) {
             //If we have a suffix but no prefix:
             //PATTERN: Look behind for suffix, then match at least one separator
-            newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.sentence.suffix.text)}))${separatorStr}+`;
+            newBoundaryPattern = `(?<=${utils.escapeRegExpSpecials(this.quirk.sentence.suffix.text)})${separatorStr}+`;
 
         } else {
             //If we simply have a new separator
@@ -562,7 +571,7 @@ class Quirk {
         } else if (!this.quirk.word.prefix && this.quirk.word.suffix) {
             //If we have a suffix but no prefix:
             //PATTERN: Look behind for suffix, then match at least one separator
-            newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.word.suffix.text)}))${separatorStr}+`;
+            newBoundaryPattern = `(?<=${utils.escapeRegExpSpecials(this.quirk.word.suffix.text)})${separatorStr}+`;
 
         } else {
             //If we simply have a new separator
