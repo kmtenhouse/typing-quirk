@@ -30,13 +30,18 @@ console.groupEnd();
 console.log("TEXT",test.text);    */
  
  const Quirk = require("./index");
-const test2 = new Quirk();
-test2.setPrefix('AA', { word: true});
-test2.setSuffix('BB', { word: true});
+const testSub = new Quirk();
+/* testSub.setPrefix('^', { word: true });
+testSub.setSuffix('^', { word: true }); */
+/* testSub.setPrefix('=||', { sentence: true });
+testSub.setSuffix('||=', { sentence: true });
+testSub.setSeparator("=", { sentence: true}); */
+testSub.setPrefix('//=', { paragraph: true });
+testSub.setSuffix('=\\\\', { paragraph: true });
 
-[ "This is a test. ...I hope? I repeat. This is only a test!" ].forEach(str => {
-    const quirked = test2.toQuirk(str);
-    const dequirked = test2.toPlain(quirked);
+[ "This is a test. I hope? I repeat. This is only a test!" ].forEach(str => {
+    const quirked = testSub.toQuirk(str);
+    const dequirked = testSub.toPlain(quirked);
     console.log(`
     Original: ${str}    
     To Quirk: ${quirked}

@@ -48,6 +48,24 @@ describe('suffixes', function () {
         expect(testSub.toQuirk("Spoons is the best possible cat. We adore him!")).to.equal('^^^Spoons is the best possible cat. We adore him!///');
     });
 
+    it('should create a valid quirk from both a paragraph prefix and paragraph suffix and sentence separator.', function () {
+        let testSub = new Quirk();
+        testSub.setPrefix('^^^', { paragraph: true } );
+        testSub.setSuffix('///',  { paragraph: true });
+        testSub.setSeparator("*", {sentence: true});
+        expect(testSub.toPlain("^^^Spoons is the best possible cat.*We adore him!///")).to.equal('Spoons is the best possible cat. We adore him!');
+        expect(testSub.toQuirk("Spoons is the best possible cat. We adore him!")).to.equal('^^^Spoons is the best possible cat.*We adore him!///');
+    });
+
+    it('should create a valid quirk from both a paragraph prefix and paragraph suffix and word separator.', function () {
+        let testSub = new Quirk();
+        testSub.setPrefix('^^^', { paragraph: true } );
+        testSub.setSuffix('///',  { paragraph: true });
+        testSub.setSeparator("*", {word: true});
+        expect(testSub.toPlain("^^^Spoons*is*the*best*possible*cat. We*adore*him!///")).to.equal('Spoons is the best possible cat. We adore him!');
+        expect(testSub.toQuirk("Spoons is the best possible cat. We adore him!")).to.equal('^^^Spoons*is*the*best*possible*cat. We*adore*him!///');
+    });
+
     it('should create a valid quirk from both a sentence prefix and sentence suffix', function () {
         let testSub = new Quirk();
         testSub.setPrefix('^^^', { sentence: true });
@@ -63,6 +81,15 @@ describe('suffixes', function () {
         testSub.setSeparator("*", {sentence: true});
         expect(testSub.toPlain("^^^this is nonsense.///*^^^What are we doing?///")).to.equal('This is nonsense. What are we doing?');
         expect(testSub.toQuirk("this is nonsense. What are we doing?")).to.equal('^^^this is nonsense.///*^^^What are we doing?///');
+    });
+
+    it('should create a valid quirk from both a sentence prefix and sentence suffix with a word separator', function () {
+        let testSub = new Quirk();
+        testSub.setPrefix('^^^', { sentence: true });
+        testSub.setSuffix('///', { sentence: true });
+        testSub.setSeparator("*", {word: true});
+        expect(testSub.toPlain("^^^this*is*nonsense./// ^^^What*are*we*doing?///")).to.equal('This is nonsense. What are we doing?');
+        expect(testSub.toQuirk("this is nonsense. What are we doing?")).to.equal('^^^this*is*nonsense./// ^^^What*are*we*doing?///');
     });
 
     it('should create a valid quirk from both a word prefix and word suffix', function () {
@@ -98,6 +125,20 @@ describe('suffixes', function () {
         testSub.setSeparator("*", { sentence: true});
         expect(testSub.toPlain("^eight$ ^bits$ ^are$ ^enough$ ^for$ ^me.$*^That$ ^is$ ^fine!$")).to.equal('Eight bits are enough for me. That is fine!');
         expect(testSub.toQuirk("eight bits are enough for me. That is fine!")).to.equal('^eight$ ^bits$ ^are$ ^enough$ ^for$ ^me.$*^That$ ^is$ ^fine!$');
+    });
+
+    it('should create a valid quirk from all possible options', function () {
+        let testSub = new Quirk();
+        testSub.setPrefix('^', { word: true });
+        testSub.setSuffix('$', { word: true });
+        testSub.setSeparator("*", { word: true});
+        testSub.setPrefix('a', { sentence: true });
+        testSub.setSuffix('b', { sentence: true });
+        testSub.setSeparator("+ +", { sentence: true});
+        testSub.setPrefix('>>', { paragraph: true });
+        testSub.setSuffix('<<', { paragraph: true });
+        expect(testSub.toPlain(">>a^This$*^is$*^a$*^test.$b+ +a^I$*^hope?$b+ +a^I$*^repeat.$b+ +a^This$*^is$*^only$*^a$*^test!$b<<")).to.equal('This is a test. I hope? I repeat. This is only a test!');
+        expect(testSub.toQuirk("This is a test. I hope? I repeat. This is only a test!")).to.equal('>>a^This$*^is$*^a$*^test.$b+ +a^I$*^hope?$b+ +a^I$*^repeat.$b+ +a^This$*^is$*^only$*^a$*^test!$b<<');
     });
 
     it('should throw an error when given an invalid suffix', function () {
