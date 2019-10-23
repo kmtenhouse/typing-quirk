@@ -296,6 +296,10 @@ class ProseMap {
         }
         return wordList;
     }
+
+    printList() {
+        this.nodes.forEach(node=>console.log(`${node.nodeName}: ${node.value}`));
+    }
 }
 
 module.exports = ProseMap;

@@ -27,17 +27,21 @@ console.groupEnd();
 
 console.log("TEXT",test.text);   */
 
- const Quirk = require("./index");
+/*  const Quirk = require("./index");
 const test = new Quirk();
-test.setSentenceCase("inversecase");
-test.setPunctuation([","]);
+test.setSeparator("*");
 
 ["This is a test. This is only a test.", "um,, your bad, maybe? I think,,ok", "wait why is this working,, but not this, huh"].forEach(str => {
     const quirked = test.toQuirk(str);
     const dequirked = test.toPlain(quirked);
     console.log(`
-    ${str}    
-    ${quirked}
-    ${dequirked}
+    Original: ${str}    
+    To Quirk: ${quirked}
+    Dequirk: ${dequirked}
     `)
-});  
+});   */
+
+const Eraser = require('./eraser');
+const prefix = new Eraser("<<");
+
+console.log(prefix.strip("<< this is the way to fuck god <<"));
