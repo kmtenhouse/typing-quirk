@@ -14,11 +14,16 @@ class Eraser {
         }
 
         this.patternToStrip = (isRegExp(patternToStrip) ? patternToStrip : new RegExp(escapeRegExpSpecials(whatToStrip), "g") );
+        this._text = whatToStrip;
     }
 
     strip(str) {
         str = str.replace(this.patternToStrip, '');
         return str;
+    }
+
+    get text() {
+        return this._text;
     }
 }
 
