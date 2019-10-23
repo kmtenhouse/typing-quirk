@@ -27,9 +27,10 @@ console.groupEnd();
 
 console.log("TEXT",test.text);   */
 
-/*  const Quirk = require("./index");
+ const Quirk = require("./index");
 const test = new Quirk();
-test.setSeparator("*");
+test.setSuffix("<<");
+console.log(test.quirk.sentence.suffix.text);
 
 ["This is a test. This is only a test.", "um,, your bad, maybe? I think,,ok", "wait why is this working,, but not this, huh"].forEach(str => {
     const quirked = test.toQuirk(str);
@@ -39,9 +40,6 @@ test.setSeparator("*");
     To Quirk: ${quirked}
     Dequirk: ${dequirked}
     `)
-});   */
+});   
 
-const Eraser = require('./eraser');
-const prefix = new Eraser("<<");
 
-console.log(prefix.strip("<< this is the way to fuck god <<"));

@@ -17,31 +17,28 @@ class Quirk {
 
         //DATA THAT APPLIES ONLY TO QUIRK
         this.quirk = {
-            paragraph: {},
+            paragraph: {
+                prefix: null, //default to none
+                suffix: null //default to none
+            },
             sentence: {
-                boundaries: null, //default: no special boundaries
+                boundaries: null, //DEFAULT: algorithm will assume all sentences are space-separated, and punctuated by one or more . ! ? ) characters
                 caseEnforcement: null, //default: none
-                capitalizeFragments: false //defaults to false
+                capitalizeFragments: false, //defaults to false
+                prefix: null, //default to none
+                suffix: null //default to none
             },
             word: {
-                boundaries: null, //default: no special boundaries
-                caseEnforcement: null //default: none
-            },
-/*             caseEnforcement: {
-                sentence: null, //default: none
-                word: null, //default: none
-                exceptions: null, //default: no exceptions to case      
-            }, */
-            exceptions: {
-                word: []
+                boundaries: null, //default: assume words are separated by one or more spaces
+                caseEnforcement: null, //default: none, 
+                exceptions: [], //default is no word-level exceptions
+                prefix: null, //default to none
+                suffix: null //default to none
             },
             caseEnforcementExceptions: null, //default: no exceptions to case  
             strip: [],
-            prefix: {},
-            //prefix: null, //default: no prefix
-            suffix: null, //default: no suffix
-            sentenceBoundary: null, //DEFAULT: algorithm will assume all sentences are space-separated, and punctuated by one or more . ! ? ) characters
-            wordBoundary: null //default: assume that words are separated by spaces
+            /*           prefix: {},
+                      suffix: null, //default: no suffix */
         }
 
         //DATA THAT APPLIES TO PLAIN TEXT
@@ -52,14 +49,10 @@ class Quirk {
                 capitalizeFragments: false //defaults to false
             },
             word: {
-                boundaries: null //default: no special boundaries
-            },
-            exceptions: {
-                word: []
+                boundaries: null, //default: no special boundaries
+                exceptions: []
             },
             strip: [],
-            sentenceBoundary: null, //DEFAULT: algorithm will assume all sentences are space-separated, and punctuated by one or more . ! ? ) characters
-            wordBoundary: null //default: assume that words are separated by spaces
         };
     }
 
@@ -78,40 +71,40 @@ class Quirk {
         if (isRegExp(pattern) && !/^\^/.test(pattern.source)) {
             throw new Error("Invalid regexp provided for a prefix (hint: check for missing ^)");
         }
-          
+
         //Finally, we can make a valid prefix!
         const prefixRegExp = (pattern ? pattern : new RegExp("^" + utils.escapeRegExpSpecials(prefix)));
         const prefixObject = new Eraser(prefix, prefixRegExp);
-        
+
         //Time to see where we are applying this prefix: 
         if (options && options.paragraph) {
-            this.quirk.prefix.paragraph = prefixObject;
+            this.quirk.paragraph.prefix = prefixObject;
         }
 
         if (options && options.word) {
-            this.quirk.prefix.word = prefixObject;
+            this.quirk.word.prefix = prefixObject;
             //To-do: update word boundaries
         }
-        
+
         // (If no options are provided, the default prefix location is 'sentence')
         if (!options || options.sentence) {
-            this.quirk.prefix.sentence = prefixObject;
-            
+            this.quirk.sentence.prefix = prefixObject;
+
             //lastly: update our sentence boundaries!  Prefixes and suffixes make detecting the edges way easier :)
             //The update will slightly depend on having a suffix:
             let newBoundaryPattern = "";
-            if (!this.quirk.suffix) { //NO SUFFIX
+            if (!this.quirk.sentence.suffix) { //NO SUFFIX
                 //PATTERN: Match at least one space, then look ahead for the prefix
-                newBoundaryPattern = `\\s+(?=(${utils.escapeRegExpSpecials(this.quirk.prefix.sentence.text)}))`;
+                newBoundaryPattern = `\\s+(?=(${utils.escapeRegExpSpecials(this.quirk.sentence.prefix.text)}))`;
             } else {  //SUFFIX EXISTS
                 //PATTERN: Look behind for suffix, then match at least one space, then look ahead for the prefix
-                newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.suffix.text)}))\\s+(?=(${utils.escapeRegExpSpecials(this.quirk.prefix.sentence.text)}))`;
+                newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.sentence.suffix.text)}))\\s+(?=(${utils.escapeRegExpSpecials(this.quirk.sentence.prefix.text)}))`;
             }
             this.quirk.sentence.boundaries = new RegExp(newBoundaryPattern, "g");
         }
     }
 
-    setSuffix(suffix, pattern = '') {
+    setSuffix(suffix, pattern = '', options = null) {
         if (!isString(suffix) || suffix === '') {
             throw new Error("Suffix must be a non-empty string!");
         }
@@ -125,26 +118,37 @@ class Quirk {
             throw new Error("Invalid regexp provided for a suffix (hint: check for missing $)");
         }
 
+        //Finally, we can make a valid suffix!
         //create the proper regexp for the suffix (if necessary)
-        let suffixRegExp = (pattern ? pattern : new RegExp(utils.escapeRegExpSpecials(suffix) + "$"));
+        const suffixRegExp = (pattern ? pattern : new RegExp(utils.escapeRegExpSpecials(suffix) + "$"));
+        const suffixObject = new Eraser(suffix, suffixRegExp);
 
-        this.quirk.suffix = {
-            text: suffix,
-            patternToStrip: suffixRegExp
-        };
-
-        let newBoundaryPattern = "";
-
-        //lastly: update our sentence boundaries!  Prefixes and suffixes make detecting the edges way easier :)
-        //The update will slightly depend on having a suffix:
-        if (!this.quirk.prefix.sentence) { //NO PREFIX
-            //PATTERN: Look behind for suffix, then match at least one space
-            newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.suffix.text)}))\\s+`;
-        } else {  //PREFIX EXISTS
-            //PATTERN: Look behind for suffix, then match at least one space, then look ahead for the prefix
-            newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.suffix.text)}))\\s+(?=(${utils.escapeRegExpSpecials(this.quirk.prefix.sentence.text)}))`;
+        //Now, figure out what level we are attaching the suffix to
+        if (options && options.paragraph) {
+            this.quirk.paragraph.suffix = suffixObject;
         }
-        this.quirk.sentence.boundaries = new RegExp(newBoundaryPattern, "g");
+
+        if (options && options.word) {
+            this.quirk.word.suffix = suffixObject;
+            //To-do: update word boundaries
+        }
+
+        // (If no options are provided, the default prefix location is 'sentence')
+        if (!options || options.sentence) {
+            this.quirk.sentence.suffix = suffixObject;
+
+            let newBoundaryPattern = "";
+            //lastly: update our sentence boundaries!  Prefixes and suffixes make detecting the edges way easier :)
+            //The update will slightly depend on having a suffix:
+            if (!this.quirk.sentence.prefix) { //NO PREFIX
+                //PATTERN: Look behind for suffix, then match at least one space
+                newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.sentence.suffix.text)}))\\s+`;
+            } else {  //PREFIX EXISTS
+                //PATTERN: Look behind for suffix, then match at least one space, then look ahead for the prefix
+                newBoundaryPattern = `(?<=(${utils.escapeRegExpSpecials(this.quirk.sentence.suffix.text)}))\\s+(?=(${utils.escapeRegExpSpecials(this.quirk.sentence.prefix.text)}))`;
+            }
+            this.quirk.sentence.boundaries = new RegExp(newBoundaryPattern, "g");
+        }
     }
 
     setSeparator(separator) {
@@ -285,12 +289,12 @@ class Quirk {
 
         //If we have the 'plain=true' flag set, this exception works for both!
         if (options && options.plain === true) {
-            this.plain.exceptions.word.push(patternToAdd);
+            this.plain.word.exceptions.push(patternToAdd);
         }
 
         //otherwise, as long as we don't have a 'quirk=false', this applies to quirk
         if (!options || (options && options.quirk !== false)) {
-            this.quirk.exceptions.word.push(patternToAdd);
+            this.quirk.word.exceptions.push(patternToAdd);
         }
     }
 
@@ -324,7 +328,7 @@ class Quirk {
 
         //iterate through all words and perform substitions, strips, and fix case
         prose.forEach((node) => {
-            if (node.isWord() && !this._isWordException(node, this.quirk.exceptions.word)) {
+            if (node.isWord() && !this._isWordException(node, this.quirk.word.exceptions)) {
 
                 //PERFORM SUBSTITUTIONS AND STRIPS
                 this.substitutions.forEach(sub => node.value = sub.toQuirk(node.value));
@@ -345,12 +349,11 @@ class Quirk {
 
         //(if necesary) join the words back into sentences so that we can do any final sentence-wide tweaks
         //This will happen if we have a prefix or suffix
-        //(TO DO: fix this if it is NOT a sentence-based prefix/suffix!)
-        if (this.quirk.prefix.sentence || this.quirk.suffix) {
+        if (this.quirk.sentence.prefix || this.quirk.sentence.suffix) {
             prose.joinWords();
             prose.forEach(sentence => {
                 if (sentence.isSentence()) {
-                    sentence.value = (this.quirk.prefix.sentence ? this.quirk.prefix.sentence.text : '') + sentence.value + (this.quirk.suffix ? this.quirk.suffix.text : '');
+                    sentence.value = (this.quirk.sentence.prefix ? this.quirk.sentence.prefix.text : '') + sentence.value + (this.quirk.sentence.suffix ? this.quirk.sentence.suffix.text : '');
                 }
             });
         }
@@ -370,12 +373,12 @@ class Quirk {
             //perform the same steps on every sentence
             //start by removing any prefixes and suffixes
             if (sentence.isSentence()) {
-                if (this.quirk.prefix.sentence) {
-                    sentence.value = this.quirk.prefix.sentence.strip(sentence.value);
+                if (this.quirk.sentence.prefix) {
+                    sentence.value = this.quirk.sentence.prefix.strip(sentence.value);
                 }
 
-                if (this.quirk.suffix) {
-                    sentence.value = sentence.value.replace(this.quirk.suffix.patternToStrip, '');
+                if (this.quirk.sentence.suffix) {
+                    sentence.value = this.quirk.sentence.suffix.strip(sentence.value);
                 }
             }
         });
@@ -386,7 +389,7 @@ class Quirk {
         //go through each node
         //if it's a word, and not an exception, we will fix strips/subs and the case
         prose.forEach(word => {
-            if (word.isWord() && !this._isWordException(word, this.plain.exceptions.word)) {
+            if (word.isWord() && !this._isWordException(word, this.plain.word.exceptions)) {
                 this.substitutions.forEach(sub => word.value = sub.toPlain(word.value));
                 //TO-DO: decide how to handle strips/subs for entire sentence
                 this.plain.strip.forEach(strip => word.value = word.value.replace(strip, ""));
